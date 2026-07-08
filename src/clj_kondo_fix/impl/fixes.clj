@@ -461,3 +461,173 @@
                    (recur more current-lines fixed))
                  (recur more current-lines fixed)))))))))
 
+;; ------------------------------------------------------------
+;; Fix: redundant-let — merge nested lets into one
+;; ------------------------------------------------------------
+
+(defn reindent-line [line old-leading new-leading]
+  "Strip old-leading spaces and prepend new-leading spaces.
+   Returns line unchanged if it does not have exactly old-leading leading spaces."
+  (if (str/blank? line)
+    line
+    (let [actual (count (re-find #"^ *" line))]
+      (if (= actual old-leading)
+        (str (apply str (repeat (max 0 new-leading) " ")) (subs line old-leading))
+        line))))
+
+(defn find-outer-let [lines inner-line-idx inner-col-idx]
+  "Scan backward from inner-line-idx to find the nearest enclosing (let.
+   Returns {:line :col :close-line :close-col} or nil."
+  (loop [i inner-line-idx]
+    (when (>= i 0)
+      (let [line      (nth lines i)
+            max-col   (if (= i inner-line-idx) inner-col-idx (count line))
+            portion   (subs line 0 max-col)
+            ;; collect all valid (let positions on this line before max-col
+            candidates
+            (loop [from 0 acc []]
+              (let [idx (.indexOf portion "(let" from)]
+                (if (neg? idx)
+                  acc
+                  (let [after (+ idx 4)
+                        nch   (when (< after (count line)) (nth line after))]
+                    (if (or (nil? nch) (= nch \space) (= nch \[))
+                      (if-let [[ml mc] (find-matching-bracket-across-lines lines i idx)]
+                        ;; match must be at or after the inner let position
+                        (if (or (> ml inner-line-idx)
+                                (and (= ml inner-line-idx) (>= mc inner-col-idx)))
+                          (recur (inc idx) (conj acc {:line i :col idx :close-line ml :close-col mc}))
+                          (recur (inc idx) acc))
+                        (recur (inc idx) acc))
+                      (recur (inc idx) acc))))))]
+        (if (seq candidates)
+          (last candidates) ; rightmost = closest parent
+          (recur (dec i)))))))
+
+(defn- find-bracket-open [line start-col]
+  "Scan right from start-col to find the first [ on line. Returns col or nil."
+  (loop [j start-col]
+    (when (< j (count line))
+      (if (= \[ (nth line j)) j (recur (inc j))))))
+
+(defn- spaces [n] (apply str (repeat (max 0 n) " ")))
+
+(defn merge-lets [lines inner-line-idx inner-col-idx outer]
+  "Merge the outer let (described by outer map) with the inner let at
+   (inner-line-idx, inner-col-idx).  Returns the new line vector, or nil
+   to signal that this case should be skipped."
+  (let [{OL  :line  OC  :col
+         OCL :close-line  OCC :close-col} outer
+        outer-line    (nth lines OL)
+        outer-bv-open (find-bracket-open outer-line (+ OC 4))
+        [OBL OBC]     (when outer-bv-open
+                        (find-matching-bracket-across-lines lines OL outer-bv-open))]
+    ;; precondition: outer binding vector must be single-line
+    (when (and OBL (= OBL OL))
+      (let [IL            inner-line-idx
+            IC            inner-col-idx
+            inner-line    (nth lines IL)
+            inner-bv-open (find-bracket-open inner-line (+ IC 4))
+            [IBL IBC]     (when inner-bv-open
+                            (find-matching-bracket-across-lines lines IL inner-bv-open))
+            [ICL ICC]     (find-matching-bracket-across-lines lines IL IC)]
+        (when (and IBL ICL)
+          (let [outer-bind-col (+ OC 6)  ; column where outer bindings start (after "(let [")
+                single-line?  (= OL IL)] ; both lets on the same line
+
+            (if single-line?
+              ;; ---- Single-line: pure string surgery on one line ----
+              (let [line        outer-line
+                    outer-binds (str/trim (subs line (inc outer-bv-open) OBC))
+                    inner-binds (str/trim (subs line (inc inner-bv-open) IBC))
+                    body-text   (subs line (inc IBC) ICC)
+                    after-outer (subs line (inc OCC))
+                    merged      (str "(let [" outer-binds " " inner-binds "]" body-text ")" after-outer)]
+                (assoc lines OL (str (subs line 0 OC) merged)))
+
+              ;; ---- Multi-line merge ----
+              (let [;; outer line: strip the closing ] of its binding vector
+                    new-outer-line (subs outer-line 0 OBC)
+
+                    ;; intermediate lines (between outer binding close and inner let)
+                    ;; moved before the merged let, un-indented by 2
+                    intermediate (subvec lines (inc OL) IL)
+                    moved-lines  (mapv #(reindent-line % (+ OC 2) OC) intermediate)
+
+                    ;; inner binding lines, re-indented to outer-bind-col
+                    inner-bind-lines
+                    (if (= IBL IL)
+                      ;; single-line inner binding vector: subs between [ and ]
+                      [(str (spaces outer-bind-col)
+                            (subs inner-line (inc inner-bv-open) IBC)
+                            "]")]
+                      ;; multi-line inner binding vector
+                      (vec
+                       (concat
+                        ;; first line: everything after [ on the inner-let line
+                        [(str (spaces outer-bind-col)
+                              (str/trimr (subs inner-line (inc inner-bv-open))))]
+                        ;; continuation lines
+                        (for [i (range (inc IL) IBL)]
+                          (reindent-line (nth lines i) (+ IC 6) outer-bind-col))
+                        ;; closing ] line
+                        [(reindent-line (nth lines IBL) (+ IC 6) outer-bind-col)])))
+
+                    ;; body + close lines
+                    body-close-lines
+                    (if (= ICL IL)
+                      ;; inner close is on the same line as the inner let —
+                      ;; body (if any) is between ] and )
+                      (let [body-inline  (str/trim (subs inner-line (inc IBC) ICC))
+                            after-outer  (subs inner-line (inc OCC))]
+                        (if (str/blank? body-inline)
+                          :no-body
+                          [(str (spaces (+ OC 2)) body-inline ")" after-outer)]))
+                      ;; body is on lines after the inner binding vector
+                      (let [body-lines  (mapv #(reindent-line (nth lines %) (+ IC 2) (+ OC 2))
+                                              (range (inc IBL) ICL))
+                            close-line  (nth lines ICL)
+                            ;; remove the inner ) from the close line
+                            close-mod   (str (subs close-line 0 ICC)
+                                             (subs close-line (inc ICC)))
+                            close-rein  (reindent-line close-mod (+ IC 2) (+ OC 2))]
+                        (conj body-lines close-rein)))
+
+                    ;; no-body: append ) to the last binding line
+                    [inner-bind-lines body-close-lines]
+                    (if (= body-close-lines :no-body)
+                      (let [after-outer (subs inner-line (inc OCC))]
+                        [(conj (vec (butlast inner-bind-lines))
+                               (str (last inner-bind-lines) ")" after-outer))
+                         []])
+                      [inner-bind-lines body-close-lines])]
+
+                (vec (concat
+                      (take OL lines)
+                      moved-lines
+                      [new-outer-line]
+                      inner-bind-lines
+                      body-close-lines
+                      (drop (inc OCL) lines)))))))))))
+
+(defn fix-redundant-let-in-file [file-path lines findings log]
+  (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
+        sorted   (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
+    (loop [[f & more] sorted
+           current-lines lines
+           fixed 0]
+      (if (nil? f)
+        {:fixed fixed :lines current-lines :changed? (pos? fixed)}
+        (let [IL    (dec (:line f))
+              IC    (dec (:col f))
+              outer (find-outer-let current-lines IL IC)]
+          (if (nil? outer)
+            (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: could not find outer let"))
+                (recur more current-lines fixed))
+            (let [new-lines (merge-lets current-lines IL IC outer)]
+              (if (nil? new-lines)
+                (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: unsupported let structure"))
+                    (recur more current-lines fixed))
+                (do (swap! log conj (str "  " file-url ":" (:line f) "  merge redundant let"))
+                    (recur more new-lines (inc fixed)))))))))))
+

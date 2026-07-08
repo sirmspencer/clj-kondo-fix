@@ -62,10 +62,11 @@
     :fix-fn fixes/fix-redundant-do-in-file
     :display "redundant do"}
 
-   ;; :redundant-let intentionally omitted — the correct fix requires merging
-   ;; binding vectors across the outer and inner let, which the inline approach
-   ;; cannot do safely. Disabled until a proper merge implementation is written.
-   })
+   :redundant-let
+   {:message-re #"^Redundant let expression\.$"
+    :phase :default
+    :fix-fn fixes/fix-redundant-let-in-file
+    :display "redundant let"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})

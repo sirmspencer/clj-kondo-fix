@@ -415,6 +415,106 @@
           (is (not (str/includes? (:content result) "(do"))))))))
 
 ;; ============================================================
+;; :redundant-let
+;; ============================================================
+
+(deftest test-redundant-let
+  (testing "single-line: no body"
+    ;; (let [x 2] (let [y 1])) → (let [x 2 y 1])
+    (with-temp-file "(let [x 2] (let [y 1]))"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-redundant-let-in-file f
+                                (lint-file f :linters [:redundant-let]))]
+          (is (= 1 (:fixed result)))
+          (is (str/includes? (:content result) "(let [x 2 y 1])"))))))
+
+  (testing "single-line: with body"
+    ;; (let [x 2] (let [y 1] (+ x y))) → (let [x 2 y 1] (+ x y))
+    (with-temp-file "(let [x 2] (let [y 1] (+ x y)))"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-redundant-let-in-file f
+                                (lint-file f :linters [:redundant-let]))]
+          (is (= 1 (:fixed result)))
+          (is (str/includes? (:content result) "(let [x 2 y 1] (+ x y))"))))))
+
+  (testing "multi-line: no body"
+    (with-temp-file "(let [x 1]\n  (let [y 2]))"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-redundant-let-in-file f
+                                (lint-file f :linters [:redundant-let]))]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "(let [y 2])")))
+          (is (str/includes? (:content result) "y 2")))))  )
+
+  (testing "multi-line: with body on its own line"
+    (with-temp-file "(let [x 1]\n  (let [y 2]\n    (+ x y)))"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-redundant-let-in-file f
+                                (lint-file f :linters [:redundant-let]))]
+          (is (= 1 (:fixed result)))
+          (is (str/includes? (:content result) "y 2]"))
+          (is (str/includes? (:content result) "(+ x y)"))
+          ;; only one ) at the end, not ))
+          (is (str/ends-with? (str/trim (:content result)) ")"))))))
+
+  (testing "multi-line: body inline with inner binding close"
+    ;; (let [x 1]\n  (let [y 2] body)) — inner let all on one line
+    (with-temp-file "(let [x 1]\n  (let [y 2] (+ x y)))"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-redundant-let-in-file f
+                                (lint-file f :linters [:redundant-let]))]
+          (is (= 1 (:fixed result)))
+          (is (str/includes? (:content result) "y 2]"))
+          (is (str/includes? (:content result) "(+ x y)"))))))
+
+  (testing "multi-line: multiple inner bindings"
+    (with-temp-file "(let [a 1]\n  (let [b 2\n        c 3]\n    (+ a b c)))"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-redundant-let-in-file f
+                                (lint-file f :linters [:redundant-let]))]
+          (is (= 1 (:fixed result)))
+          (is (str/includes? (:content result) "b 2"))
+          (is (str/includes? (:content result) "c 3]"))
+          (is (str/includes? (:content result) "(+ a b c)"))))))
+
+  (testing "intermediate #_ discard form: moved before merged let"
+    (with-temp-file "(let [x 1]\n  #_(println \"hello\")\n  (let [y 2]))"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-redundant-let-in-file f
+                                (lint-file f :linters [:redundant-let]))]
+          (is (= 1 (:fixed result)))
+          ;; discard form must appear before the let
+          (let [lines (str/split-lines (:content result))
+                discard-idx (first (keep-indexed #(when (str/includes? %2 "#_") %1) lines))
+                let-idx     (first (keep-indexed #(when (str/starts-with? (str/trimr %2) "(let") %1) lines))]
+            (is (some? discard-idx))
+            (is (some? let-idx))
+            (is (< discard-idx let-idx)))))))
+
+  (testing "intermediate comment line: moved before merged let"
+    (with-temp-file "(let [x 1]\n  ;; important note\n  (let [y 2]\n    body))"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-redundant-let-in-file f
+                                (lint-file f :linters [:redundant-let]))]
+          (is (= 1 (:fixed result)))
+          (let [lines (str/split-lines (:content result))
+                comment-idx (first (keep-indexed #(when (str/includes? %2 ";;") %1) lines))
+                let-idx     (first (keep-indexed #(when (str/starts-with? (str/trimr %2) "(let") %1) lines))]
+            (is (some? comment-idx))
+            (is (some? let-idx))
+            (is (< comment-idx let-idx)))
+          (is (str/includes? (:content result) "body")))))  )
+
+  (testing "skip: outer let with multi-line binding vector"
+    ;; (let [x 1\n      y 2]\n  (let [z 3])) — outer binding spans two lines → no-op
+    (with-temp-file "(let [x 1\n      y 2]\n  (let [z 3]))"
+      (fn [f]
+        (let [findings (lint-file f :linters [:redundant-let])
+              result   (apply-fix fixes/fix-redundant-let-in-file f findings)]
+          ;; should be a safe no-op
+          (is (zero? (:fixed result))))))))
+
+;; ============================================================
 ;; Integration tests — full pipeline
 ;; ============================================================
 
