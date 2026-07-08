@@ -351,7 +351,7 @@
         (let [line-idx (dec (:line f))
               col-idx (dec (:col f))]
           (if (or (< line-idx 0) (>= line-idx (count current-lines))
-                  (< col-idx 0) (>= (+ col-idx 3) (count (nth current-lines line-idx))))
+                  (< col-idx 0) (> (+ col-idx 3) (count (nth current-lines line-idx))))
             (recur more current-lines fixed)
             (let [line (nth current-lines line-idx)]
               ;; Replace "(if" with "(when" — works for (if, (if-not, (if-let, (if-some
@@ -386,21 +386,25 @@
                 (let [end-idx (find-matching-bracket def-line bracket-idx)]
                   (if (nil? end-idx)
                     (recur more current-lines fixed)
-                    (let [prefix (str/trimr (subs def-line 0 bracket-idx))
-                          params (subs def-line bracket-idx (inc end-idx))
-                          after-params (str/trim (subs def-line (inc end-idx)))
-                          docstring-end-line-idx (find-docstring-end current-lines docstring-line-idx)
-                          indent (re-find #"^\s*" docstring-line)]
-                      (swap! log conj (str "  " file-url ":" (:line f) "  move docstring before params"))
-                      (recur more
-                             (vec (concat (take def-line-idx current-lines)
-                                          [prefix]
-                                          (subvec (vec current-lines) docstring-line-idx (inc docstring-end-line-idx))
-                                          [(str indent params
-                                                (when-not (empty? after-params)
-                                                  (str " " after-params)))]
-                                          (drop (inc docstring-end-line-idx) current-lines)))
-                             (inc fixed)))))))))))))
+                    (let [prefix (str/trimr (subs def-line 0 bracket-idx))]
+                      ;; if prefix is blank the defn name is on a different line
+                      ;; from the param vector — skip rather than produce invalid code
+                      (if (str/blank? prefix)
+                        (recur more current-lines fixed)
+                        (let [params (subs def-line bracket-idx (inc end-idx))
+                              after-params (str/trim (subs def-line (inc end-idx)))
+                              docstring-end-line-idx (find-docstring-end current-lines docstring-line-idx)
+                              indent (re-find #"^\s*" docstring-line)]
+                          (swap! log conj (str "  " file-url ":" (:line f) "  move docstring before params"))
+                          (recur more
+                                 (vec (concat (take def-line-idx current-lines)
+                                              [prefix]
+                                              (subvec (vec current-lines) docstring-line-idx (inc docstring-end-line-idx))
+                                              [(str indent params
+                                                    (when-not (empty? after-params)
+                                                      (str " " after-params)))]
+                                              (drop (inc docstring-end-line-idx) current-lines)))
+                                 (inc fixed)))))))))))))))
 
 ;; ------------------------------------------------------------
 ;; Fix: unused-private-var
@@ -442,7 +446,7 @@
         (let [line-idx (dec (:line f))
               col-idx (dec (:col f))]
           (if (or (< line-idx 0) (>= line-idx (count current-lines))
-                  (< col-idx 0) (>= (+ col-idx 3) (count (nth current-lines line-idx))))
+                  (< col-idx 0) (> (+ col-idx 3) (count (nth current-lines line-idx))))
             (recur more current-lines fixed)
             (let [line (nth current-lines line-idx)]
               (if (= "(do" (subs line col-idx (+ col-idx 3)))

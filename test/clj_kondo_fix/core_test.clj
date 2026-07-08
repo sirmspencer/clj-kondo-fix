@@ -104,7 +104,18 @@
                                 (lint-file f :linters [:unused-namespace]))]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "clojure.set :as cs")))
-          (is (str/includes? (:content result) "clojure.string :as s")))))  ))
+          (is (str/includes? (:content result) "clojure.string :as s")))))  )
+
+  (testing "inline single-line ns: after removal leaves (:require ) straggler — no corruption"
+    ;; cleanup-empty-clauses only matches (:require) when alone on its own line.
+    ;; For the inline format the straggler is harmless but stays.
+    (with-temp-file "(ns foo (:require [clojure.string :as s]))"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-unused-ns-in-file f
+                                (lint-file f :linters [:unused-namespace]))]
+          (is (= 1 (:fixed result)))
+          ;; clojure.string must be gone
+          (is (not (str/includes? (:content result) "clojure.string"))))))))
 
 ;; ============================================================
 ;; :duplicate-require
@@ -267,7 +278,18 @@
         (let [result (apply-fix fixes/fix-unused-referred-var-in-file f
                                 (lint-file f :linters [:unused-referred-var]))]
           (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) ":refer"))))))))
+          (is (not (str/includes? (:content result) ":refer")))))))
+
+  (testing "multi-line :refer vector: removes var from its own line"
+    ;; Each var is on its own line; the fix operates per-line using :col,
+    ;; so multi-line layout is handled correctly.
+    (with-temp-file "(ns foo\n  (:require\n   [clojure.string :refer [join\n                            ends-with?]]))\n(join [\"\"] \"\")"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-unused-referred-var-in-file f
+                                (lint-file f :linters [:unused-referred-var]))]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "ends-with?")))
+          (is (str/includes? (:content result) "join")))))))
 
 ;; ============================================================
 ;; :refer-all
@@ -290,7 +312,18 @@
                                 (lint-file f :linters [:refer-all]))]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) ":refer :all")))
-          (is (str/includes? (:content result) ":as s")))))))
+          (is (str/includes? (:content result) ":as s"))))))
+
+  (testing "multi-line: :refer :all on separate line from ns — safe skip"
+    ;; find-require-entry-start scans backward on the :all line only.
+    ;; The opening [ is on the previous line so it returns nil → no-op.
+    (with-temp-file "(ns foo\n  (:require [clojure.string\n             :refer :all]))"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-refer-all-in-file f
+                                (lint-file f :linters [:refer-all]))]
+          (is (zero? (:fixed result)))
+          ;; source must be unmodified
+          (is (str/includes? (:content result) ":refer :all")))))))
 
 ;; ============================================================
 ;; :misplaced-docstring
@@ -334,7 +367,20 @@
           (is (zero? (:fixed result)))
           ;; source must be unmodified
           (is (str/includes? (:content result) ";; explains x"))
-          (is (str/includes? (:content result) "\"doc\""   )))))))
+          (is (str/includes? (:content result) "\"doc\""   ))))))
+
+  (testing "multi-line defn signature: params on separate line from defn name — safe skip"
+    ;; (defn f\n  [x]\n  "doc"\n  body) — def-line is "  [x]", prefix is blank.
+    ;; The blank-prefix guard prevents emitting a malformed defn form.
+    (with-temp-file "(defn f\n  [x]\n  \"doc\"\n  x)"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-misplaced-docstring-in-file f
+                                (lint-file f :linters [:misplaced-docstring]))]
+          (is (zero? (:fixed result)))
+          ;; source must be unmodified — no empty line injected between name and params
+          (is (str/includes? (:content result) "(defn f"))
+          (is (str/includes? (:content result) "  [x]"))
+          (is (str/includes? (:content result) "\"doc\""  ))))))  )
 
 ;; ============================================================
 ;; :missing-else-branch
@@ -449,7 +495,18 @@
         (let [result (apply-fix fixes/fix-redundant-do-in-file f
                                 (lint-file f :linters [:redundant-do]))]
           (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "(do"))))))))
+          (is (not (str/includes? (:content result) "(do")))))))
+
+  (testing "removes redundant do wrapper (multi-line)"
+    (with-temp-file "(when true\n  (do\n    (println \"a\")\n    (println \"b\")))"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-redundant-do-in-file f
+                                (lint-file f :linters [:redundant-do]))]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "(do")))
+          ;; body expressions must survive
+          (is (str/includes? (:content result) "(println \"a\")"))
+          (is (str/includes? (:content result) "(println \"b\")"))))  )))
 
 ;; ============================================================
 ;; :redundant-let
