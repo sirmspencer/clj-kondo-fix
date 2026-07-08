@@ -1,6 +1,6 @@
 # clj-kondo-fix
 
-clj-kondo doesnt have a fix option.  this is to create a tool that runs exactly the same as clj-kondo to give the option to fix the code.
+clj-kondo doesn't have a fix option.  this is to create a tool that runs exactly the same as clj-kondo to give the option to fix the code.
 
 ## Usage
 

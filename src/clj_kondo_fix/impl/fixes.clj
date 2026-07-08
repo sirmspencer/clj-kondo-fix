@@ -30,15 +30,19 @@
   (let [pattern (re-pattern (str (java.util.regex.Pattern/quote ns-name) "(?:\\s|\\]|$)"))]
     (re-find pattern (subs line idx))))
 
-(defn find-ns-on-line [line ns-name]
-  (let [ns-str (str "[" ns-name)]
-    (loop [start 0]
-      (let [idx (.indexOf line ns-str start)]
-        (if (neg? idx)
-          nil
-          (if (ns-name-matches-at line (inc idx) ns-name)
-            idx
-            (recur (inc idx))))))))
+;; start-from: 0-indexed minimum position to begin searching (used to skip the
+;; first occurrence when the finding's :col points to a later duplicate).
+(defn find-ns-on-line
+  ([line ns-name] (find-ns-on-line line ns-name 0))
+  ([line ns-name start-from]
+   (let [ns-str (str "[" ns-name)]
+     (loop [start (max 0 start-from)]
+       (let [idx (.indexOf line ns-str start)]
+         (if (neg? idx)
+           nil
+           (if (ns-name-matches-at line (inc idx) ns-name)
+             idx
+             (recur (inc idx)))))))))
 
 (defn remove-entry-from-line [line ns-name]
   (let [idx (find-ns-on-line line ns-name)]
@@ -83,12 +87,17 @@
 ;; ------------------------------------------------------------
 
 (defn remove-require-finding [lines finding file-url log]
-  (let [line-idx (dec (:line finding))
-        ns-name (extract-ns-name (:message finding))]
+  (let [line-idx  (dec (:line finding))
+        ;; :col is 1-indexed and points to the first char of the ns name.
+        ;; The [ preceding it is at col-2 (0-indexed), so start the bracket
+        ;; search from there.  This ensures that for duplicate-require we skip
+        ;; the first (non-duplicate) occurrence and land on the right entry.
+        col-start (max 0 (- (:col finding) 2))
+        ns-name   (extract-ns-name (:message finding))]
     (if (or (nil? ns-name) (< line-idx 0) (>= line-idx (count lines)))
       [lines nil]
       (let [line (nth lines line-idx)
-            idx (find-ns-on-line line ns-name)]
+            idx (find-ns-on-line line ns-name col-start)]
         (if (nil? idx)
           (do (swap! log conj (str "  " file-url ":" (:line finding) "  skip: can't find [" ns-name))
               [lines nil])
@@ -164,7 +173,7 @@
 
 (defn fix-unused-ns-in-file [file-path lines findings log]
   (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
-        sorted (sort-by :line #(compare %2 %1) (distinct findings))]
+        sorted (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
     (loop [[f & more] sorted
            current-lines lines
            fixed 0]
@@ -207,6 +216,11 @@
                   (if (not= (subs line idx word-end) binding-name)
                     (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: binding " binding-name " not found at column " (:col f)))
                         (recur more current-lines fixed))
+                    ;; skip namespaced keys e.g. {:keys [ns/name]} — the :col
+                    ;; lands on "name" but inserting _ there produces ns/_name
+                    (if (and (pos? idx) (= \/ (nth line (dec idx))))
+                      (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: binding " binding-name " is part of a namespaced key"))
+                          (recur more current-lines fixed))
                     (let [text-before (subs line 0 idx)]
                       (if (re-find #":as\s+$" text-before)
                         (let [new-line (remove-as-clause-from-line line binding-name idx word-end)]
@@ -216,9 +230,10 @@
                                  (inc fixed)))
                         (let [new-line (str (subs line 0 idx) "_" (subs line idx))]
                           (swap! log conj (str "  " file-url ":" (:line f) "  rename unused binding: " binding-name " -> _" binding-name))
-                          (recur more
-                                 (assoc current-lines line-idx new-line)
-                                 (inc fixed)))))))))))))))
+                           (recur more
+                                  (assoc current-lines line-idx new-line)
+                                  (inc fixed))))))))))))))))
+
 
 ;; ------------------------------------------------------------
 ;; Fix: referred var, refer-all, import
@@ -298,7 +313,7 @@
 
 (defn fix-refer-all-in-file [file-path lines findings log]
   (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
-        sorted (sort-by :line #(compare %2 %1) (distinct findings))]
+        sorted (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
     (loop [[f & more] sorted current-lines lines fixed 0]
       (if (nil? f)
         {:fixed fixed :lines current-lines :changed? (pos? fixed)}
@@ -327,7 +342,7 @@
 
 (defn fix-missing-else-branch-in-file [file-path lines findings log]
   (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
-        sorted (sort-by :line #(compare %2 %1) (distinct findings))]
+        sorted (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
     (loop [[f & more] sorted
            current-lines lines
            fixed 0]
@@ -353,7 +368,7 @@
 
 (defn fix-misplaced-docstring-in-file [file-path lines findings log]
   (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
-        sorted (sort-by :line #(compare %2 %1) (distinct findings))]
+        sorted (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
     (loop [[f & more] sorted
            current-lines lines
            fixed 0]
@@ -393,17 +408,21 @@
 
 (defn fix-unused-private-var-in-file [file-path lines findings log]
   (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
-        sorted (sort-by :line #(compare %2 %1) (distinct findings))]
+        sorted (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
     (loop [[f & more] sorted current-lines lines fixed 0]
       (if (nil? f)
         {:fixed fixed :lines current-lines :changed? (pos? fixed)}
-        (let [msg (:message f)
+        (let [msg      (:message f)
               var-name (some-> (re-find #"^Unused private var .+/(.+)$" msg) second)
-              line-idx (dec (:line f))]
+              line-idx (dec (:line f))
+              ;; :col is 1-indexed and points to the first char of the var name.
+              ;; Start .indexOf from there so we skip any earlier occurrences of
+              ;; the same substring (e.g. "f" appearing in "foo" before the def).
+              col-start (max 0 (- (:col f) 2))]
           (if (nil? var-name)
             (recur more current-lines fixed)
             (let [line (nth current-lines line-idx)
-                  idx (.indexOf line var-name)]
+                  idx  (.indexOf line var-name col-start)]
               (if (neg? idx)
                 (recur more current-lines fixed)
                 (let [new-line (str (subs line 0 idx) "_" (subs line idx))]
@@ -416,7 +435,7 @@
 
 (defn fix-redundant-do-in-file [file-path lines findings log]
   (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
-        sorted (sort-by :line #(compare %2 %1) (distinct findings))]
+        sorted (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
     (loop [[f & more] sorted current-lines lines fixed 0]
       (if (nil? f)
         {:fixed fixed :lines current-lines :changed? (pos? fixed)}
@@ -438,48 +457,7 @@
                                         (assoc line-idx start-line)
                                         (assoc match-line new-match)))]
                     (swap! log conj (str "  " file-url ":" (:line f) "  remove redundant do"))
-                    (recur more new-lines (inc fixed)))
-                  (recur more current-lines fixed))
-                (recur more current-lines fixed)))))))))
+                     (recur more new-lines (inc fixed)))
+                   (recur more current-lines fixed))
+                 (recur more current-lines fixed)))))))))
 
-;; ------------------------------------------------------------
-;; Fix: redundant-let
-;; ------------------------------------------------------------
-
-(defn fix-redundant-let-in-file [file-path lines findings log]
-  (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
-        sorted (sort-by :line #(compare %2 %1) (distinct findings))]
-    (loop [[f & more] sorted current-lines lines fixed 0]
-      (if (nil? f)
-        {:fixed fixed :lines current-lines :changed? (pos? fixed)}
-        (let [line-idx (dec (:line f))
-              col-idx (dec (:col f))]
-          (if (or (< line-idx 0) (>= line-idx (count current-lines))
-                  (< col-idx 0) (>= (+ col-idx 4) (count (nth current-lines line-idx))))
-            (recur more current-lines fixed)
-            (let [line (nth current-lines line-idx)]
-              (if (= "(let" (subs line col-idx (+ col-idx 4)))
-                (let [bracket-start (str/index-of line "[" (+ col-idx 4))]
-                  (if bracket-start
-                    (if-let [[bracket-line bracket-col] (find-matching-bracket-across-lines current-lines line-idx bracket-start)]
-                      (if-let [[close-line close-col] (find-matching-bracket-across-lines current-lines line-idx col-idx)]
-                        (if (= line-idx bracket-line close-line)
-                          (let [after-open (subs line (inc bracket-start))
-                                binding-end (or (str/index-of after-open " ") (count after-open))
-                                binding-name (subs after-open 0 binding-end)
-                                rest-after-name (str/triml (subs after-open binding-end))
-                                bracket-idx (.indexOf rest-after-name "]")
-                                val (subs rest-after-name 0 bracket-idx)
-                                after-bracket (subs rest-after-name (inc bracket-idx))
-                                body (str/trimr after-bracket)
-                                inlined (str/replace body binding-name val)]
-                            (swap! log conj (str "  " file-url ":" (:line f) "  inline redundant let"))
-                            (recur more
-                                   (assoc current-lines line-idx
-                                          (str (subs line 0 col-idx) inlined))
-                                   (inc fixed)))
-                          (recur more current-lines fixed))
-                        (recur more current-lines fixed))
-                      (recur more current-lines fixed))
-                    (recur more current-lines fixed)))
-                (recur more current-lines fixed)))))))))
