@@ -80,7 +80,31 @@
                                 (lint-file f :linters [:unused-namespace]))]
           (is (= 2 (:fixed result)))
           (is (not (str/includes? (:content result) "clojure.string")))
-          (is (not (str/includes? (:content result) "clojure.set"))))))))
+          (is (not (str/includes? (:content result) "clojure.set")))))))
+
+  (testing "trailing comment on the removed entry line becomes a straggler — no corruption"
+    ;; [clojure.set :as cs] ;; for set ops — after removal the comment text
+    ;; stays on that line.  The important thing is the code is not corrupted
+    ;; and the remaining require is intact.
+    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            [clojure.set :as cs] ;; for set ops\n))\n(s/join [\"\"] \"\")"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-unused-ns-in-file f
+                                (lint-file f :linters [:unused-namespace]))]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "clojure.set :as cs")))
+          ;; used require must survive intact
+          (is (str/includes? (:content result) "clojure.string :as s"))))))
+
+  (testing "comment-only line before removed entry stays as orphan — no corruption"
+    ;; The comment on the line before the unused entry is not removed.
+    ;; Result is a harmless orphan comment, not corrupt source.
+    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            ;; this one is unused\n            [clojure.set :as cs]))\n(s/join [\"\"] \"\")"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-unused-ns-in-file f
+                                (lint-file f :linters [:unused-namespace]))]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "clojure.set :as cs")))
+          (is (str/includes? (:content result) "clojure.string :as s")))))  ))
 
 ;; ============================================================
 ;; :duplicate-require
@@ -297,7 +321,20 @@
       (fn [f]
         (let [result (apply-fix fixes/fix-misplaced-docstring-in-file f
                                 (lint-file f :linters [:misplaced-docstring]))]
-          (is (zero? (:fixed result))))))))
+          (is (zero? (:fixed result)))))))
+
+  (testing "comment between params and docstring — safe no-op (def-line-idx points to comment, not defn)"
+    ;; (defn f [x]\n  ;; comment\n  "doc"\n  body) — docstring is on row 3.
+    ;; def-line-idx = row3 - 1 = row 2 (the comment line).
+    ;; find-bracket finds no [ in the comment → silently skips.
+    (with-temp-file "(defn f [x]\n  ;; explains x\n  \"doc\"\n  x)"
+      (fn [f]
+        (let [result (apply-fix fixes/fix-misplaced-docstring-in-file f
+                                (lint-file f :linters [:misplaced-docstring]))]
+          (is (zero? (:fixed result)))
+          ;; source must be unmodified
+          (is (str/includes? (:content result) ";; explains x"))
+          (is (str/includes? (:content result) "\"doc\""   )))))))
 
 ;; ============================================================
 ;; :missing-else-branch
