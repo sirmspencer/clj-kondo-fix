@@ -378,6 +378,34 @@
           ;; state is used so the map collapses to state
           (is (str/includes? (:content result) "[state arg]"))))))
 
+  (testing "map inside function call (let rhs) is NOT collapsed — not in destructuring position"
+    ;; The {:results {:as vals}} is a function-call argument inside a let vector.
+    ;; Only :query (the destructuring key) is unused; vals is a separate param.
+    ;; Regression: find-opening-bracket scanned through (q/with-params ...)
+    ;; and found the let's [ — incorrectly treating the call-arg map as destructuring.
+    (with-temp-file "(defn f [{:keys [query]} vals]\n  (let [sql (q/with-params {:results {:as vals}})]\n    sql))"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) " query")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (= 1 (:fixed result)))
+          ;; function-call map {:results {:as vals}} must be untouched
+          (is (str/includes? (:content result) "{:results {:as vals}}"))
+          ;; destructuring map collapses to _
+          (is (str/includes? (:content result) "[_ vals]"))))))
+
+  (testing "map inside fn-call argument vector is NOT collapsed — vector not a binding form"
+    ;; (let [z (side-effect-fn [{:foo [x]} y])] ...) — the [{:foo [x]} y] is passed
+    ;; to g, NOT a destructuring vector.  binding-bracket? rejects non-binding forms.
+    (with-temp-file "(defn f [{:keys [x]} vals]\n  (let [z (g [{:bar vals} \"data\"])]\n    z))"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) " x")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (= 1 (:fixed result)))
+          ;; the fn-call argument map {:bar vals} must be untouched
+          (is (str/includes? (:content result) "{:bar vals}"))
+          ;; destructuring map collapses to _
+          (is (str/includes? (:content result) "[_ vals]")))))))
+
   (testing ":as and concrete binding both unused → :as removed, map collapses to _"
     ;; {conn :db/conn :as req} both unused → conn→_conn, remove :as req → {_conn :db/conn} → _
     (with-temp-file "(defn f [{conn :db/conn :as req}] {:status 501})"
@@ -437,7 +465,7 @@
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "x")))
           ;; no :as binding → collapses to plain _
-          (is (str/includes? (:content result) "[_]")))))))
+          (is (str/includes? (:content result) "[_]"))))))
 
   (testing "keys-destr in let: unused key removed — safe, just a deref on existing var"
     ;; (let [{:keys [x y]} m] (foo y)) — x is unused but removing it is safe

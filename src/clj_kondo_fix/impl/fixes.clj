@@ -455,6 +455,40 @@
 
       :else nil)))
 
+(defn- enclosing-bracket-type [lines line-idx col-idx]
+  "Returns the character ([, (, or {) of the bracket that directly contains
+   (line-idx, col-idx-1), tracking all three bracket pairs so function-call
+   parens act as barriers.  Returns nil at top level."
+  (loop [i line-idx, j (dec col-idx), depth 0]
+    (when (>= i 0)
+      (if (< j 0)
+        (when (> i 0)
+          (recur (dec i) (dec (count (nth lines (dec i)))) depth))
+        (let [ch (nth (nth lines i) j)]
+          (case ch
+            (\] \) \}) (recur i (dec j) (inc depth))
+            (\[ \( \{) (if (zero? depth)
+                         ch
+                         (recur i (dec j) (dec depth)))
+            (recur i (dec j) depth)))))))
+
+(defn- binding-bracket? [lines bracket-line bracket-col]
+  "Returns true if the [ at (bracket-line, bracket-col) belongs to a known
+   binding form (let/defn/fn/for/etc. or :keys/:strs/:syms).
+   Used by collapse-destr-maps to reject function-call argument vectors."
+  (let [brk-text (subs (nth lines bracket-line) 0 bracket-col)
+        ctx-text  (if (str/blank? brk-text)
+                    (loop [i (dec bracket-line)]
+                      (if (< i 0) ""
+                        (let [lt (str/trim (nth lines i))]
+                          (if (str/blank? lt) (recur (dec i)) lt))))
+                    brk-text)
+        words  (re-seq #"[a-zA-Z*!?][a-zA-Z0-9*!?-]*" ctx-text)
+        rwords (vec (reverse words))]
+    (or (some let-like-forms (take 3 rwords))
+        (some fn-like-forms  (take 3 rwords))
+        (some #{"keys" "strs" "syms" "keys!" "strs!" "syms!"} (take 2 rwords)))))
+
 (defn collapse-destr-maps [lines]
   "Post-pass: replace destructuring maps whose bindings are all effectively
    unused (_-prefixed or empty) with either their :as name or plain `_`.
@@ -468,11 +502,18 @@
         (if-let [j (some (fn [j] (when (= \{ (nth line j)) j))
                          (range (count line)))]
           (if-let [[cl cc] (find-matching-bracket-across-lines current-lines i j)]
-            (let [;; Only collapse maps in destructuring (vector) position.
-                  ;; Find the bracket immediately enclosing this { and check it's [.
-                  enc   (find-opening-bracket current-lines i j)
-                  enc-ch (when enc (nth (nth current-lines (:line enc)) (:col enc)))
-                  in-destr-pos? (= enc-ch \[)
+            (let [                  ;; Only collapse maps in destructuring (vector) position.
+                  ;; Two-part check:
+                  ;; 1. enclosing-bracket-type: must be [ (not ( or {)
+                  ;; 2. binding-bracket?: the [ must belong to a known binding form
+                  ;;    (let/defn/fn/for/etc.), not a function-call argument vector
+                  ;;    like (side-effect-fn [{:foo [x]} y]).
+                  enc-ch        (enclosing-bracket-type current-lines i j)
+                  in-destr-pos? (and (= enc-ch \[)
+                                     (if-let [{bl :line bc :col}
+                                              (find-opening-bracket current-lines i j)]
+                                       (binding-bracket? current-lines bl bc)
+                                       false))
                   ;; extract full content between { and }
                   content (if (= i cl)
                             (subs line (inc j) cc)
