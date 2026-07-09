@@ -221,32 +221,32 @@
           (is (str/includes? (:content result) ":as str]))"  ))))))
 
   (testing "multi-line entry removed: middle entry between two single-line entries"
-    ;; [path.acceptance...\n :as scenarios] is in the middle; both siblings survive.
-    (with-temp-file "(ns foo\n  (:require [clojure.set :as cs]\n            [path.acceptance.augment.remote-phy-device.reserve-daas-port\n             :as scenarios]\n            [clojure.string :as str]))\n(cs/difference #{1} #{2})\n(str/join [\"\"] \"\")  "
+    ;; [my.app...\n :as unused] is in the middle; both siblings survive.
+    (with-temp-file "(ns foo\n  (:require [clojure.set :as cs]\n            [my.app.some.long-unused-ns\n             :as unused]\n            [clojure.string :as str]))\n(cs/difference #{1} #{2})\n(str/join [\"\"] \"\")  "
       (fn [f]
         (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
           (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "reserve-daas-port")))
+          (is (not (str/includes? (:content result) "long-unused-ns")))
           (is (str/includes? (:content result) "clojure.set :as cs"))
           (is (str/includes? (:content result) "clojure.string :as str"))))))
 
   (testing "multi-line entry removed: last entry — closing ) merged onto previous ]"
-    ;; [path.acceptance...\n :as scenarios]) is last; ) must land on [clojure.set] line.
-    (with-temp-file "(ns foo\n  (:require [clojure.set :as cs]\n            [path.acceptance.augment.remote-phy-device.reserve-daas-port\n             :as scenarios]))\n(cs/difference #{1} #{2})"
+    ;; [my.app...\n :as unused]) is last; ) must land on [clojure.set] line.
+    (with-temp-file "(ns foo\n  (:require [clojure.set :as cs]\n            [my.app.some.long-unused-ns\n             :as unused]))\n(cs/difference #{1} #{2})"
       (fn [f]
         (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
           (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "reserve-daas-port")))
+          (is (not (str/includes? (:content result) "long-unused-ns")))
           ;; closing )) must be on the surviving entry's line, not dangling
           (is (str/includes? (:content result) "[clojure.set :as cs]))"  ))))))
 
   (testing "multi-line entry removed: only entry in require clause"
-    ;; [path.acceptance...\n :as scenarios] is the only require; clause is cleaned up.
-    (with-temp-file "(ns foo\n  (:require\n   [path.acceptance.augment.remote-phy-device.reserve-daas-port\n    :as scenarios]))"
+    ;; [my.app...\n :as unused] is the only require; clause is cleaned up.
+    (with-temp-file "(ns foo\n  (:require\n   [my.app.some.long-unused-ns\n    :as unused]))"
       (fn [f]
         (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
           (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "reserve-daas-port"))))))  ))
+          (is (not (str/includes? (:content result) "long-unused-ns"))))))  ))
 
 (deftest test-duplicate-require
   (testing "case 1: only first alias used — remove reported duplicate, no renames"
@@ -381,9 +381,9 @@
   (testing "map inside function call (let rhs) is NOT collapsed — not in destructuring position"
     ;; The {:results {:as vals}} is a function-call argument inside a let vector.
     ;; Only :query (the destructuring key) is unused; vals is a separate param.
-    ;; Regression: find-opening-bracket scanned through (q/with-params ...)
+    ;; Regression: find-opening-bracket scanned through (some-fn/call ...)
     ;; and found the let's [ — incorrectly treating the call-arg map as destructuring.
-    (with-temp-file "(defn f [{:keys [query]} vals]\n  (let [sql (q/with-params {:results {:as vals}})]\n    sql))"
+    (with-temp-file "(defn f [{:keys [query]} vals]\n  (let [sql (some-fn/call {:results {:as vals}})]\n    sql))"
       (fn [f]
         (let [pred   #(str/includes? (:message %) " query")
               result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
