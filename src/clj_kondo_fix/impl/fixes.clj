@@ -496,7 +496,7 @@
 
 (defn fix-unused-binding-in-file
   "Fix unused bindings.  fix-contexts controls which binding types to handle:
-     :as-clause    — rename the :as binding to _name (kept for map collapse)
+     :as-clause    — remove the :as clause when unused
      :fn-param     — prefix unused function params with _
      :keys-destr-fn — remove from {:keys/strs/syms []} in function params
      :keys-destr-let — remove from {:keys/strs/syms []} in let bindings
@@ -536,11 +536,11 @@
                         (let [ctx (detect-binding-context current-lines line-idx idx)]
                           (cond
                             ;; :as clause — rename to _name (keep in place so post-pass can
-                            ;; collapse the whole map if all concrete bindings become unused)
-                            (and (= ctx :as-clause) (fix-contexts :as-clause))
-                            (let [new-line (str (subs line 0 idx) "_" (subs line idx))]
-                              (swap! log conj (str "  " file-url ":" (:line f) "  rename unused :as binding: " binding-name " -> _" binding-name))
-                              (recur more (assoc current-lines line-idx new-line) (inc fixed)))
+                            ;; :as clause — remove the whole clause
+                             (and (= ctx :as-clause) (fix-contexts :as-clause))
+                             (let [new-line (remove-as-clause-from-line line binding-name idx word-end)]
+                               (swap! log conj (str "  " file-url ":" (:line f) "  remove unused :as binding: " binding-name))
+                               (recur more (assoc current-lines line-idx new-line) (inc fixed)))
 
                            ;; :keys/:strs/:syms destructuring in fn param — remove from vector
                            (and (= ctx :keys-destr-fn) (fix-contexts :keys-destr-fn))

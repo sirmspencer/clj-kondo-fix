@@ -356,16 +356,15 @@
       (fn [f]
         (assert-skip fixes/fix-unused-binding-in-file f [:unused-binding]))))
 
-  (testing ":as clause in destructuring: renamed to _config when unused (not removed)"
-    ;; :as config unused, but :a is used → rename config → _config, keep clause
-    ;; post-pass does NOT collapse because :a is a non-_ binding
+  (testing ":as clause in destructuring: removed when unused"
+    ;; :as config unused, but :a is used → remove :as config clause
     (with-temp-file "(defn f [{:keys [a] :as config}] a)"
       (fn [f]
         (let [pred   #(str/includes? (:message %) "config")
               result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
           (is (= 1 (:fixed result)))
-          ;; renamed, not removed
-          (is (str/includes? (:content result) ":as _config"))
+          ;; :as config removed entirely
+          (is (not (str/includes? (:content result) ":as")))
           (is (str/includes? (:content result) ":keys [a]"))))))
 
   (testing ":as clause: all concrete bindings unused → map collapses to _as-name"
@@ -376,29 +375,28 @@
               result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) ":keys")))
-          ;; state is used so the map collapses to state (not _state)
+          ;; state is used so the map collapses to state
           (is (str/includes? (:content result) "[state arg]"))))))
 
-  (testing ":as and concrete binding both unused → map collapses to _name"
-    ;; {conn :db/conn :as req} both unused → {_conn :db/conn :as _req} → _req
+  (testing ":as and concrete binding both unused → :as removed, map collapses to _"
+    ;; {conn :db/conn :as req} both unused → conn→_conn, remove :as req → {_conn :db/conn} → _
     (with-temp-file "(defn f [{conn :db/conn :as req}] {:status 501})"
       (fn [f]
         (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 2)]
           (is (= 2 (:fixed result)))
-          ;; destructuring map collapses to _req
-          (is (str/includes? (:content result) "[_req]"))
-          ;; the destructuring { is gone (only {:status 501} remains)
-          (is (not (str/includes? (:content result) "{conn")))
-          (is (not (str/includes? (:content result) "{_conn"))))))
+          ;; :as req removed, map collapses to _
+          (is (str/includes? (:content result) "[_]"))
+          (is (not (str/includes? (:content result) ":as")))
+          (is (not (str/includes? (:content result) "{conn")))))))
 
-  (testing "multi-line: {_conn :db/conn :as _req} collapses to _req"
+  (testing "multi-line: :as removed, map collapses to _"
     (with-temp-file "(defn f [{conn :db/conn\n          :as req}] {:status 501})"
       (fn [f]
         (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 2)]
           (is (= 2 (:fixed result)))
-          (is (str/includes? (:content result) "[_req]"))
-          (is (not (str/includes? (:content result) "{conn")))
-          (is (not (str/includes? (:content result) "{_conn")))))))
+          (is (str/includes? (:content result) "[_]"))
+          (is (not (str/includes? (:content result) ":as")))
+          (is (not (str/includes? (:content result) "{conn")))))))
 
   (testing "keys-destr in fn-param: removes unused key from :keys vector"
     (with-temp-file "(defn f [{:keys [x y z]}] (+ y z))"
@@ -501,7 +499,7 @@
           ;; x removed but y and z survive
           (is (not (str/includes? (:content result) "[x ")))
           (is (str/includes? (:content result) "y"))
-          (is (str/includes? (:content result) "z"))))))
+          (is (str/includes? (:content result) "z")))))
 
   (testing "keys-destr multi-line: first key was only thing after {:keys [ — pull next key up"
     ;; {:keys [btw-thing\n  cdc-thing\n  ...]} remove btw-thing →
