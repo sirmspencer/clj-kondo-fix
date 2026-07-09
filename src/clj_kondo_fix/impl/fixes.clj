@@ -400,20 +400,24 @@
         sorted (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
     (loop [[f & more] sorted current-lines lines fixed 0]
       (if (nil? f)
-        {:fixed fixed :lines current-lines :changed? (pos? fixed)}
+        (let [cleaned (cleanup-empty-clauses current-lines)]
+          {:fixed fixed :lines cleaned :changed? (or (pos? fixed) (not= cleaned lines))})
         (let [msg (:message f)
               var-name (some-> (re-find #"^Unused import (.+)$" msg) second)
               line-idx (dec (:line f))
               col-idx (dec (:col f))]
           (if (or (nil? var-name) (< line-idx 0) (>= line-idx (count current-lines)))
             (recur more current-lines fixed)
-            (let [line (nth current-lines line-idx)
-                  new-line (remove-referred-var-from-line line var-name col-idx)]
-              (if (= new-line line)
+            (let [line     (nth current-lines line-idx)
+                  new-line (remove-referred-var-from-line line var-name col-idx)
+                  ;; If removing the class left a bare [package] vector (no classes
+                  ;; remaining), strip it so cleanup-empty-clauses can tidy the clause.
+                  final-line (str/replace new-line #"\s*\[[a-z][a-zA-Z0-9.]*\s*\]" "")]
+              (if (= final-line line)
                 (recur more current-lines fixed)
                 (do (swap! log conj (str "  " file-url ":" (:line f) "  remove unused import: " var-name))
                     (recur more
-                           (assoc current-lines line-idx new-line)
+                           (assoc current-lines line-idx final-line)
                            (inc fixed)))))))))))
 
 (defn- extract-ns-from-referred-var-msg [msg]

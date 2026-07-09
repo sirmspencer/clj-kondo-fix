@@ -394,7 +394,17 @@
               result   (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1 foo-pred)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "Foo")))
-          (is (str/includes? (:content result) "Bar")))))))
+          (is (str/includes? (:content result) "Bar"))))))
+
+  (testing "removes entire import group when last class removed — no bare [package] left"
+    ;; (:import [java.time Instant]) with Instant unused:
+    ;; removing Instant must not leave [java.time] (invalid) — whole group goes away.
+    (with-temp-file "(ns foo\n  (:import [java.time Instant]))"
+      (fn [f]
+        (let [result (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "java.time")))
+          (is (not (str/includes? (:content result) ":import"))))))  ))
 
 ;; ============================================================
 ;; :unused-referred-var
