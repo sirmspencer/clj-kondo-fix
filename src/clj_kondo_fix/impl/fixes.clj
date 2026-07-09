@@ -461,19 +461,29 @@
 
                            ;; :keys/:strs/:syms destructuring in fn param — remove from vector
                            (and (= ctx :keys-destr-fn) (fix-contexts :keys-destr-fn))
-                           (let [new-line (remove-referred-var-from-line line binding-name idx)]
-                             (if (= new-line line)
+                           (let [new-line  (remove-referred-var-from-line line binding-name idx)
+                                 ;; if the key was the only item on its line the result is blank;
+                                 ;; remove the whole line so we don't leave a dangling open bracket
+                                 new-lines (if (str/blank? new-line)
+                                             (vec (concat (take line-idx current-lines)
+                                                          (drop (inc line-idx) current-lines)))
+                                             (assoc current-lines line-idx new-line))]
+                             (if (= new-lines current-lines)
                                (recur more current-lines fixed)
                                (do (swap! log conj (str "  " file-url ":" (:line f) "  remove from keys vector: " binding-name))
-                                   (recur more (assoc current-lines line-idx new-line) (inc fixed)))))
+                                   (recur more new-lines (inc fixed)))))
 
                            ;; :keys/:strs/:syms destructuring in let — also safe (just a deref, no side effects)
                            (and (= ctx :keys-destr-let) (fix-contexts :keys-destr-let))
-                           (let [new-line (remove-referred-var-from-line line binding-name idx)]
-                             (if (= new-line line)
+                           (let [new-line  (remove-referred-var-from-line line binding-name idx)
+                                 new-lines (if (str/blank? new-line)
+                                             (vec (concat (take line-idx current-lines)
+                                                          (drop (inc line-idx) current-lines)))
+                                             (assoc current-lines line-idx new-line))]
+                             (if (= new-lines current-lines)
                                (recur more current-lines fixed)
                                (do (swap! log conj (str "  " file-url ":" (:line f) "  remove from keys vector: " binding-name))
-                                   (recur more (assoc current-lines line-idx new-line) (inc fixed)))))
+                                   (recur more new-lines (inc fixed)))))
 
                            ;; fn param — prefix with _
                            (and (= ctx :fn-param) (fix-contexts :fn-param))

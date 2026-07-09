@@ -420,7 +420,52 @@
     ;; (let [x (side-effect-fn)] ...) — cannot safely remove
     (with-temp-file "(let [x 1])"
       (fn [f]
-        (assert-skip fixes/fix-unused-binding-in-file f [:unused-binding])))  ))
+        (assert-skip fixes/fix-unused-binding-in-file f [:unused-binding]))))
+
+  (testing "keys-destr multi-line: unused key is only item on its line — line removed"
+    ;; {:keys [x\n         y\n         z]} remove x → line containing x removed entirely
+    (with-temp-file "(defn f [{:keys [x\n                 y\n                 z]}] (+ y z))"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) " x")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (= 1 (:fixed result)))
+          ;; the x-containing line must be gone
+          (is (not (str/includes? (:content result) "                 x")))
+          (is (str/includes? (:content result) "                 y"))
+          (is (str/includes? (:content result) "                 z"))))))
+
+  (testing "keys-destr multi-line: unused key is middle item on its own line — line removed"
+    (with-temp-file "(defn f [{:keys [x\n                 y\n                 z]}] (+ x z))"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) " y")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "                 y")))
+          ;; x is on the {:keys [x line, not its own indented line
+          (is (str/includes? (:content result) "{:keys [x"))
+          (is (str/includes? (:content result) "                 z"))))))
+
+  (testing "keys-destr multi-line: unused key is last item on its own line — line removed"
+    (with-temp-file "(defn f [{:keys [x\n                 y\n                 z]}] (+ x y))"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) " z")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "                 z")))
+          (is (str/includes? (:content result) "{:keys [x"))
+          (is (str/includes? (:content result) "                 y"))))))
+
+  (testing "keys-destr multi-line: unused key shares line with other keys — others preserved"
+    ;; {:keys [x y\n         z]} remove x → [y\n         z] — y survives on same line
+    (with-temp-file "(defn f [{:keys [x y\n                 z]}] (+ y z))"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) " x")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (= 1 (:fixed result)))
+          ;; x removed but y and z survive
+          (is (not (str/includes? (:content result) "[x ")))
+          (is (str/includes? (:content result) "y"))
+          (is (str/includes? (:content result) "z")))))  ))
 ;; ============================================================
 ;; :unused-import
 ;; ============================================================
