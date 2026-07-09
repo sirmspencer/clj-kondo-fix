@@ -404,7 +404,34 @@
         (let [result (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "java.time")))
-          (is (not (str/includes? (:content result) ":import"))))))  ))
+          (is (not (str/includes? (:content result) ":import")))))))
+
+  (testing "removes middle unused import — first and last preserved with correct spacing"
+    (with-temp-file "(ns foo (:import [java.util Date Instant List]))"
+      (fn [f]
+        (let [pred   #(str/ends-with? (:message %) "Instant")
+              result (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1 pred)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "Instant")))
+          (is (str/includes? (:content result) "Date List"))))))
+
+  (testing "removes first unused import from group — rest preserved"
+    (with-temp-file "(ns foo (:import [java.util Date Instant List]))"
+      (fn [f]
+        (let [pred   #(str/ends-with? (:message %) "Date")
+              result (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1 pred)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "Date")))
+          (is (str/includes? (:content result) "Instant List"))))))
+
+  (testing "removes last unused import from group — preceding preserved"
+    (with-temp-file "(ns foo (:import [java.util Date Instant List]))"
+      (fn [f]
+        (let [pred   #(str/ends-with? (:message %) "List")
+              result (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1 pred)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "List")))
+          (is (str/includes? (:content result) "Date Instant")))))  ))
 
 ;; ============================================================
 ;; :unused-referred-var
