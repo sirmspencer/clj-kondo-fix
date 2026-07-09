@@ -429,9 +429,9 @@
         (let [pred   #(str/includes? (:message %) " x")
               result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
           (is (= 1 (:fixed result)))
-          ;; the x-containing line must be gone
+          ;; the x-containing line must be gone; y is pulled up to {:keys [y
           (is (not (str/includes? (:content result) "                 x")))
-          (is (str/includes? (:content result) "                 y"))
+          (is (str/includes? (:content result) "{:keys [y"))
           (is (str/includes? (:content result) "                 z"))))))
 
   (testing "keys-destr multi-line: unused key is middle item on its own line — line removed"
@@ -465,7 +465,19 @@
           ;; x removed but y and z survive
           (is (not (str/includes? (:content result) "[x ")))
           (is (str/includes? (:content result) "y"))
-          (is (str/includes? (:content result) "z")))))  ))
+          (is (str/includes? (:content result) "z"))))))
+
+  (testing "keys-destr multi-line: first key was only thing after {:keys [ — pull next key up"
+    ;; {:keys [btw-thing\n  cdc-thing\n  ...]} remove btw-thing →
+    ;; {:keys [cdc-thing\n  ...]} NOT {:keys [\n  cdc-thing\n  ...}
+    (with-temp-file "(defn f [{:keys [x\n                 y\n                 z]}] (+ y z))"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) " x")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (= 1 (:fixed result)))
+          ;; y should be pulled up to the {:keys [ line, not left dangling on the next
+          (is (str/includes? (:content result) "{:keys [y"))
+          (is (not (str/includes? (:content result) "{:keys [\n")))))  )))
 ;; ============================================================
 ;; :unused-import
 ;; ============================================================

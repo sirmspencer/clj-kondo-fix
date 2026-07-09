@@ -462,11 +462,24 @@
                            ;; :keys/:strs/:syms destructuring in fn param — remove from vector
                            (and (= ctx :keys-destr-fn) (fix-contexts :keys-destr-fn))
                            (let [new-line  (remove-referred-var-from-line line binding-name idx)
-                                 ;; if the key was the only item on its line the result is blank;
-                                 ;; remove the whole line so we don't leave a dangling open bracket
-                                 new-lines (if (str/blank? new-line)
+                                 new-lines (cond
+                                             ;; key was the only item on its line — remove the line
+                                             (str/blank? new-line)
                                              (vec (concat (take line-idx current-lines)
                                                           (drop (inc line-idx) current-lines)))
+                                             ;; key was first on a {:keys [ line — pull next line's content up
+                                             (and (re-find #"\[\s*$" new-line)
+                                                  (< (inc line-idx) (count current-lines)))
+                                             (let [next-idx  (inc line-idx)
+                                                   next-trim (str/triml (nth current-lines next-idx))]
+                                               (if (str/blank? next-trim)
+                                                 (vec (concat (take line-idx current-lines)
+                                                              [new-line]
+                                                              (drop (inc next-idx) current-lines)))
+                                                 (vec (concat (take line-idx current-lines)
+                                                              [(str (str/trimr new-line) next-trim)]
+                                                              (drop (inc next-idx) current-lines)))))
+                                             :else
                                              (assoc current-lines line-idx new-line))]
                              (if (= new-lines current-lines)
                                (recur more current-lines fixed)
@@ -476,9 +489,22 @@
                            ;; :keys/:strs/:syms destructuring in let — also safe (just a deref, no side effects)
                            (and (= ctx :keys-destr-let) (fix-contexts :keys-destr-let))
                            (let [new-line  (remove-referred-var-from-line line binding-name idx)
-                                 new-lines (if (str/blank? new-line)
+                                 new-lines (cond
+                                             (str/blank? new-line)
                                              (vec (concat (take line-idx current-lines)
                                                           (drop (inc line-idx) current-lines)))
+                                             (and (re-find #"\[\s*$" new-line)
+                                                  (< (inc line-idx) (count current-lines)))
+                                             (let [next-idx  (inc line-idx)
+                                                   next-trim (str/triml (nth current-lines next-idx))]
+                                               (if (str/blank? next-trim)
+                                                 (vec (concat (take line-idx current-lines)
+                                                              [new-line]
+                                                              (drop (inc next-idx) current-lines)))
+                                                 (vec (concat (take line-idx current-lines)
+                                                              [(str (str/trimr new-line) next-trim)]
+                                                              (drop (inc next-idx) current-lines)))))
+                                             :else
                                              (assoc current-lines line-idx new-line))]
                              (if (= new-lines current-lines)
                                (recur more current-lines fixed)
