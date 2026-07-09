@@ -457,7 +457,9 @@
 
 (defn collapse-destr-maps [lines]
   "Post-pass: replace destructuring maps whose bindings are all effectively
-   unused (_-prefixed or empty) with either their :as name or plain `_`."
+   unused (_-prefixed or empty) with either their :as name or plain `_`.
+   Only collapses maps that are directly inside a [...] vector (destructuring
+   position) — never maps that are arguments to function calls (inside (...))."
   (loop [i 0, current-lines (vec lines)]
     (if (>= i (count current-lines))
       current-lines
@@ -466,13 +468,18 @@
         (if-let [j (some (fn [j] (when (= \{ (nth line j)) j))
                          (range (count line)))]
           (if-let [[cl cc] (find-matching-bracket-across-lines current-lines i j)]
-            (let [;; extract full content between { and }
+            (let [;; Only collapse maps in destructuring (vector) position.
+                  ;; Find the bracket immediately enclosing this { and check it's [.
+                  enc   (find-opening-bracket current-lines i j)
+                  enc-ch (when enc (nth (nth current-lines (:line enc)) (:col enc)))
+                  in-destr-pos? (= enc-ch \[)
+                  ;; extract full content between { and }
                   content (if (= i cl)
                             (subs line (inc j) cc)
                             (str (subs line (inc j))
                                  (str/join "\n" (map #(nth current-lines %) (range (inc i) cl)))
                                  (subs (nth current-lines cl) 0 cc)))
-                  target (map-collapses-to content)]
+                  target (when in-destr-pos? (map-collapses-to content))]
               (if target
                 ;; replace the {…} span with target
                 (let [before    (subs line 0 j)
@@ -487,29 +494,27 @@
             (recur (inc i) current-lines))
           (recur (inc i) current-lines))))))
 
-
 (defn fix-unused-binding-in-file
   "Fix unused bindings.  fix-contexts controls which binding types to handle:
-     :as-clause    — remove the :as clause from destructuring (always safe)
+     :as-clause    — rename the :as binding to _name (kept for map collapse)
      :fn-param     — prefix unused function params with _
      :keys-destr-fn — remove from {:keys/strs/syms []} in function params
      :keys-destr-let — remove from {:keys/strs/syms []} in let bindings
-                       (also removes binding pair when keys empty; cleanup-empty-lets)
      :let-binding  — prefix unused let/loop/for/doseq bindings with _
    Default: #{:as-clause :fn-param :keys-destr-fn :keys-destr-let} (let scalar bindings skipped)"
   ([file-path lines findings log]
    (fix-unused-binding-in-file file-path lines findings log
                                #{:as-clause :fn-param :keys-destr-fn :keys-destr-let}))
-  ([file-path lines findings log fix-contexts]
-   (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
-         sorted   (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
-     (loop [[f & more] sorted
-            current-lines lines
-            fixed 0]
-       (if (nil? f)
-          ;; Post-passes: collapse destructuring maps that can be simplified
-          (let [collapsed (collapse-destr-maps current-lines)]
-            {:fixed fixed :lines collapsed :changed? (or (pos? fixed) (not= collapsed lines))})
+    ([file-path lines findings log fix-contexts]
+     (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
+           sorted   (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
+       (loop [[f & more] sorted
+              current-lines lines
+              fixed 0]
+         (if (nil? f)
+            ;; Post-pass: collapse destructuring maps (position-checked inside)
+            (let [collapsed (collapse-destr-maps current-lines)]
+              {:fixed fixed :lines collapsed :changed? (or (pos? fixed) (not= collapsed lines))})
          (let [binding-name (extract-binding-name (:message f))
                line-idx     (dec (:line f))
                col-idx      (dec (:col f))]
