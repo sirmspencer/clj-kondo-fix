@@ -235,8 +235,90 @@
           (recur more new-lines (if changed (inc fixed) fixed)))))))
 
 ;; ------------------------------------------------------------
-;; Fix: unused-binding — rename to underscore prefix
+;; Fix: duplicate-require — keep one alias, rename usages if needed
 ;; ------------------------------------------------------------
+
+(defn find-require-aliases [lines ns-name]
+  "Returns [{:alias string :line-idx int}] for every [ns-name :as alias] entry found.
+   Uses re-seq so multiple entries on the same line are all captured."
+  (let [pattern (re-pattern (str "\\[" (java.util.regex.Pattern/quote ns-name)
+                                 "\\s+:as\\s+([^\\s\\]]+)\\]"))]
+    (into []
+          (mapcat (fn [[i line]]
+                    (map (fn [[_ alias]] {:alias alias :line-idx i})
+                         (re-seq pattern line)))
+                  (map-indexed vector lines)))))
+
+(defn find-alias-col [line ns-name alias]
+  "Returns the 1-indexed column of [ns-name :as alias] on the line, or 1 as fallback."
+  (let [pattern (re-pattern (str "\\[" (java.util.regex.Pattern/quote ns-name)
+                                 "\\s+:as\\s+" (java.util.regex.Pattern/quote alias) "\\]"))
+        m       (re-matcher pattern line)]
+    (if (.find m) (inc (.start m)) 1)))
+
+(defn alias-used-in-file? [lines alias]
+  "Returns true if `alias/` appears in any line (word-boundary anchored)."
+  (let [pattern (re-pattern (str "\\b" (java.util.regex.Pattern/quote alias) "/"))]
+    (boolean (some #(re-find pattern %) lines))))
+
+(defn fix-duplicate-require-in-file [file-path lines findings log]
+  (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
+        sorted   (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
+    (loop [[f & more] sorted
+           current-lines lines
+           fixed 0]
+      (if (nil? f)
+        (let [cleaned (cleanup-empty-clauses current-lines)]
+          {:fixed fixed :lines cleaned :changed? (or (pos? fixed) (not= cleaned lines))})
+        (let [ns-name     (some-> (re-find #"^duplicate require of (.+)$" (:message f)) second)
+              all-aliases (when ns-name (find-require-aliases current-lines ns-name))]
+          (if (not= (count all-aliases) 2)
+            ;; Not exactly 2 entries (already fixed, or 3+ duplicates) — fall back
+            (let [[new-lines changed] (remove-require-finding current-lines f file-url log)]
+              (recur more new-lines (if changed (inc fixed) fixed)))
+            (let [first-entry   (first all-aliases)
+                  second-entry  (second all-aliases)
+                  first-alias   (:alias first-entry)
+                  second-alias  (:alias second-entry)
+                  first-used?   (alias-used-in-file? current-lines first-alias)
+                  second-used?  (alias-used-in-file? current-lines second-alias)
+                  ;; Loser = entry to remove.
+                  ;; - Only first used or neither used → remove second (reported duplicate).
+                  ;; - Only second used                → remove first.
+                  ;; - Both used                       → keep longer alias; first wins tie.
+                  [loser keeper]
+                  (cond
+                    (not second-used?)
+                    [second-entry first-entry]
+
+                    (not first-used?)
+                    [first-entry second-entry]
+
+                    :else
+                    (if (>= (count first-alias) (count second-alias))
+                      [second-entry first-entry]
+                      [first-entry  second-entry]))
+                  ;; Rename loser/  →  keeper/ throughout the file when both were in use
+                  renamed-lines
+                  (if (and first-used? second-used?)
+                    (do (swap! log conj (str "  " file-url "  rename "
+                                             (:alias loser) "/ -> " (:alias keeper) "/"))
+                        (mapv #(str/replace %
+                                            (re-pattern (str "\\b"
+                                                             (java.util.regex.Pattern/quote (:alias loser))
+                                                             "/"))
+                                            (str (:alias keeper) "/"))
+                              current-lines))
+                    current-lines)
+                  ;; Synthetic finding pointing at the loser's exact position
+                  loser-col     (find-alias-col (nth renamed-lines (:line-idx loser))
+                                                ns-name (:alias loser))
+                  loser-finding {:line    (inc (:line-idx loser))
+                                 :col     loser-col
+                                 :message (str "duplicate require of " ns-name)}
+                  [new-lines changed] (remove-require-finding renamed-lines loser-finding file-url log)]
+              (recur more new-lines (if changed (inc fixed) fixed)))))))))
+
 
 (defn remove-as-clause-from-line [line binding-name idx word-end]
   (if-let [m (re-find #"[\s,]:as\s+[\w-]+$" (subs line 0 word-end))]

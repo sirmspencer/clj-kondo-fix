@@ -11,7 +11,7 @@
    :duplicate-require
    {:message-re #"^duplicate require of (.+)$"
     :phase :require
-    :fix-fn fixes/fix-unused-ns-in-file
+    :fix-fn fixes/fix-duplicate-require-in-file
     :display "duplicate require"}
 
    :unused-binding

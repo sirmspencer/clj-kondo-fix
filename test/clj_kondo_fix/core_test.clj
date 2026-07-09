@@ -239,32 +239,71 @@
           (is (not (str/includes? (:content result) "reserve-daas-port"))))))  ))
 
 (deftest test-duplicate-require
-  (testing "removes the duplicate (second) entry, keeps the first"
-    ;; s/join is used so only the duplicate :as str entry should be removed.
+  (testing "case 1: only first alias used — remove reported duplicate, no renames"
+    ;; [ns :as s] used via s/join; [ns :as str] unused → remove str entry
     (with-temp-file "(ns foo (:require [clojure.string :as s] [clojure.string :as str])) (s/join [\"\"] \"\")"
       (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:duplicate-require] 1)]
+        (let [result (assert-fix fixes/fix-duplicate-require-in-file f [:duplicate-require] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "clojure.string :as s"))
-          (is (not (str/includes? (:content result) ":as str")))))))
+          (is (not (str/includes? (:content result) ":as str")))
+          ;; s/ calls must be untouched
+          (is (str/includes? (:content result) "s/join"))))))
 
-  (testing "removes duplicate when both are on separate lines"
-    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            [clojure.string :as str])) (s/join [\"\"] \"\")"
+  (testing "case 2: only duplicate alias used — remove first entry, no renames"
+    ;; [ns :as s] not used; [ns :as str] used via str/join → remove s entry, keep str
+    (with-temp-file "(ns foo (:require [clojure.string :as s] [clojure.string :as str])) (str/join [\"\"] \"\")"
       (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:duplicate-require] 1)]
+        (let [result (assert-fix fixes/fix-duplicate-require-in-file f [:duplicate-require] 1)]
           (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "clojure.string :as s"))
-          (is (not (str/includes? (:content result) ":as str")))))))
+          ;; str entry must survive
+          (is (str/includes? (:content result) "clojure.string :as str"))
+          ;; s entry must be gone
+          (is (not (str/includes? (:content result) ":as s ") ))
+          ;; str/ calls must be untouched
+          (is (str/includes? (:content result) "str/join"))))))
 
-  (testing "removes the duplicate when both entries are unused"
-    ;; kondo reports duplicate-require for the second entry only;
-    ;; after removal, no more duplicates (one entry remains).
+  (testing "case 3: both aliases used — keep longer, rename shorter usages, remove shorter entry"
+    ;; [ns :as pt] used + [ns :as toolz] used → toolz is longer → keep toolz, rename pt/ → toolz/
+    (with-temp-file "(ns foo\n  (:require [path.tools :as pt]\n            [path.tools :as toolz]))\n(pt/make-endpoint :x)\n(toolz/make-exception {})"
+      (fn [f]
+        (let [result (assert-fix fixes/fix-duplicate-require-in-file f [:duplicate-require] 1)]
+          (is (= 1 (:fixed result)))
+          ;; toolz entry survives
+          (is (str/includes? (:content result) "path.tools :as toolz"))
+          ;; pt entry gone
+          (is (not (str/includes? (:content result) ":as pt")))
+          ;; pt/ calls renamed to toolz/
+          (is (not (str/includes? (:content result) "pt/")))
+          (is (str/includes? (:content result) "toolz/make-endpoint"))
+          (is (str/includes? (:content result) "toolz/make-exception")))))  )
+
+  (testing "case 3 tie: both aliases same length — keep first (shorter or equal wins)"
+    ;; [ns :as aa] and [ns :as bb] both used, same length → keep first (aa), rename bb/ → aa/
+    (with-temp-file "(ns foo\n  (:require [clojure.string :as aa]\n            [clojure.string :as bb]))\n(aa/join [\"\"] \"\")\n(bb/upper-case \"x\")"
+      (fn [f]
+        (let [result (assert-fix fixes/fix-duplicate-require-in-file f [:duplicate-require] 1)]
+          (is (= 1 (:fixed result)))
+          (is (str/includes? (:content result) "clojure.string :as aa"))
+          (is (not (str/includes? (:content result) ":as bb")))
+          (is (str/includes? (:content result) "aa/join"))
+          (is (str/includes? (:content result) "aa/upper-case"))
+          (is (not (str/includes? (:content result) "bb/")))))))
+
+  (testing "case 4: neither alias used — remove reported duplicate, first entry remains"
     (with-temp-file "(ns foo (:require [clojure.string :as s] [clojure.string :as str]))"
       (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:duplicate-require] 1)]
+        (let [result (assert-fix fixes/fix-duplicate-require-in-file f [:duplicate-require] 1)]
           (is (pos? (:fixed result)))
-          (is (= 1 (count (re-seq #"\[clojure\.string" (:content result))))))))))
+          (is (= 1 (count (re-seq #"\[clojure\.string" (:content result))))))))  )
 
+  (testing "entries on separate lines"
+    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            [clojure.string :as str])) (s/join [\"\"] \"\")"
+      (fn [f]
+        (let [result (assert-fix fixes/fix-duplicate-require-in-file f [:duplicate-require] 1)]
+          (is (= 1 (:fixed result)))
+          (is (str/includes? (:content result) "clojure.string :as s"))
+          (is (not (str/includes? (:content result) ":as str"))))))))
 ;; ============================================================
 ;; :unused-binding
 ;; ============================================================
