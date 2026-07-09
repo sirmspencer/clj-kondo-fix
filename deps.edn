@@ -5,4 +5,6 @@
  {:test {:extra-paths ["test"]
          :extra-deps {io.github.cognitect-labs/test-runner
                       {:git/tag "v0.5.1" :git/sha "dfb30dd"}}}
-  :run {:main-opts ["-m" "clj-kondo-fix.main"]}}}
+  :run {:main-opts ["-m" "clj-kondo-fix.main"]}
+  :gen-fixtures {:extra-paths ["local"]
+                 :main-opts ["-m" "gen-fixtures"]}}}

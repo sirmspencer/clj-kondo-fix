@@ -11,6 +11,14 @@
 ;; Helpers
 ;; ============================================================
 
+(defn fixture-path
+  "Returns the absolute path for a fixture file.
+   rule  — clj-kondo rule name (e.g. \"unused-namespace\")
+   slug  — file slug without extension (e.g. \"removes-single-in\")"
+  [rule slug]
+  (str (System/getProperty "user.dir")
+       "/test/clj_kondo_fix/fixtures/" rule "/" slug ".clj"))
+
 (defn with-temp-file [content f]
   (let [fpath (str (System/getProperty "java.io.tmpdir")
                    "/clj-kondo-fix-test-" (java.util.UUID/randomUUID) ".clj")]
@@ -22,47 +30,47 @@
    Returns findings normalized to {:line :col :message}."
   [file-path & {:keys [linters]}]
   (let [all-off {:linters {:namespace-name-mismatch    {:level :off}
-                           :syntax                     {:level :off}
-                           :datalog-syntax             {:level :off}
-                           :invalid-arity              {:level :off}
-                           :unresolved-symbol          {:level :off}
-                           :unresolved-var             {:level :off}
-                           :unresolved-namespace       {:level :off}
-                           :unresolved-excluded-var    {:level :off}
-                           :unresolved-protocol-method {:level :off}
-                           :unused-binding             {:level :off}
-                           :unused-referred-var        {:level :off}
-                           :unused-namespace           {:level :off}
-                           :unused-private-var         {:level :off}
-                           :unused-import              {:level :off}
-                           :duplicate-require          {:level :off}
-                           :redundant-do               {:level :off}
-                           :redundant-let              {:level :off}
-                           :redundant-let-binding      {:level :off}
-                           :redundant-expression       {:level :off}
-                           :redundant-call             {:level :off}
-                           :redundant-declare          {:level :off}
-                           :redundant-fn-wrapper       {:level :off}
-                           :redundant-nested-call      {:level :off}
-                           :refer-all                  {:level :off}
-                           :misplaced-docstring        {:level :off}
-                           :missing-docstring          {:level :off}
-                           :missing-else-branch        {:level :off}
-                           :missing-body-in-when       {:level :off}
-                           :missing-test-assertion     {:level :off}
-                           :unused-value               {:level :off}
-                           :not-a-function             {:level :off}
-                           :type-mismatch              {:level :off}
-                           :shadowed-var               {:level :off}
-                           :shadowed-fn-param          {:level :off}
-                           :loop-without-recur         {:level :off}
-                           :uninitialized-var          {:level :off}
-                           :inline-def                 {:level :off}
-                           :cond-else                  {:level :off}
-                           :condition-always-true      {:level :off}
-                           :earmuffed-var-not-dynamic  {:level :off}
-                           :unknown-require-option     {:level :off}
-                           :invalid-ref                {:level :off}}}
+                            :syntax                     {:level :off}
+                            :datalog-syntax             {:level :off}
+                            :invalid-arity              {:level :off}
+                            :unresolved-symbol          {:level :off}
+                            :unresolved-var             {:level :off}
+                            :unresolved-namespace       {:level :off}
+                            :unresolved-excluded-var    {:level :off}
+                            :unresolved-protocol-method {:level :off}
+                            :unused-binding             {:level :off}
+                            :unused-referred-var        {:level :off}
+                            :unused-namespace           {:level :off}
+                            :unused-private-var         {:level :off}
+                            :unused-import              {:level :off}
+                            :duplicate-require          {:level :off}
+                            :redundant-do               {:level :off}
+                            :redundant-let              {:level :off}
+                            :redundant-let-binding      {:level :off}
+                            :redundant-expression       {:level :off}
+                            :redundant-call             {:level :off}
+                            :redundant-declare          {:level :off}
+                            :redundant-fn-wrapper       {:level :off}
+                            :redundant-nested-call      {:level :off}
+                            :refer-all                  {:level :off}
+                            :misplaced-docstring        {:level :off}
+                            :missing-docstring          {:level :off}
+                            :missing-else-branch        {:level :off}
+                            :missing-body-in-when       {:level :off}
+                            :missing-test-assertion     {:level :off}
+                            :unused-value               {:level :off}
+                            :not-a-function             {:level :off}
+                            :type-mismatch              {:level :off}
+                            :shadowed-var               {:level :off}
+                            :shadowed-fn-param          {:level :off}
+                            :loop-without-recur         {:level :off}
+                            :uninitialized-var          {:level :off}
+                            :inline-def                 {:level :off}
+                            :cond-else                  {:level :off}
+                            :condition-always-true      {:level :off}
+                            :earmuffed-var-not-dynamic  {:level :off}
+                            :unknown-require-option     {:level :off}
+                            :invalid-ref                {:level :off}}}
         enabled {:linters (into {:namespace-name-mismatch {:level :off}}
                                 (map (fn [k] [k {:level :warning}]) linters))}
         config  {:linters (merge (:linters all-off) (:linters enabled))}
@@ -73,18 +81,18 @@
             :message (:message f)}))))
 
 (defn apply-fix
-  "Apply fix-fn to file-path and return {:fixed N :content string}.
-   Writes the result back to the file if changed."
+  "Apply fix-fn to file-path purely in memory.
+   Returns {:fixed N :content string}.  Never writes to disk."
   [fix-fn file-path findings]
   (let [lines  (read-lines file-path)
         log    (atom [])
         result (fix-fn file-path lines findings log)]
-    (when (:changed? result)
-      (spit file-path (str/join "\n" (:lines result))))
-    {:fixed (:fixed result) :content (slurp file-path)}))
+    {:fixed (:fixed result) :content (str (str/join "\n" (:lines result)) "\n")}))
 
 (defn assert-fix
   "Assert: expected-count matching findings exist before fix; none after.
+   Writes fixed content to a temp file internally for the after-lint check —
+   the input fixture file is never modified.
    Optional filter-fn narrows which findings count (for partial-fix cases).
    Returns the apply-fix result map for additional content assertions."
   ([fix-fn file-path linters expected-count]
@@ -94,11 +102,16 @@
          before     (if filter-fn (filter filter-fn all-before) all-before)]
      (is (= expected-count (count before))
          (str "expected " expected-count " finding(s) before fix, got " (count before)))
-     (let [result    (apply-fix fix-fn file-path before)
-           all-after (lint-file file-path :linters linters)
-           after     (if filter-fn (filter filter-fn all-after) all-after)]
-       (is (empty? after) "expected no matching findings after fix")
-       result))))
+     (let [result   (apply-fix fix-fn file-path before)
+           tmp-path (str (System/getProperty "java.io.tmpdir")
+                         "/clj-kondo-fix-verify-" (java.util.UUID/randomUUID) ".clj")]
+       (spit tmp-path (:content result))
+       (try
+         (let [all-after (lint-file tmp-path :linters linters)
+               after     (if filter-fn (filter filter-fn all-after) all-after)]
+           (is (empty? after) "expected no matching findings after fix")
+           result)
+         (finally (io/delete-file tmp-path true)))))))
 
 (defn assert-skip
   "Assert: linter fires before; fix makes no changes; linter still fires after.
@@ -126,491 +139,375 @@
 
 (deftest test-unused-namespace
   (testing "removes unused namespace from require"
-    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "clojure.string")))))))
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "removes-single-in")
+                             [:unused-namespace] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "removes-single-out")) (:content result)))))
 
   (testing "all requires removed — (:require) block is removed and ns closes cleanly"
-    ;; Reproduces path.handler.digital: both entries unused, result must be
-    ;; (ns foo) not (ns foo\n  (:require )))
-    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            [clojure.set :as cs]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 2)]
-          (is (= 2 (:fixed result)))
-          (is (not (str/includes? (:content result) ":require")))
-          (is (= "(ns foo)" (str/trim (:content result))))))))
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "all-requires-removed-in")
+                             [:unused-namespace] 2)]
+      (is (= 2 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "all-requires-removed-out")) (:content result)))))
 
   (testing "leaves used namespace untouched"
-    (with-temp-file "(ns foo (:require [clojure.string :as s])) (s/join [\"\"] \"\")"
-      (fn [f]
-        (let [result (assert-no-finding fixes/fix-unused-ns-in-file f [:unused-namespace])]
-          (is (zero? (:fixed result)))))))
+    (let [result (assert-no-finding fixes/fix-unused-ns-in-file
+                                    (fixture-path "unused-namespace" "used-ns")
+                                    [:unused-namespace])]
+      (is (zero? (:fixed result)))))
 
   (testing "removes both of two unused namespaces on same line"
-    (with-temp-file "(ns foo (:require [clojure.string :as s] [clojure.set :as cs]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 2)]
-          (is (= 2 (:fixed result)))
-          (is (not (str/includes? (:content result) "clojure.string")))
-          (is (not (str/includes? (:content result) "clojure.set")))))))
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "removes-two-same-line-in")
+                             [:unused-namespace] 2)]
+      (is (= 2 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "removes-two-same-line-out")) (:content result)))))
 
   (testing "keyword lookups like (:count) in threading macros are not touched"
-    ;; Regression: cleanup-empty-clauses must not match (:count)))) in function bodies.
-    ;; Only ns-form clause keywords (require/import/use/refer/...) should be cleaned.
-    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]))\n(defn f [m]\n  (-> m\n      first\n      (:count)))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
-          (is (= 1 (:fixed result)))
-          ;; (:count) must survive — it's a keyword lookup, not a clause
-          (is (str/includes? (:content result) "(:count)"))))))
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "keyword-lookup-regression-in")
+                             [:unused-namespace] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "keyword-lookup-regression-out")) (:content result)))))
 
   (testing "trailing comment on the removed entry line — no corruption"
-    ;; [clojure.set :as cs] ;; for set ops — comment becomes a straggler but
-    ;; the linter no longer fires (the entry is gone) and source is valid.
-    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            [clojure.set :as cs] ;; for set ops\n))\n(s/join [\"\"] \"\")"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "clojure.set :as cs")))
-          (is (str/includes? (:content result) "clojure.string :as s"))))))
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "trailing-comment-in")
+                             [:unused-namespace] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "trailing-comment-out")) (:content result)))))
 
   (testing "comment-only line before removed entry stays as orphan — no corruption"
-    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            ;; this one is unused\n            [clojure.set :as cs]))\n(s/join [\"\"] \"\")"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "clojure.set :as cs")))
-          (is (str/includes? (:content result) "clojure.string :as s"))))))
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "orphan-comment-in")
+                             [:unused-namespace] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "orphan-comment-out")) (:content result)))))
 
   (testing "inline single-line ns: entry removed, (:require ) straggler stays — no corruption"
-    ;; cleanup-empty-clauses only matches (:require) when alone on its own line;
-    ;; the straggler is harmless and the linter no longer fires.
-    (with-temp-file "(ns foo (:require [clojure.string :as s]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "clojure.string")))))))
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "inline-ns-in")
+                             [:unused-namespace] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "inline-ns-out")) (:content result)))))
 
   (testing "last entry removed when prev line is (:require — closing )) merged onto preceding ]"
-    ;; Reproduces change_detector.clj:
-    ;;   (:require [clojure.set :as set]
-    ;;             [clojure.tools.logging :as log]))   ← removed
-    ;; Must produce:   (:require [clojure.set :as set]))
-    ;; NOT:            (:require [clojure.set :as set]\n            ))
-    (with-temp-file "(ns foo\n  (:require [clojure.set :as set]\n            [clojure.tools.logging :as log]))\n(set/difference #{1} #{2})"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "clojure.tools.logging")))
-          (is (str/includes? (:content result) "[clojure.set :as set]))"))))))
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "last-entry-prev-require-in")
+                             [:unused-namespace] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "last-entry-prev-require-out")) (:content result)))))
 
   (testing "last entry removed when prev entry is multi-line — closing ) merged onto :as line"
-    ;; Reproduces outside_plant_multiplexer.clj:
-    ;;   [clojure.string
-    ;;    :as str]
-    ;;   [clojure.set :as cs])   ← removed
-    ;; Must produce:   [clojure.string\n   :as str])
-    ;; NOT:            [clojure.string\n   :as str]\n            )
-    (with-temp-file "(ns foo\n  (:require [clojure.string\n             :as str]\n            [clojure.set :as cs]))\n(str/join [\"\"] \"\")"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "clojure.set")))
-          (is (str/includes? (:content result) ":as str]))"  ))))))
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "last-entry-prev-multiline-in")
+                             [:unused-namespace] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "last-entry-prev-multiline-out")) (:content result)))))
 
   (testing "multi-line entry removed: middle entry between two single-line entries"
-    ;; [my.app...\n :as unused] is in the middle; both siblings survive.
-    (with-temp-file "(ns foo\n  (:require [clojure.set :as cs]\n            [my.app.some.long-unused-ns\n             :as unused]\n            [clojure.string :as str]))\n(cs/difference #{1} #{2})\n(str/join [\"\"] \"\")  "
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "long-unused-ns")))
-          (is (str/includes? (:content result) "clojure.set :as cs"))
-          (is (str/includes? (:content result) "clojure.string :as str"))))))
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "multiline-middle-entry-in")
+                             [:unused-namespace] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "multiline-middle-entry-out")) (:content result)))))
 
   (testing "multi-line entry removed: last entry — closing ) merged onto previous ]"
-    ;; [my.app...\n :as unused]) is last; ) must land on [clojure.set] line.
-    (with-temp-file "(ns foo\n  (:require [clojure.set :as cs]\n            [my.app.some.long-unused-ns\n             :as unused]))\n(cs/difference #{1} #{2})"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "long-unused-ns")))
-          ;; closing )) must be on the surviving entry's line, not dangling
-          (is (str/includes? (:content result) "[clojure.set :as cs]))"  ))))))
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "multiline-last-entry-in")
+                             [:unused-namespace] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "multiline-last-entry-out")) (:content result)))))
 
   (testing "multi-line entry removed: only entry in require clause"
-    ;; [my.app...\n :as unused] is the only require; clause is cleaned up.
-    (with-temp-file "(ns foo\n  (:require\n   [my.app.some.long-unused-ns\n    :as unused]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "long-unused-ns"))))))  ))
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "multiline-only-entry-in")
+                             [:unused-namespace] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "multiline-only-entry-out")) (:content result))))))
+
+;; ============================================================
+;; :duplicate-require
+;; ============================================================
 
 (deftest test-duplicate-require
   (testing "case 1: only first alias used — remove reported duplicate, no renames"
-    ;; [ns :as s] used via s/join; [ns :as str] unused → remove str entry
-    (with-temp-file "(ns foo (:require [clojure.string :as s] [clojure.string :as str])) (s/join [\"\"] \"\")"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-duplicate-require-in-file f [:duplicate-require] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "clojure.string :as s"))
-          (is (not (str/includes? (:content result) ":as str")))
-          ;; s/ calls must be untouched
-          (is (str/includes? (:content result) "s/join"))))))
+    (let [result (assert-fix fixes/fix-duplicate-require-in-file
+                             (fixture-path "duplicate-require" "first-alias-used-in")
+                             [:duplicate-require] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "duplicate-require" "first-alias-used-out")) (:content result)))))
 
   (testing "case 2: only duplicate alias used — remove first entry, no renames"
-    ;; [ns :as s] not used; [ns :as str] used via str/join → remove s entry, keep str
-    (with-temp-file "(ns foo (:require [clojure.string :as s] [clojure.string :as str])) (str/join [\"\"] \"\")"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-duplicate-require-in-file f [:duplicate-require] 1)]
-          (is (= 1 (:fixed result)))
-          ;; str entry must survive
-          (is (str/includes? (:content result) "clojure.string :as str"))
-          ;; s entry must be gone
-          (is (not (str/includes? (:content result) ":as s ") ))
-          ;; str/ calls must be untouched
-          (is (str/includes? (:content result) "str/join"))))))
+    (let [result (assert-fix fixes/fix-duplicate-require-in-file
+                             (fixture-path "duplicate-require" "second-alias-used-in")
+                             [:duplicate-require] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "duplicate-require" "second-alias-used-out")) (:content result)))))
 
   (testing "case 3: both aliases used — keep longer, rename shorter usages, remove shorter entry"
-    ;; [ns :as pt] used + [ns :as toolz] used → toolz is longer → keep toolz, rename pt/ → toolz/
-    (with-temp-file "(ns foo\n  (:require [path.tools :as pt]\n            [path.tools :as toolz]))\n(pt/make-endpoint :x)\n(toolz/make-exception {})"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-duplicate-require-in-file f [:duplicate-require] 1)]
-          (is (= 1 (:fixed result)))
-          ;; toolz entry survives
-          (is (str/includes? (:content result) "path.tools :as toolz"))
-          ;; pt entry gone
-          (is (not (str/includes? (:content result) ":as pt")))
-          ;; pt/ calls renamed to toolz/
-          (is (not (str/includes? (:content result) "pt/")))
-          (is (str/includes? (:content result) "toolz/make-endpoint"))
-          (is (str/includes? (:content result) "toolz/make-exception")))))  )
+    (let [result (assert-fix fixes/fix-duplicate-require-in-file
+                             (fixture-path "duplicate-require" "both-aliases-used-keep-longer-in")
+                             [:duplicate-require] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "duplicate-require" "both-aliases-used-keep-longer-out")) (:content result)))))
 
   (testing "case 3 tie: both aliases same length — keep first (shorter or equal wins)"
-    ;; [ns :as aa] and [ns :as bb] both used, same length → keep first (aa), rename bb/ → aa/
-    (with-temp-file "(ns foo\n  (:require [clojure.string :as aa]\n            [clojure.string :as bb]))\n(aa/join [\"\"] \"\")\n(bb/upper-case \"x\")"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-duplicate-require-in-file f [:duplicate-require] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "clojure.string :as aa"))
-          (is (not (str/includes? (:content result) ":as bb")))
-          (is (str/includes? (:content result) "aa/join"))
-          (is (str/includes? (:content result) "aa/upper-case"))
-          (is (not (str/includes? (:content result) "bb/")))))))
+    (let [result (assert-fix fixes/fix-duplicate-require-in-file
+                             (fixture-path "duplicate-require" "both-aliases-used-tie-keep-first-in")
+                             [:duplicate-require] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "duplicate-require" "both-aliases-used-tie-keep-first-out")) (:content result)))))
 
   (testing "case 4: neither alias used — remove reported duplicate, first entry remains"
-    (with-temp-file "(ns foo (:require [clojure.string :as s] [clojure.string :as str]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-duplicate-require-in-file f [:duplicate-require] 1)]
-          (is (pos? (:fixed result)))
-          (is (= 1 (count (re-seq #"\[clojure\.string" (:content result))))))))  )
+    (let [result (assert-fix fixes/fix-duplicate-require-in-file
+                             (fixture-path "duplicate-require" "neither-alias-used-in")
+                             [:duplicate-require] 1)]
+      (is (pos? (:fixed result)))
+      (is (= (slurp (fixture-path "duplicate-require" "neither-alias-used-out")) (:content result)))))
 
   (testing "entries on separate lines"
-    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            [clojure.string :as str])) (s/join [\"\"] \"\")"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-duplicate-require-in-file f [:duplicate-require] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "clojure.string :as s"))
-          (is (not (str/includes? (:content result) ":as str"))))))))
+    (let [result (assert-fix fixes/fix-duplicate-require-in-file
+                             (fixture-path "duplicate-require" "entries-separate-lines-in")
+                             [:duplicate-require] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "duplicate-require" "entries-separate-lines-out")) (:content result))))))
+
 ;; ============================================================
 ;; :unused-binding
 ;; ============================================================
 
 (deftest test-unused-binding
   (testing "prefixes simple unused fn param with underscore"
-    (with-temp-file "(defn foo [x])"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "_x"))))))
+    (let [result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "simple-fn-param-in")
+                             [:unused-binding] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "simple-fn-param-out")) (:content result)))))
 
   (testing "let binding is skipped by default — too risky (may be side-effectful)"
-    (with-temp-file "(let [x 1])"
-      (fn [f]
-        (assert-skip fixes/fix-unused-binding-in-file f [:unused-binding]))))
+    (assert-skip fixes/fix-unused-binding-in-file
+                 (fixture-path "unused-binding" "let-binding-skip")
+                 [:unused-binding]))
 
   (testing "no change when binding is used"
-    (with-temp-file "(defn foo [x] x)"
-      (fn [f]
-        (let [result (assert-no-finding fixes/fix-unused-binding-in-file f [:unused-binding])]
-          (is (zero? (:fixed result)))))))
+    (let [result (assert-no-finding fixes/fix-unused-binding-in-file
+                                    (fixture-path "unused-binding" "binding-used")
+                                    [:unused-binding])]
+      (is (zero? (:fixed result)))))
 
   (testing "skips namespaced key destructuring — inserting _ would corrupt source"
-    ;; kondo reports col pointing into 'id' inside 'patient/id'.
-    ;; We must NOT produce {:keys [patient/_id]}.
-    (with-temp-file "(let [{:keys [patient/id order/id]} {}] id)"
-      (fn [f]
-        (let [result (assert-skip fixes/fix-unused-binding-in-file f [:unused-binding])]
-          (is (not (str/includes? (:content result) "_id")))))))
+    (let [result (assert-skip fixes/fix-unused-binding-in-file
+                              (fixture-path "unused-binding" "namespaced-key-skip")
+                              [:unused-binding])]
+      (is (not (str/includes? (:content result) "_id")))))
 
   (testing ":as bindings are not reported by :unused-binding"
-    (with-temp-file "(ns foo (:require [clojure.string :as s]))"
-      (fn [f]
-        (let [result (assert-no-finding fixes/fix-unused-binding-in-file f [:unused-binding])]
-          (is (zero? (:fixed result)))))))
+    (let [result (assert-no-finding fixes/fix-unused-binding-in-file
+                                    (fixture-path "unused-binding" "as-alias-no-finding")
+                                    [:unused-binding])]
+      (is (zero? (:fixed result)))))
 
   (testing "loop/for bindings are skipped by default"
-    (with-temp-file "(loop [x 1 y 2])"
-      (fn [f]
-        (assert-skip fixes/fix-unused-binding-in-file f [:unused-binding]))))
+    (assert-skip fixes/fix-unused-binding-in-file
+                 (fixture-path "unused-binding" "loop-binding-skip")
+                 [:unused-binding]))
 
   (testing ":as clause in destructuring: removed when unused"
-    ;; :as config unused, but :a is used → remove :as config clause
-    (with-temp-file "(defn f [{:keys [a] :as config}] a)"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) "config")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (= 1 (:fixed result)))
-          ;; :as config removed entirely
-          (is (not (str/includes? (:content result) ":as")))
-          (is (str/includes? (:content result) ":keys [a]"))))))
+    (let [pred   #(str/includes? (:message %) "config")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "as-clause-removed-in")
+                             [:unused-binding] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "as-clause-removed-out")) (:content result)))))
 
   (testing ":as clause: all concrete bindings unused → map collapses to _as-name"
-    ;; {:keys [db] :as state} with db unused, state used → {:keys [] :as state} → state
-    (with-temp-file "(defn f [{:keys [db] :as state} arg] (foo state arg))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " db")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) ":keys")))
-          ;; state is used so the map collapses to state
-          (is (str/includes? (:content result) "[state arg]"))))))
+    (let [pred   #(str/includes? (:message %) " db")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "as-clause-collapses-to-name-in")
+                             [:unused-binding] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "as-clause-collapses-to-name-out")) (:content result)))))
 
   (testing "map inside function call (let rhs) is NOT collapsed — not in destructuring position"
-    ;; The {:results {:as vals}} is a function-call argument inside a let vector.
-    ;; Only :query (the destructuring key) is unused; vals is a separate param.
-    ;; Regression: find-opening-bracket scanned through (some-fn/call ...)
-    ;; and found the let's [ — incorrectly treating the call-arg map as destructuring.
-    (with-temp-file "(defn f [{:keys [query]} vals]\n  (let [sql (some-fn/call {:results {:as vals}})]\n    sql))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " query")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (= 1 (:fixed result)))
-          ;; function-call map {:results {:as vals}} must be untouched
-          (is (str/includes? (:content result) "{:results {:as vals}}"))
-          ;; destructuring map collapses to _
-          (is (str/includes? (:content result) "[_ vals]"))))))
+    (let [pred   #(str/includes? (:message %) " query")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "fn-call-arg-not-collapsed-in")
+                             [:unused-binding] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "fn-call-arg-not-collapsed-out")) (:content result)))))
 
   (testing "map inside fn-call argument vector is NOT collapsed — vector not a binding form"
-    ;; (let [z (side-effect-fn [{:foo [x]} y])] ...) — the [{:foo [x]} y] is passed
-    ;; to g, NOT a destructuring vector.  binding-bracket? rejects non-binding forms.
-    (with-temp-file "(defn f [{:keys [x]} vals]\n  (let [z (g [{:bar vals} \"data\"])]\n    z))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " x")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (= 1 (:fixed result)))
-          ;; the fn-call argument map {:bar vals} must be untouched
-          (is (str/includes? (:content result) "{:bar vals}"))
-          ;; destructuring map collapses to _
-          (is (str/includes? (:content result) "[_ vals]")))))))
+    (let [pred   #(str/includes? (:message %) " x")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "fn-call-vector-not-collapsed-in")
+                             [:unused-binding] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "fn-call-vector-not-collapsed-out")) (:content result)))))
 
   (testing ":as and concrete binding both unused → :as removed, map collapses to _"
-    ;; {conn :db/conn :as req} both unused → conn→_conn, remove :as req → {_conn :db/conn} → _
-    (with-temp-file "(defn f [{conn :db/conn :as req}] {:status 501})"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 2)]
-          (is (= 2 (:fixed result)))
-          ;; :as req removed, map collapses to _
-          (is (str/includes? (:content result) "[_]"))
-          (is (not (str/includes? (:content result) ":as")))
-          (is (not (str/includes? (:content result) "{conn")))))))
+    (let [result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "as-and-binding-both-unused-in")
+                             [:unused-binding] 2)]
+      (is (= 2 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "as-and-binding-both-unused-out")) (:content result)))))
 
   (testing "multi-line: :as removed, map collapses to _"
-    (with-temp-file "(defn f [{conn :db/conn\n          :as req}] {:status 501})"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 2)]
-          (is (= 2 (:fixed result)))
-          (is (str/includes? (:content result) "[_]"))
-          (is (not (str/includes? (:content result) ":as")))
-          (is (not (str/includes? (:content result) "{conn")))))))
+    (let [result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "multiline-as-and-binding-both-unused-in")
+                             [:unused-binding] 2)]
+      (is (= 2 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "multiline-as-and-binding-both-unused-out")) (:content result)))))
 
   (testing "keys-destr in fn-param: removes unused key from :keys vector"
-    (with-temp-file "(defn f [{:keys [x y z]}] (+ y z))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " x")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "x")))
-          (is (str/includes? (:content result) "y z"))))))
+    (let [pred   #(str/includes? (:message %) " x")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "keys-destr-removes-first-in")
+                             [:unused-binding] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "keys-destr-removes-first-out")) (:content result)))))
 
   (testing "keys-destr in fn-param: removes first key, rest preserved"
-    (with-temp-file "(defn f [{:keys [x y z]}] (+ y z))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " x")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (str/includes? (:content result) "y z"))))))
+    (let [pred   #(str/includes? (:message %) " x")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "keys-destr-removes-first-in")
+                             [:unused-binding] 1 pred)]
+      (is (= (slurp (fixture-path "unused-binding" "keys-destr-removes-first-out")) (:content result)))))
 
   (testing "keys-destr in fn-param: removes middle key, space preserved"
-    (with-temp-file "(defn f [{:keys [x y z]}] (+ x z))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " y")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (str/includes? (:content result) "x z"))
-          (is (not (str/includes? (:content result) "xz"))))  )))
+    (let [pred   #(str/includes? (:message %) " y")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "keys-destr-removes-middle-in")
+                             [:unused-binding] 1 pred)]
+      (is (= (slurp (fixture-path "unused-binding" "keys-destr-removes-middle-out")) (:content result)))))
 
   (testing "keys-destr in fn-param: removes last key, preceding preserved"
-    (with-temp-file "(defn f [{:keys [x y z]}] (+ x y))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " z")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (str/includes? (:content result) "x y"))))))
+    (let [pred   #(str/includes? (:message %) " z")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "keys-destr-removes-last-in")
+                             [:unused-binding] 1 pred)]
+      (is (= (slurp (fixture-path "unused-binding" "keys-destr-removes-last-out")) (:content result)))))
 
   (testing "keys-destr in fn-param: only key removed, entire map collapses to _"
-    ;; {keys [x]} with x unused → {:keys []} → no :as → collapse to _
-    (with-temp-file "(defn f [{:keys [x]}])"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "x")))
-          ;; no :as binding → collapses to plain _
-          (is (str/includes? (:content result) "[_]"))))))
+    (let [result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "keys-destr-only-key-collapses-in")
+                             [:unused-binding] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "keys-destr-only-key-collapses-out")) (:content result)))))
 
   (testing "keys-destr in let: unused key removed — safe, just a deref on existing var"
-    ;; (let [{:keys [x y]} m] (foo y)) — x is unused but removing it is safe
-    ;; because m is evaluated regardless; we're just choosing not to destructure x
-    (with-temp-file "(let [{:keys [x y]} some-map] (foo some-map y))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " x")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "x")))
-          (is (str/includes? (:content result) "y"))))))
+    (let [pred   #(str/includes? (:message %) " x")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "keys-destr-let-safe-in")
+                             [:unused-binding] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "keys-destr-let-safe-out")) (:content result)))))
 
   (testing "let scalar binding is still skipped — may be side-effectful"
-    ;; (let [x (side-effect-fn)] ...) — cannot safely remove
-    (with-temp-file "(let [x 1])"
-      (fn [f]
-        (assert-skip fixes/fix-unused-binding-in-file f [:unused-binding]))))
+    (assert-skip fixes/fix-unused-binding-in-file
+                 (fixture-path "unused-binding" "let-binding-skip")
+                 [:unused-binding]))
 
   (testing "keys-destr multi-line: unused key is only item on its line — line removed"
-    ;; {:keys [x\n         y\n         z]} remove x → line containing x removed entirely
-    (with-temp-file "(defn f [{:keys [x\n                 y\n                 z]}] (+ y z))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " x")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (= 1 (:fixed result)))
-          ;; the x-containing line must be gone; y is pulled up to {:keys [y
-          (is (not (str/includes? (:content result) "                 x")))
-          (is (str/includes? (:content result) "{:keys [y"))
-          (is (str/includes? (:content result) "                 z"))))))
+    (let [pred   #(str/includes? (:message %) " x")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "keys-destr-multiline-first-key-in")
+                             [:unused-binding] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "keys-destr-multiline-first-key-out")) (:content result)))))
 
   (testing "keys-destr multi-line: unused key is middle item on its own line — line removed"
-    (with-temp-file "(defn f [{:keys [x\n                 y\n                 z]}] (+ x z))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " y")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "                 y")))
-          ;; x is on the {:keys [x line, not its own indented line
-          (is (str/includes? (:content result) "{:keys [x"))
-          (is (str/includes? (:content result) "                 z"))))))
+    (let [pred   #(str/includes? (:message %) " y")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "keys-destr-multiline-middle-key-in")
+                             [:unused-binding] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "keys-destr-multiline-middle-key-out")) (:content result)))))
 
   (testing "keys-destr multi-line: unused key is last item on its own line — line removed"
-    (with-temp-file "(defn f [{:keys [x\n                 y\n                 z]}] (+ x y))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " z")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "                 z")))
-          (is (str/includes? (:content result) "{:keys [x"))
-          (is (str/includes? (:content result) "                 y"))))))
+    (let [pred   #(str/includes? (:message %) " z")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "keys-destr-multiline-last-key-in")
+                             [:unused-binding] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "keys-destr-multiline-last-key-out")) (:content result)))))
 
   (testing "keys-destr multi-line: unused key shares line with other keys — others preserved"
-    ;; {:keys [x y\n         z]} remove x → [y\n         z] — y survives on same line
-    (with-temp-file "(defn f [{:keys [x y\n                 z]}] (+ y z))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " x")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (= 1 (:fixed result)))
-          ;; x removed but y and z survive
-          (is (not (str/includes? (:content result) "[x ")))
-          (is (str/includes? (:content result) "y"))
-          (is (str/includes? (:content result) "z")))))
+    (let [pred   #(str/includes? (:message %) " x")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "keys-destr-multiline-shared-line-in")
+                             [:unused-binding] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "keys-destr-multiline-shared-line-out")) (:content result)))))
 
   (testing "keys-destr multi-line: first key was only thing after {:keys [ — pull next key up"
-    ;; {:keys [btw-thing\n  cdc-thing\n  ...]} remove btw-thing →
-    ;; {:keys [cdc-thing\n  ...]} NOT {:keys [\n  cdc-thing\n  ...}
-    (with-temp-file "(defn f [{:keys [x\n                 y\n                 z]}] (+ y z))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) " x")
-              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
-          (is (= 1 (:fixed result)))
-          ;; y should be pulled up to the {:keys [ line, not left dangling on the next
-          (is (str/includes? (:content result) "{:keys [y"))
-          (is (not (str/includes? (:content result) "{:keys [\n")))))  )))
+    (let [pred   #(str/includes? (:message %) " x")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "keys-destr-multiline-first-key-in")
+                             [:unused-binding] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "keys-destr-multiline-first-key-out")) (:content result))))))
+
 ;; ============================================================
 ;; :unused-import
 ;; ============================================================
 
 (deftest test-unused-import
   (testing "removes one unused import from group, leaves the other"
-    (with-temp-file "(ns foo (:import [java.util Date List]))"
-      (fn [f]
-        (let [list-pred #(str/ends-with? (:message %) "List")
-              result    (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1 list-pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "List")))
-          ;; Date is still present (we only fixed List)
-          (is (str/includes? (:content result) "Date"))
-          ;; Date finding still fires
-          (is (= 1 (count (filter #(str/ends-with? (:message %) "Date")
-                                  (lint-file f :linters [:unused-import])))))))))
+    (let [pred   #(str/ends-with? (:message %) "List")
+          result (assert-fix fixes/fix-unused-import-in-file
+                             (fixture-path "unused-import" "removes-one-from-group-in")
+                             [:unused-import] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-import" "removes-one-from-group-out")) (:content result)))))
 
   (testing "removes all unused imports from group"
-    (with-temp-file "(ns foo (:import [java.util Date List]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 2)]
-          (is (= 2 (:fixed result)))
-          (is (not (str/includes? (:content result) "Date")))
-          (is (not (str/includes? (:content result) "List")))))))
+    (let [result (assert-fix fixes/fix-unused-import-in-file
+                             (fixture-path "unused-import" "removes-all-from-group-in")
+                             [:unused-import] 2)]
+      (is (= 2 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-import" "removes-all-from-group-out")) (:content result)))))
 
   (testing "removes unused import from vector-style standalone import"
-    (with-temp-file "(import '[java.util Foo Bar])"
-      (fn [f]
-        (let [foo-pred #(str/ends-with? (:message %) "Foo")
-              result   (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1 foo-pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "Foo")))
-          (is (str/includes? (:content result) "Bar"))))))
+    (let [pred   #(str/ends-with? (:message %) "Foo")
+          result (assert-fix fixes/fix-unused-import-in-file
+                             (fixture-path "unused-import" "removes-from-standalone-vector-in")
+                             [:unused-import] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-import" "removes-from-standalone-vector-out")) (:content result)))))
 
   (testing "removes entire import group when last class removed — no bare [package] left"
-    ;; (:import [java.time Instant]) with Instant unused:
-    ;; removing Instant must not leave [java.time] (invalid) — whole group goes away.
-    (with-temp-file "(ns foo\n  (:import [java.time Instant]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "java.time")))
-          (is (not (str/includes? (:content result) ":import")))))))
+    (let [result (assert-fix fixes/fix-unused-import-in-file
+                             (fixture-path "unused-import" "removes-last-class-removes-group-in")
+                             [:unused-import] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-import" "removes-last-class-removes-group-out")) (:content result)))))
 
   (testing "removes middle unused import — first and last preserved with correct spacing"
-    (with-temp-file "(ns foo (:import [java.util Date Instant List]))"
-      (fn [f]
-        (let [pred   #(str/ends-with? (:message %) "Instant")
-              result (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "Instant")))
-          (is (str/includes? (:content result) "Date List"))))))
+    (let [pred   #(str/ends-with? (:message %) "Instant")
+          result (assert-fix fixes/fix-unused-import-in-file
+                             (fixture-path "unused-import" "removes-middle-in")
+                             [:unused-import] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-import" "removes-middle-out")) (:content result)))))
 
   (testing "removes first unused import from group — rest preserved"
-    (with-temp-file "(ns foo (:import [java.util Date Instant List]))"
-      (fn [f]
-        (let [pred   #(str/ends-with? (:message %) "Date")
-              result (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "Date")))
-          (is (str/includes? (:content result) "Instant List"))))))
+    (let [pred   #(str/ends-with? (:message %) "Date")
+          result (assert-fix fixes/fix-unused-import-in-file
+                             (fixture-path "unused-import" "removes-first-in")
+                             [:unused-import] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-import" "removes-first-out")) (:content result)))))
 
   (testing "removes last unused import from group — preceding preserved"
-    (with-temp-file "(ns foo (:import [java.util Date Instant List]))"
-      (fn [f]
-        (let [pred   #(str/ends-with? (:message %) "List")
-              result (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "List")))
-          (is (str/includes? (:content result) "Date Instant")))))  ))
+    (let [pred   #(str/ends-with? (:message %) "List")
+          result (assert-fix fixes/fix-unused-import-in-file
+                             (fixture-path "unused-import" "removes-last-in")
+                             [:unused-import] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-import" "removes-last-out")) (:content result))))))
 
 ;; ============================================================
 ;; :unused-referred-var
@@ -618,78 +515,66 @@
 
 (deftest test-unused-referred-var
   (testing "removes single unused referred var, keeps used one"
-    (with-temp-file "(ns foo (:require [clojure.string :refer [join ends-with?]]))\n(join [\"\"] \"\")"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) "ends-with?")
-              result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "ends-with?")))
-          (is (str/includes? (:content result) "join"))))))
+    (let [pred   #(str/includes? (:message %) "ends-with?")
+          result (assert-fix fixes/fix-unused-referred-var-in-file
+                             (fixture-path "unused-referred-var" "removes-one-keeps-other-in")
+                             [:unused-referred-var] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-referred-var" "removes-one-keeps-other-out")) (:content result)))))
 
   (testing "works with vars whose names end in ? (word boundary)"
-    (with-temp-file "(ns foo (:require [clojure.string :refer [starts-with? ends-with?]]))"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) "ends-with?")
-              result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "ends-with?")))
-          (is (str/includes? (:content result) "starts-with?"))))))
+    (let [pred   #(str/includes? (:message %) "ends-with?")
+          result (assert-fix fixes/fix-unused-referred-var-in-file
+                             (fixture-path "unused-referred-var" "predicate-var-name-in")
+                             [:unused-referred-var] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-referred-var" "predicate-var-name-out")) (:content result)))))
 
   (testing "removes :refer clause when all vars removed"
-    (with-temp-file "(ns foo (:require [clojure.string :refer [join]]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) ":refer")))))))
+    (let [result (assert-fix fixes/fix-unused-referred-var-in-file
+                             (fixture-path "unused-referred-var" "removes-refer-clause-when-all-removed-in")
+                             [:unused-referred-var] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-referred-var" "removes-refer-clause-when-all-removed-out")) (:content result)))))
 
   (testing "removes entire require entry when only referred var is removed"
-    ;; [clojure.set :refer [rename-keys]] with rename-keys unused:
-    ;; after removing rename-keys, :refer [] is cleaned, leaving bare [clojure.set]
-    ;; which should also be removed since it was only required for the :refer.
-    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            [clojure.set :refer [rename-keys]]))\n(s/join [\"\"] \"\")"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "clojure.set")))
-          (is (str/includes? (:content result) "clojure.string :as s"))))))
+    (let [result (assert-fix fixes/fix-unused-referred-var-in-file
+                             (fixture-path "unused-referred-var" "removes-entire-entry-when-only-referred-in")
+                             [:unused-referred-var] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-referred-var" "removes-entire-entry-when-only-referred-out")) (:content result)))))
 
   (testing "space preserved when removing middle var from :refer vector"
-    ;; [step run-cucumber hook] remove run-cucumber → [step hook], not [stephook]
-    (with-temp-file "(ns foo (:require [burpless :refer [step run-cucumber hook]]))\n(step) (hook)"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) "run-cucumber")
-              result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "run-cucumber")))
-          ;; step and hook must remain with a space between them
-          (is (str/includes? (:content result) "step hook")))))  )
+    (let [pred   #(str/includes? (:message %) "run-cucumber")
+          result (assert-fix fixes/fix-unused-referred-var-in-file
+                             (fixture-path "unused-referred-var" "removes-middle-var-in")
+                             [:unused-referred-var] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-referred-var" "removes-middle-var-out")) (:content result)))))
 
   (testing "space preserved when removing first var from :refer vector"
-    (with-temp-file "(ns foo (:require [clojure.string :refer [join split starts-with?]]))\n(split \"\" #\",\") (starts-with? \"\" \"\")"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) "clojure.string/join")
-              result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) " join")))
-          (is (str/includes? (:content result) "split starts-with?")))))  )
+    (let [pred   #(str/includes? (:message %) "clojure.string/join")
+          result (assert-fix fixes/fix-unused-referred-var-in-file
+                             (fixture-path "unused-referred-var" "removes-first-var-in")
+                             [:unused-referred-var] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-referred-var" "removes-first-var-out")) (:content result)))))
 
   (testing "space preserved when removing last var from :refer vector"
-    (with-temp-file "(ns foo (:require [clojure.string :refer [join split]]))\n(join [\"\"] \"\")"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) "clojure.string/split")
-              result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "split")))
-          (is (str/includes? (:content result) "[join]")))))  )
+    (let [pred   #(str/includes? (:message %) "clojure.string/split")
+          result (assert-fix fixes/fix-unused-referred-var-in-file
+                             (fixture-path "unused-referred-var" "removes-last-var-in")
+                             [:unused-referred-var] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-referred-var" "removes-last-var-out")) (:content result)))))
 
   (testing "multi-line :refer vector: removes var from its own line"
-    (with-temp-file "(ns foo\n  (:require\n   [clojure.string :refer [join\n                            ends-with?]]))\n(join [\"\"] \"\")"
-      (fn [f]
-        (let [pred   #(str/includes? (:message %) "ends-with?")
-              result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1 pred)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "ends-with?")))
-          (is (str/includes? (:content result) "join")))))))
+    (let [pred   #(str/includes? (:message %) "ends-with?")
+          result (assert-fix fixes/fix-unused-referred-var-in-file
+                             (fixture-path "unused-referred-var" "multiline-refer-vector-in")
+                             [:unused-referred-var] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-referred-var" "multiline-refer-vector-out")) (:content result))))))
 
 ;; ============================================================
 ;; :refer-all
@@ -697,28 +582,24 @@
 
 (deftest test-refer-all
   (testing "removes :refer :all leaving bare require"
-    (with-temp-file "(ns foo (:require [clojure.string :refer :all]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-refer-all-in-file f [:refer-all] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) ":refer :all")))
-          (is (str/includes? (:content result) "clojure.string"))))))
+    (let [result (assert-fix fixes/fix-refer-all-in-file
+                             (fixture-path "refer-all" "bare-require-in")
+                             [:refer-all] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "refer-all" "bare-require-out")) (:content result)))))
 
   (testing "removes :refer :all when :as alias also present"
-    (with-temp-file "(ns foo (:require [clojure.string :as s :refer :all]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-refer-all-in-file f [:refer-all] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) ":refer :all")))
-          (is (str/includes? (:content result) ":as s"))))))
+    (let [result (assert-fix fixes/fix-refer-all-in-file
+                             (fixture-path "refer-all" "with-as-alias-in")
+                             [:refer-all] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "refer-all" "with-as-alias-out")) (:content result)))))
 
   (testing "multi-line: :refer :all on separate line from ns — safe skip"
-    ;; find-require-entry-start scans backward on the :all line only;
-    ;; the opening [ is on the previous line so it returns nil → no-op.
-    (with-temp-file "(ns foo\n  (:require [clojure.string\n             :refer :all]))"
-      (fn [f]
-        (let [result (assert-skip fixes/fix-refer-all-in-file f [:refer-all])]
-          (is (str/includes? (:content result) ":refer :all")))))))
+    (let [result (assert-skip fixes/fix-refer-all-in-file
+                              (fixture-path "refer-all" "multiline-safe-skip")
+                              [:refer-all])]
+      (is (str/includes? (:content result) ":refer :all")))))
 
 ;; ============================================================
 ;; :misplaced-docstring
@@ -726,42 +607,38 @@
 
 (deftest test-misplaced-docstring
   (testing "moves docstring before param vector (multi-line form)"
-    (with-temp-file "(defn my-fn [x y]\n  \"does something\"\n  (+ x y))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-misplaced-docstring-in-file f [:misplaced-docstring] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "\"does something\""))
-          (is (str/includes? (:content result) "[x y]"))))))
+    (let [result (assert-fix fixes/fix-misplaced-docstring-in-file
+                             (fixture-path "misplaced-docstring" "moves-before-params-in")
+                             [:misplaced-docstring] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "misplaced-docstring" "moves-before-params-out")) (:content result)))))
 
   (testing "single-line form is skipped — finding is on row 1, def-line-idx = -1"
-    (with-temp-file "(defn f [x] \"dude\" x)"
-      (fn [f]
-        (let [result (assert-skip fixes/fix-misplaced-docstring-in-file f [:misplaced-docstring])]
-          (is (str/includes? (:content result) "(defn f [x] \"dude\" x)"))))))
+    (let [result (assert-skip fixes/fix-misplaced-docstring-in-file
+                              (fixture-path "misplaced-docstring" "single-line-skip")
+                              [:misplaced-docstring])]
+      (is (str/includes? (:content result) "(defn f [x] \"dude\" x)"))))
 
   (testing "correctly placed docstring is unchanged"
-    (with-temp-file "(defn f \"doc\" [x] x)"
-      (fn [f]
-        (let [result (assert-no-finding fixes/fix-misplaced-docstring-in-file f [:misplaced-docstring])]
-          (is (zero? (:fixed result)))))))
+    (let [result (assert-no-finding fixes/fix-misplaced-docstring-in-file
+                                    (fixture-path "misplaced-docstring" "correctly-placed")
+                                    [:misplaced-docstring])]
+      (is (zero? (:fixed result)))))
 
   (testing "comment between params and docstring — safe skip"
-    ;; def-line-idx points to the comment line; find-bracket finds no [ there.
-    (with-temp-file "(defn f [x]\n  ;; explains x\n  \"doc\"\n  x)"
-      (fn [f]
-        (let [result (assert-skip fixes/fix-misplaced-docstring-in-file f [:misplaced-docstring])]
-          (is (str/includes? (:content result) ";; explains x"))
-          (is (str/includes? (:content result) "\"doc\""))))))
+    (let [result (assert-skip fixes/fix-misplaced-docstring-in-file
+                              (fixture-path "misplaced-docstring" "comment-between-skip")
+                              [:misplaced-docstring])]
+      (is (str/includes? (:content result) ";; explains x"))
+      (is (str/includes? (:content result) "\"doc\""))))
 
   (testing "multi-line defn signature: params on separate line — safe skip"
-    ;; def-line is \"  [x]\", prefix is blank; blank-prefix guard skips
-    ;; to avoid emitting a malformed defn with an injected empty line.
-    (with-temp-file "(defn f\n  [x]\n  \"doc\"\n  x)"
-      (fn [f]
-        (let [result (assert-skip fixes/fix-misplaced-docstring-in-file f [:misplaced-docstring])]
-          (is (str/includes? (:content result) "(defn f"))
-          (is (str/includes? (:content result) "  [x]"))
-          (is (str/includes? (:content result) "\"doc\"")))))))
+    (let [result (assert-skip fixes/fix-misplaced-docstring-in-file
+                              (fixture-path "misplaced-docstring" "multiline-sig-skip")
+                              [:misplaced-docstring])]
+      (is (str/includes? (:content result) "(defn f"))
+      (is (str/includes? (:content result) "  [x]"))
+      (is (str/includes? (:content result) "\"doc\"")))))
 
 ;; ============================================================
 ;; :missing-else-branch
@@ -769,48 +646,45 @@
 
 (deftest test-missing-else-branch
   (testing "converts (if ...) to (when ...)"
-    (with-temp-file "(if true 1)"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-missing-else-branch-in-file f [:missing-else-branch] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/starts-with? (:content result) "(when "))))))
+    (let [result (assert-fix fixes/fix-missing-else-branch-in-file
+                             (fixture-path "missing-else-branch" "converts-if-in")
+                             [:missing-else-branch] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "missing-else-branch" "converts-if-out")) (:content result)))))
 
   (testing "converts (if-not ...) to (when-not ...)"
-    (with-temp-file "(if-not true 1)"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-missing-else-branch-in-file f [:missing-else-branch] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/starts-with? (:content result) "(when-not "))))))
+    (let [result (assert-fix fixes/fix-missing-else-branch-in-file
+                             (fixture-path "missing-else-branch" "converts-if-not-in")
+                             [:missing-else-branch] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "missing-else-branch" "converts-if-not-out")) (:content result)))))
 
   (testing "converts (if-let ...) to (when-let ...)"
-    (with-temp-file "(if-let [x 1] x)"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-missing-else-branch-in-file f [:missing-else-branch] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/starts-with? (:content result) "(when-let "))))))
+    (let [result (assert-fix fixes/fix-missing-else-branch-in-file
+                             (fixture-path "missing-else-branch" "converts-if-let-in")
+                             [:missing-else-branch] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "missing-else-branch" "converts-if-let-out")) (:content result)))))
 
   (testing "converts (if-some ...) to (when-some ...)"
-    (with-temp-file "(if-some [x 1] x)"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-missing-else-branch-in-file f [:missing-else-branch] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/starts-with? (:content result) "(when-some "))))))
+    (let [result (assert-fix fixes/fix-missing-else-branch-in-file
+                             (fixture-path "missing-else-branch" "converts-if-some-in")
+                             [:missing-else-branch] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "missing-else-branch" "converts-if-some-out")) (:content result)))))
 
   (testing "multiple if variants on same line all converted"
-    (with-temp-file "(if true 1) (if-not true 1) (if-let [x 1] x) (if-some [x 1] x)"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-missing-else-branch-in-file f [:missing-else-branch] 4)]
-          (is (= 4 (:fixed result)))
-          (is (str/includes? (:content result) "(when "))
-          (is (str/includes? (:content result) "(when-not "))
-          (is (str/includes? (:content result) "(when-let "))
-          (is (str/includes? (:content result) "(when-some "))))))
+    (let [result (assert-fix fixes/fix-missing-else-branch-in-file
+                             (fixture-path "missing-else-branch" "converts-multiple-variants-in")
+                             [:missing-else-branch] 4)]
+      (is (= 4 (:fixed result)))
+      (is (= (slurp (fixture-path "missing-else-branch" "converts-multiple-variants-out")) (:content result)))))
 
   (testing "no change when else branch is present"
-    (with-temp-file "(if true 1 2)"
-      (fn [f]
-        (let [result (assert-no-finding fixes/fix-missing-else-branch-in-file f [:missing-else-branch])]
-          (is (zero? (:fixed result))))))))
+    (let [result (assert-no-finding fixes/fix-missing-else-branch-in-file
+                                    (fixture-path "missing-else-branch" "else-branch-present")
+                                    [:missing-else-branch])]
+      (is (zero? (:fixed result))))))
 
 ;; ============================================================
 ;; :unused-private-var
@@ -818,39 +692,32 @@
 
 (deftest test-unused-private-var
   (testing "removes defn- form entirely"
-    (with-temp-file "(ns foo)\n\n(defn- helper [])\n\n(defn public [] :ok)"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-private-var-in-file f [:unused-private-var] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "(ns foo)"))
-          (is (str/includes? (:content result) "(defn public [] :ok)"))
-          (is (not (str/includes? (:content result) "helper")))))))
+    (let [result (assert-fix fixes/fix-unused-private-var-in-file
+                             (fixture-path "unused-private-var" "removes-defn-form-in")
+                             [:unused-private-var] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-private-var" "removes-defn-form-out")) (:content result)))))
 
   (testing "removes def ^:private form entirely"
-    (with-temp-file "(ns foo)\n\n(def ^:private threshold 42)\n\n(defn public [] :ok)"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-private-var-in-file f [:unused-private-var] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "(ns foo)"))
-          (is (str/includes? (:content result) "(defn public [] :ok)"))
-          (is (not (str/includes? (:content result) "threshold")))))))
+    (let [result (assert-fix fixes/fix-unused-private-var-in-file
+                             (fixture-path "unused-private-var" "removes-def-private-form-in")
+                             [:unused-private-var] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-private-var" "removes-def-private-form-out")) (:content result)))))
 
   (testing "removes multi-line def ^:private form"
-    (with-temp-file "(ns foo)\n\n(def ^:private\n  default-str\n  [:re \"^[a-z]+$\"])\n\n(defn public [] :ok)"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-private-var-in-file f [:unused-private-var] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "default-str")))
-          (is (str/includes? (:content result) "(defn public [] :ok)"))))))
+    (let [result (assert-fix fixes/fix-unused-private-var-in-file
+                             (fixture-path "unused-private-var" "removes-multiline-def-private-in")
+                             [:unused-private-var] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-private-var" "removes-multiline-def-private-out")) (:content result)))))
 
   (testing "removes two independent private vars"
-    (with-temp-file "(ns foo)\n\n(defn- foo-helper [])\n\n(defn- bar-helper [])\n\n(defn public [] :ok)"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-unused-private-var-in-file f [:unused-private-var] 2)]
-          (is (= 2 (:fixed result)))
-          (is (not (str/includes? (:content result) "foo-helper")))
-          (is (not (str/includes? (:content result) "bar-helper")))
-          (is (str/includes? (:content result) "(defn public [] :ok)")))))))
+    (let [result (assert-fix fixes/fix-unused-private-var-in-file
+                             (fixture-path "unused-private-var" "removes-two-private-vars-in")
+                             [:unused-private-var] 2)]
+      (is (= 2 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-private-var" "removes-two-private-vars-out")) (:content result))))))
 
 ;; ============================================================
 ;; :redundant-do
@@ -858,20 +725,18 @@
 
 (deftest test-redundant-do
   (testing "removes redundant do wrapper (single-line)"
-    (with-temp-file "(when true (do (println \"a\") (println \"b\")))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-redundant-do-in-file f [:redundant-do] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "(do")))))))
+    (let [result (assert-fix fixes/fix-redundant-do-in-file
+                             (fixture-path "redundant-do" "single-line-in")
+                             [:redundant-do] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "redundant-do" "single-line-out")) (:content result)))))
 
   (testing "removes redundant do wrapper (multi-line)"
-    (with-temp-file "(when true\n  (do\n    (println \"a\")\n    (println \"b\")))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-redundant-do-in-file f [:redundant-do] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "(do")))
-          (is (str/includes? (:content result) "(println \"a\")"))
-          (is (str/includes? (:content result) "(println \"b\")")))))))
+    (let [result (assert-fix fixes/fix-redundant-do-in-file
+                             (fixture-path "redundant-do" "multi-line-in")
+                             [:redundant-do] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "redundant-do" "multi-line-out")) (:content result))))))
 
 ;; ============================================================
 ;; :redundant-let
@@ -879,84 +744,77 @@
 
 (deftest test-redundant-let
   (testing "single-line: no body"
-    (with-temp-file "(let [x 2] (let [y 1]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "(let [x 2 y 1])"))))))
+    (let [result (assert-fix fixes/fix-redundant-let-in-file
+                             (fixture-path "redundant-let" "single-line-no-body-in")
+                             [:redundant-let] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "redundant-let" "single-line-no-body-out")) (:content result)))))
 
   (testing "single-line: with body"
-    (with-temp-file "(let [x 2] (let [y 1] (+ x y)))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "(let [x 2 y 1] (+ x y))"))))))
+    (let [result (assert-fix fixes/fix-redundant-let-in-file
+                             (fixture-path "redundant-let" "single-line-with-body-in")
+                             [:redundant-let] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "redundant-let" "single-line-with-body-out")) (:content result)))))
 
   (testing "multi-line: no body"
-    (with-temp-file "(let [x 1]\n  (let [y 2]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
-          (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "(let [y 2])")))
-          (is (str/includes? (:content result) "y 2"))))))
+    (let [result (assert-fix fixes/fix-redundant-let-in-file
+                             (fixture-path "redundant-let" "multiline-no-body-in")
+                             [:redundant-let] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "redundant-let" "multiline-no-body-out")) (:content result)))))
 
   (testing "multi-line: with body on its own line"
-    (with-temp-file "(let [x 1]\n  (let [y 2]\n    (+ x y)))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "y 2]"))
-          (is (str/includes? (:content result) "(+ x y)"))
-          (is (str/ends-with? (str/trim (:content result)) ")"))))))
+    (let [result (assert-fix fixes/fix-redundant-let-in-file
+                             (fixture-path "redundant-let" "multiline-body-own-line-in")
+                             [:redundant-let] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "redundant-let" "multiline-body-own-line-out")) (:content result)))))
 
   (testing "multi-line: body inline with inner binding close"
-    (with-temp-file "(let [x 1]\n  (let [y 2] (+ x y)))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "y 2]"))
-          (is (str/includes? (:content result) "(+ x y)"))))))
+    (let [result (assert-fix fixes/fix-redundant-let-in-file
+                             (fixture-path "redundant-let" "multiline-body-inline-in")
+                             [:redundant-let] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "redundant-let" "multiline-body-inline-out")) (:content result)))))
 
   (testing "multi-line: multiple inner bindings"
-    (with-temp-file "(let [a 1]\n  (let [b 2\n        c 3]\n    (+ a b c)))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "b 2"))
-          (is (str/includes? (:content result) "c 3]"))
-          (is (str/includes? (:content result) "(+ a b c)"))))))
+    (let [result (assert-fix fixes/fix-redundant-let-in-file
+                             (fixture-path "redundant-let" "multiline-multiple-inner-bindings-in")
+                             [:redundant-let] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "redundant-let" "multiline-multiple-inner-bindings-out")) (:content result)))))
 
   (testing "intermediate #_ discard form: moved before merged let"
-    (with-temp-file "(let [x 1]\n  #_(println \"hello\")\n  (let [y 2]))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
-          (is (= 1 (:fixed result)))
-          (let [lines      (str/split-lines (:content result))
-                discard-idx (first (keep-indexed #(when (str/includes? %2 "#_") %1) lines))
-                let-idx     (first (keep-indexed #(when (str/starts-with? (str/trimr %2) "(let") %1) lines))]
-            (is (some? discard-idx))
-            (is (some? let-idx))
-            (is (< discard-idx let-idx)))))))
+    (let [result (assert-fix fixes/fix-redundant-let-in-file
+                             (fixture-path "redundant-let" "intermediate-discard-form-in")
+                             [:redundant-let] 1)]
+      (is (= 1 (:fixed result)))
+      (let [lines       (str/split-lines (:content result))
+            discard-idx (first (keep-indexed #(when (str/includes? %2 "#_") %1) lines))
+            let-idx     (first (keep-indexed #(when (str/starts-with? (str/trimr %2) "(let") %1) lines))]
+        (is (some? discard-idx))
+        (is (some? let-idx))
+        (is (< discard-idx let-idx)))))
 
   (testing "intermediate comment line: moved before merged let"
-    (with-temp-file "(let [x 1]\n  ;; important note\n  (let [y 2]\n    body))"
-      (fn [f]
-        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
-          (is (= 1 (:fixed result)))
-          (let [lines       (str/split-lines (:content result))
-                comment-idx (first (keep-indexed #(when (str/includes? %2 ";;") %1) lines))
-                let-idx     (first (keep-indexed #(when (str/starts-with? (str/trimr %2) "(let") %1) lines))]
-            (is (some? comment-idx))
-            (is (some? let-idx))
-            (is (< comment-idx let-idx)))
-          (is (str/includes? (:content result) "body"))))))
+    (let [result (assert-fix fixes/fix-redundant-let-in-file
+                             (fixture-path "redundant-let" "intermediate-comment-in")
+                             [:redundant-let] 1)]
+      (is (= 1 (:fixed result)))
+      (let [lines       (str/split-lines (:content result))
+            comment-idx (first (keep-indexed #(when (str/includes? %2 ";;") %1) lines))
+            let-idx     (first (keep-indexed #(when (str/starts-with? (str/trimr %2) "(let") %1) lines))]
+        (is (some? comment-idx))
+        (is (some? let-idx))
+        (is (< comment-idx let-idx)))
+      (is (str/includes? (:content result) "body"))))
 
   (testing "skip: outer let with multi-line binding vector"
-    ;; outer binding spans two lines — unsupported structure, safe no-op
-    (with-temp-file "(let [x 1\n      y 2]\n  (let [z 3]))"
-      (fn [f]
-        (let [result (assert-skip fixes/fix-redundant-let-in-file f [:redundant-let])]
-          (is (zero? (:fixed result))))))))
+    (let [result (assert-skip fixes/fix-redundant-let-in-file
+                              (fixture-path "redundant-let" "skip-multiline-outer-binding")
+                              [:redundant-let])]
+      (is (zero? (:fixed result))))))
 
 ;; ============================================================
 ;; Integration tests — full pipeline
