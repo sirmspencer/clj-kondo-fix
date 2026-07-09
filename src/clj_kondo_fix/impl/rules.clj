@@ -18,6 +18,7 @@
    {:message-re #"^unused binding (.+)$"
     :phase :binding
     :fix-fn fixes/fix-unused-binding-in-file
+    :config {:fix-contexts #{:as-clause :fn-param :keys-destr-fn :keys-destr-let}}
     :display "unused binding"}
 
    :unused-import

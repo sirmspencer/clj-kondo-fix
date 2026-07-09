@@ -56,8 +56,11 @@
          :lines current-lines
          :changed? (not= current-lines initial-lines)}
         (let [file-findings (get findings file-path [])
-              fix-fn (:fix-fn rule-def)
-              result (fix-fn file-path current-lines file-findings log)]
+               fix-fn        (:fix-fn rule-def)
+               rule-cfg      (:config rule-def)
+               result        (if rule-cfg
+                               (fix-fn file-path current-lines file-findings log rule-cfg)
+                               (fix-fn file-path current-lines file-findings log))]
           (recur more (:lines result) (+ total-fixed (:fixed result))))))))
 
 (defn fix!

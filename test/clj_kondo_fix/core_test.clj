@@ -403,8 +403,24 @@
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "x")))
           ;; destructuring structure preserved — signature not changed
-          (is (str/includes? (:content result) "{:keys []}")))))))
+          (is (str/includes? (:content result) "{:keys []}"))))))
 
+  (testing "keys-destr in let: unused key removed — safe, just a deref on existing var"
+    ;; (let [{:keys [x y]} m] (foo y)) — x is unused but removing it is safe
+    ;; because m is evaluated regardless; we're just choosing not to destructure x
+    (with-temp-file "(let [{:keys [x y]} some-map] (foo some-map y))"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) " x")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "x")))
+          (is (str/includes? (:content result) "y"))))))
+
+  (testing "let scalar binding is still skipped — may be side-effectful"
+    ;; (let [x (side-effect-fn)] ...) — cannot safely remove
+    (with-temp-file "(let [x 1])"
+      (fn [f]
+        (assert-skip fixes/fix-unused-binding-in-file f [:unused-binding])))  ))
 ;; ============================================================
 ;; :unused-import
 ;; ============================================================

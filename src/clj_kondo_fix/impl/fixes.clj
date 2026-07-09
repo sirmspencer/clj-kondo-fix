@@ -421,10 +421,10 @@
      :keys-destr-let — remove from {:keys/strs/syms []} in let bindings
                        (also removes binding pair when keys empty; cleanup-empty-lets)
      :let-binding  — prefix unused let/loop/for/doseq bindings with _
-   Default: #{:as-clause :fn-param :keys-destr-fn} (let bindings skipped)"
+   Default: #{:as-clause :fn-param :keys-destr-fn :keys-destr-let} (let scalar bindings skipped)"
   ([file-path lines findings log]
    (fix-unused-binding-in-file file-path lines findings log
-                               #{:as-clause :fn-param :keys-destr-fn}))
+                               #{:as-clause :fn-param :keys-destr-fn :keys-destr-let}))
   ([file-path lines findings log fix-contexts]
    (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
          sorted   (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
@@ -461,6 +461,14 @@
 
                            ;; :keys/:strs/:syms destructuring in fn param — remove from vector
                            (and (= ctx :keys-destr-fn) (fix-contexts :keys-destr-fn))
+                           (let [new-line (remove-referred-var-from-line line binding-name idx)]
+                             (if (= new-line line)
+                               (recur more current-lines fixed)
+                               (do (swap! log conj (str "  " file-url ":" (:line f) "  remove from keys vector: " binding-name))
+                                   (recur more (assoc current-lines line-idx new-line) (inc fixed)))))
+
+                           ;; :keys/:strs/:syms destructuring in let — also safe (just a deref, no side effects)
+                           (and (= ctx :keys-destr-let) (fix-contexts :keys-destr-let))
                            (let [new-line (remove-referred-var-from-line line binding-name idx)]
                              (if (= new-line line)
                                (recur more current-lines fixed)
