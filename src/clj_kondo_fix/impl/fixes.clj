@@ -193,8 +193,18 @@
       lines
       (let [line (nth lines i)]
         (cond
-          (re-find #"^\s*\(\s*:\w+\s*\)\s*$" line)
-          (recur i (vec (concat (take i lines) (drop (inc i) lines))))
+          ;; Empty clause on one line: (:require ) or (:require )) etc.
+          ;; The first ) closes the clause; any extra )s close outer forms
+          ;; and must be attached to the preceding line.
+          (re-find #"^\s*\(\s*:\w+\s*\)+\s*$" line)
+          (let [extras (let [[_ ps] (re-find #"^\s*\(\s*:\w+\s*(\)+)\s*$" line)]
+                         (subs ps 1))]  ; parens beyond the clause's own )
+            (if (and (pos? i) (not (str/blank? extras)))
+              (let [prev (nth lines (dec i))]
+                (recur (dec i) (vec (concat (take (dec i) lines)
+                                            [(str prev extras)]
+                                            (drop (inc i) lines)))))
+              (recur i (vec (concat (take i lines) (drop (inc i) lines))))))
 
           (and (re-find #"^\s*\(\s*:\w+\s*$" line)
                (< (inc i) (count lines))

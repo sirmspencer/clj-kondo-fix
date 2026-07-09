@@ -132,6 +132,16 @@
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "clojure.string")))))))
 
+  (testing "all requires removed — (:require) block is removed and ns closes cleanly"
+    ;; Reproduces path.handler.digital: both entries unused, result must be
+    ;; (ns foo) not (ns foo\n  (:require )))
+    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            [clojure.set :as cs]))"
+      (fn [f]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 2)]
+          (is (= 2 (:fixed result)))
+          (is (not (str/includes? (:content result) ":require")))
+          (is (= "(ns foo)" (str/trim (:content result))))))))
+
   (testing "leaves used namespace untouched"
     (with-temp-file "(ns foo (:require [clojure.string :as s])) (s/join [\"\"] \"\")"
       (fn [f]
