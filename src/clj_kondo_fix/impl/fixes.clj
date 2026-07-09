@@ -319,8 +319,88 @@
                                  :col     loser-col
                                  :message (str "duplicate require of " ns-name)}
                   [new-lines changed] (remove-require-finding renamed-lines loser-finding file-url log)]
-              (recur more new-lines (if changed (inc fixed) fixed)))))))))
+               (recur more new-lines (if changed (inc fixed) fixed)))))))))
 
+
+;; ------------------------------------------------------------
+;; Fix: unused-binding — context detection helpers
+;; ------------------------------------------------------------
+
+(def ^:private let-like-forms
+  #{"let" "loop" "for" "doseq" "binding" "with-open"
+    "if-let" "when-let" "if-some" "when-some"
+    "with-local-vars" "letfn" "when-first" "dotimes"
+    "with-bindings"})
+
+(def ^:private fn-like-forms
+  #{"defn" "defn-" "fn" "fn*" "defmethod" "defmacro"
+    "defmulti" "reify" "proxy"})
+
+(defn- find-opening-bracket [lines line-idx col-idx]
+  "Scan left from (line-idx, col-idx-1) to find the [ that directly contains
+   the position.  Returns {:line l :col c} or nil."
+  (loop [i line-idx, j (dec col-idx), depth 0]
+    (when (>= i 0)
+      (if (< j 0)
+        (when (> i 0)
+          (recur (dec i) (dec (count (nth lines (dec i)))) depth))
+        (let [ch (nth (nth lines i) j)]
+          (case ch
+            \] (recur i (dec j) (inc depth))
+            \[ (if (zero? depth)
+                 {:line i :col j}
+                 (recur i (dec j) (dec depth)))
+            (recur i (dec j) depth)))))))
+
+(defn- classify-bracket-context [text-before-bracket]
+  "Given text before a [, classify as :keys-destr, :fn-param, or :let-binding."
+  (let [words (re-seq #"[a-zA-Z*!?][a-zA-Z0-9*!?-]*" text-before-bracket)
+        rwords (vec (reverse words))]
+    (cond
+      (some #{"keys" "strs" "syms" "keys!" "strs!" "syms!"} (take 2 rwords)) :keys-destr
+      (some let-like-forms (take 3 rwords)) :let-binding
+      (some fn-like-forms  (take 3 rwords)) :fn-param
+      :else :let-binding)))
+
+(defn detect-binding-context
+  "Detect the context of the binding at (line-idx, col-idx).
+   Returns :as-clause, :fn-param, :let-binding, :keys-destr-fn, or :keys-destr-let."
+  [lines line-idx col-idx]
+  (let [line       (nth lines line-idx)
+        before-col (subs line 0 col-idx)]
+    (if (re-find #":as\s+$" before-col)
+      :as-clause
+      (if-let [{brk-line :line brk-col :col}
+               (find-opening-bracket lines line-idx col-idx)]
+        (let [brk-text     (subs (nth lines brk-line) 0 brk-col)
+              ;; If [ is at start of line, scan previous lines for context
+              context-text (if (str/blank? brk-text)
+                             (loop [i (dec brk-line)]
+                               (if (< i 0) ""
+                                 (let [lt (str/trim (nth lines i))]
+                                   (if (str/blank? lt) (recur (dec i)) lt))))
+                             brk-text)
+              inner-ctx    (classify-bracket-context context-text)]
+          (if (= inner-ctx :keys-destr)
+            ;; Find the { that contains this [ then find the [ containing that {
+            (if-let [{outer-line :line outer-col :col}
+                     (find-opening-bracket lines brk-line brk-col)]
+              (let [outer-text    (subs (nth lines outer-line) 0 outer-col)
+                    outer-context (if (str/blank? outer-text)
+                                    (loop [i (dec outer-line)]
+                                      (if (< i 0) ""
+                                        (let [lt (str/trim (nth lines i))]
+                                          (if (str/blank? lt) (recur (dec i)) lt))))
+                                    outer-text)
+                    outer-ctx     (classify-bracket-context outer-context)]
+                (if (= outer-ctx :fn-param) :keys-destr-fn :keys-destr-let))
+              :keys-destr-fn)  ; can't find outer → default to fn-param behaviour
+             inner-ctx))
+        :let-binding))))
+
+;; ------------------------------------------------------------
+;; Fix: unused-binding — rename to underscore prefix / remove
+;; ------------------------------------------------------------
 
 (defn remove-as-clause-from-line [line binding-name idx word-end]
   (if-let [m (re-find #"[\s,]:as\s+[\w-]+$" (subs line 0 word-end))]
@@ -329,46 +409,80 @@
       (str (subs line 0 clause-start) (subs line word-end)))
     line))
 
-(defn fix-unused-binding-in-file [file-path lines findings log]
-  (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
-        sorted (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
-    (loop [[f & more] sorted
-           current-lines lines
-           fixed 0]
-      (if (nil? f)
-        {:fixed fixed :lines current-lines :changed? (pos? fixed)}
-        (let [binding-name (extract-binding-name (:message f))
-              line-idx (dec (:line f))
-              col-idx (dec (:col f))]
-          (if (or (nil? binding-name) (< line-idx 0) (>= line-idx (count current-lines)))
-            (recur more current-lines fixed)
-            (let [line (nth current-lines line-idx)
-                  idx (find-binding-on-line line binding-name col-idx)]
-              (if (nil? idx)
-                (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: can't find binding " binding-name " on line"))
-                    (recur more current-lines fixed))
-                (let [word-end (word-end-pos line idx)]
-                  (if (not= (subs line idx word-end) binding-name)
-                    (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: binding " binding-name " not found at column " (:col f)))
-                        (recur more current-lines fixed))
-                    ;; skip namespaced keys e.g. {:keys [ns/name]} — the :col
-                    ;; lands on "name" but inserting _ there produces ns/_name
-                    (if (and (pos? idx) (= \/ (nth line (dec idx))))
-                      (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: binding " binding-name " is part of a namespaced key"))
-                          (recur more current-lines fixed))
-                    (let [text-before (subs line 0 idx)]
-                      (if (re-find #":as\s+$" text-before)
-                        (let [new-line (remove-as-clause-from-line line binding-name idx word-end)]
-                          (swap! log conj (str "  " file-url ":" (:line f) "  remove unused :as binding: " binding-name))
-                          (recur more
-                                 (assoc current-lines line-idx new-line)
-                                 (inc fixed)))
-                        (let [new-line (str (subs line 0 idx) "_" (subs line idx))]
-                          (swap! log conj (str "  " file-url ":" (:line f) "  rename unused binding: " binding-name " -> _" binding-name))
-                           (recur more
-                                  (assoc current-lines line-idx new-line)
-                                  (inc fixed))))))))))))))))
+;; forward declaration — remove-referred-var-from-line is defined in the
+;; referred-var section below but is also used for :keys-destr removal here.
+(declare remove-referred-var-from-line)
 
+(defn fix-unused-binding-in-file
+  "Fix unused bindings.  fix-contexts controls which binding types to handle:
+     :as-clause    — remove the :as clause from destructuring (always safe)
+     :fn-param     — prefix unused function params with _
+     :keys-destr-fn — remove from {:keys/strs/syms []} in function params
+     :keys-destr-let — remove from {:keys/strs/syms []} in let bindings
+                       (also removes binding pair when keys empty; cleanup-empty-lets)
+     :let-binding  — prefix unused let/loop/for/doseq bindings with _
+   Default: #{:as-clause :fn-param :keys-destr-fn} (let bindings skipped)"
+  ([file-path lines findings log]
+   (fix-unused-binding-in-file file-path lines findings log
+                               #{:as-clause :fn-param :keys-destr-fn}))
+  ([file-path lines findings log fix-contexts]
+   (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
+         sorted   (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
+     (loop [[f & more] sorted
+            current-lines lines
+            fixed 0]
+       (if (nil? f)
+         {:fixed fixed :lines current-lines :changed? (pos? fixed)}
+         (let [binding-name (extract-binding-name (:message f))
+               line-idx     (dec (:line f))
+               col-idx      (dec (:col f))]
+           (if (or (nil? binding-name) (< line-idx 0) (>= line-idx (count current-lines)))
+             (recur more current-lines fixed)
+             (let [line (nth current-lines line-idx)
+                   idx  (find-binding-on-line line binding-name col-idx)]
+               (if (nil? idx)
+                 (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: can't find binding " binding-name " on line"))
+                     (recur more current-lines fixed))
+                 (let [word-end (word-end-pos line idx)]
+                   (if (not= (subs line idx word-end) binding-name)
+                     (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: binding " binding-name " not found at column " (:col f)))
+                         (recur more current-lines fixed))
+                     ;; skip namespaced keys e.g. {:keys [ns/name]}
+                     (if (and (pos? idx) (= \/ (nth line (dec idx))))
+                       (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: binding " binding-name " is part of a namespaced key"))
+                           (recur more current-lines fixed))
+                       (let [ctx (detect-binding-context current-lines line-idx idx)]
+                         (cond
+                           ;; :as clause — remove whole clause
+                           (and (= ctx :as-clause) (fix-contexts :as-clause))
+                           (let [new-line (remove-as-clause-from-line line binding-name idx word-end)]
+                             (swap! log conj (str "  " file-url ":" (:line f) "  remove unused :as binding: " binding-name))
+                             (recur more (assoc current-lines line-idx new-line) (inc fixed)))
+
+                           ;; :keys/:strs/:syms destructuring in fn param — remove from vector
+                           (and (= ctx :keys-destr-fn) (fix-contexts :keys-destr-fn))
+                           (let [new-line (remove-referred-var-from-line line binding-name idx)]
+                             (if (= new-line line)
+                               (recur more current-lines fixed)
+                               (do (swap! log conj (str "  " file-url ":" (:line f) "  remove from keys vector: " binding-name))
+                                   (recur more (assoc current-lines line-idx new-line) (inc fixed)))))
+
+                           ;; fn param — prefix with _
+                           (and (= ctx :fn-param) (fix-contexts :fn-param))
+                           (let [new-line (str (subs line 0 idx) "_" (subs line idx))]
+                             (swap! log conj (str "  " file-url ":" (:line f) "  rename unused binding: " binding-name " -> _" binding-name))
+                             (recur more (assoc current-lines line-idx new-line) (inc fixed)))
+
+                           ;; let-binding — prefix with _ only if explicitly enabled
+                           (and (= ctx :let-binding) (fix-contexts :let-binding))
+                           (let [new-line (str (subs line 0 idx) "_" (subs line idx))]
+                             (swap! log conj (str "  " file-url ":" (:line f) "  rename unused binding: " binding-name " -> _" binding-name))
+                             (recur more (assoc current-lines line-idx new-line) (inc fixed)))
+
+                           ;; anything else or context not in fix-contexts — skip
+                           :else
+                           (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: binding " binding-name " in context " ctx " not enabled"))
+                               (recur more current-lines fixed))))))))))))))))
 
 ;; ------------------------------------------------------------
 ;; Fix: referred var, refer-all, import

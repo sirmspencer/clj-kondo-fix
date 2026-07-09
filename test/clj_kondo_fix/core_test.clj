@@ -319,19 +319,17 @@
 ;; ============================================================
 
 (deftest test-unused-binding
-  (testing "prefixes simple unused binding with underscore"
+  (testing "prefixes simple unused fn param with underscore"
     (with-temp-file "(defn foo [x])"
       (fn [f]
         (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "_x"))))))
 
-  (testing "prefixes unused let binding"
+  (testing "let binding is skipped by default — too risky (may be side-effectful)"
     (with-temp-file "(let [x 1])"
       (fn [f]
-        (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1)]
-          (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "_x"))))))
+        (assert-skip fixes/fix-unused-binding-in-file f [:unused-binding]))))
 
   (testing "no change when binding is used"
     (with-temp-file "(defn foo [x] x)"
@@ -353,13 +351,59 @@
         (let [result (assert-no-finding fixes/fix-unused-binding-in-file f [:unused-binding])]
           (is (zero? (:fixed result)))))))
 
-  (testing "prefixes multiple unused bindings in same let"
+  (testing "loop/for bindings are skipped by default"
     (with-temp-file "(loop [x 1 y 2])"
       (fn [f]
-        (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 2)]
-          (is (= 2 (:fixed result)))
-          (is (str/includes? (:content result) "_x"))
-          (is (str/includes? (:content result) "_y")))))))
+        (assert-skip fixes/fix-unused-binding-in-file f [:unused-binding]))))
+
+  (testing ":as clause in destructuring is removed"
+    (with-temp-file "(defn f [{:keys [a] :as config}] a)"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) "config")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) ":as config")))
+          (is (str/includes? (:content result) ":keys [a]"))))))
+
+  (testing "keys-destr in fn-param: removes unused key from :keys vector"
+    (with-temp-file "(defn f [{:keys [x y z]}] (+ y z))"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) " x")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "x")))
+          (is (str/includes? (:content result) "y z"))))))
+
+  (testing "keys-destr in fn-param: removes first key, rest preserved"
+    (with-temp-file "(defn f [{:keys [x y z]}] (+ y z))"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) " x")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (str/includes? (:content result) "y z"))))))
+
+  (testing "keys-destr in fn-param: removes middle key, space preserved"
+    (with-temp-file "(defn f [{:keys [x y z]}] (+ x z))"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) " y")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (str/includes? (:content result) "x z"))
+          (is (not (str/includes? (:content result) "xz"))))  )))
+
+  (testing "keys-destr in fn-param: removes last key, preceding preserved"
+    (with-temp-file "(defn f [{:keys [x y z]}] (+ x y))"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) " z")
+              result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1 pred)]
+          (is (str/includes? (:content result) "x y"))))))
+
+  (testing "keys-destr in fn-param: only key removed, leaves {:keys []}"
+    (with-temp-file "(defn f [{:keys [x]}])"
+      (fn [f]
+        (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "x")))
+          ;; destructuring structure preserved — signature not changed
+          (is (str/includes? (:content result) "{:keys []}")))))))
 
 ;; ============================================================
 ;; :unused-import
