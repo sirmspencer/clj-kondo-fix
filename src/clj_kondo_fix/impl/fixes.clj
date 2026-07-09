@@ -441,7 +441,12 @@
         remaining (str/trim no-empty2)]
     (cond
       ;; nothing meaningful left — all was empty vectors / :as
-      (str/blank? remaining)
+      ;; BUT only if the original content had actual destructuring patterns.
+      ;; A bare {} (empty map used as a value) must NOT be collapsed.
+      (and (str/blank? remaining)
+           (or as-name
+               (re-find #":(?:keys|strs|syms)!?\s*\[" content)
+               (re-find #"_[a-zA-Z]" content)))
       (or as-name "_")
 
       ;; only _-prefixed concrete bindings remain: `_x :keyword` pairs
