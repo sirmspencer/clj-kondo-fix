@@ -55,13 +55,17 @@
         {:fixed total-fixed
          :lines current-lines
          :changed? (not= current-lines initial-lines)}
-        (let [file-findings (get findings file-path [])
-               fix-fn        (:fix-fn rule-def)
-               rule-cfg      (:config rule-def)
-               result        (if rule-cfg
-                               (fix-fn file-path current-lines file-findings log rule-cfg)
+        (let [file-findings  (get findings file-path [])
+              fix-fn         (:fix-fn rule-def)
+              ;; Extract :fix-contexts from the rule's :config map and pass it
+              ;; as the 5th arg.  Other fix functions ignore the extra arg via
+              ;; their default arity.
+              fix-contexts   (get-in rule-def [:config :fix-contexts])
+              result         (if fix-contexts
+                               (fix-fn file-path current-lines file-findings log fix-contexts)
                                (fix-fn file-path current-lines file-findings log))]
           (recur more (:lines result) (+ total-fixed (:fixed result))))))))
+
 
 (defn fix!
   [{:keys [lint config dry-run rules]
