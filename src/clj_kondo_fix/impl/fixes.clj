@@ -868,20 +868,31 @@
         {:fixed fixed :lines current-lines :changed? (pos? fixed)}
         (let [msg      (:message f)
               var-name (some-> (re-find #"^Unused private var .+/(.+)$" msg) second)
-              line-idx (dec (:line f))
-              ;; :col is 1-indexed and points to the first char of the var name.
-              ;; Start .indexOf from there so we skip any earlier occurrences of
-              ;; the same substring (e.g. "f" appearing in "foo" before the def).
-              col-start (max 0 (- (:col f) 2))]
+              line-idx (dec (:line f))]
           (if (nil? var-name)
             (recur more current-lines fixed)
-            (let [line (nth current-lines line-idx)
-                  idx  (.indexOf line var-name col-start)]
-              (if (neg? idx)
+            ;; Scan backwards from the finding line to locate the opening
+            ;; top-level (def...) or (defn-...) form.
+            (let [form-start (loop [i line-idx]
+                               (cond
+                                 (< i 0) nil
+                                 (re-find #"^\s*\(def" (nth current-lines i)) i
+                                 :else (recur (dec i))))
+                  form-col   (when form-start
+                               (.indexOf (nth current-lines form-start) "("))]
+              (if (or (nil? form-start) (neg? form-col))
                 (recur more current-lines fixed)
-                (let [new-line (str (subs line 0 idx) "_" (subs line idx))]
-                  (swap! log conj (str "  " file-url ":" (:line f) "  prefix unused private var: " var-name))
-                  (recur more (assoc current-lines line-idx new-line) (inc fixed)))))))))))
+                (if-let [[end-line _] (find-matching-bracket-across-lines current-lines form-start form-col)]
+                  (let [;; Include a preceding blank line in the removal if present
+                        remove-start (if (and (> form-start 0)
+                                              (str/blank? (nth current-lines (dec form-start))))
+                                       (dec form-start)
+                                       form-start)
+                        new-lines (vec (concat (subvec current-lines 0 remove-start)
+                                               (subvec current-lines (inc end-line))))]
+                    (swap! log conj (str "  " file-url ":" (:line f) "  remove unused private var: " var-name))
+                    (recur more new-lines (inc fixed)))
+                  (recur more current-lines fixed))))))))))
 
 ;; ------------------------------------------------------------
 ;; Fix: redundant-do

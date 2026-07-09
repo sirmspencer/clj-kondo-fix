@@ -817,37 +817,40 @@
 ;; ============================================================
 
 (deftest test-unused-private-var
-  (testing "prefixes defn- var name, not an earlier same-letter substring"
-    ;; 'f' also appears in 'foo'; col-based search must land on the definition.
-    (with-temp-file "(ns foo) (defn- f [])"
+  (testing "removes defn- form entirely"
+    (with-temp-file "(ns foo)\n\n(defn- helper [])\n\n(defn public [] :ok)"
       (fn [f]
         (let [result (assert-fix fixes/fix-unused-private-var-in-file f [:unused-private-var] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "(ns foo)"))
-          (is (str/includes? (:content result) "defn- _f"))))))
+          (is (str/includes? (:content result) "(defn public [] :ok)"))
+          (is (not (str/includes? (:content result) "helper")))))))
 
-  (testing "prefixes def ^:private var, not earlier substring"
-    (with-temp-file "(ns foo) (def ^:private f)"
+  (testing "removes def ^:private form entirely"
+    (with-temp-file "(ns foo)\n\n(def ^:private threshold 42)\n\n(defn public [] :ok)"
       (fn [f]
         (let [result (assert-fix fixes/fix-unused-private-var-in-file f [:unused-private-var] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "(ns foo)"))
-          (is (str/includes? (:content result) "^:private _f"))))))
+          (is (str/includes? (:content result) "(defn public [] :ok)"))
+          (is (not (str/includes? (:content result) "threshold")))))))
 
-  (testing "handles multi-char var name correctly"
-    (with-temp-file "(ns foo) (defn- my-helper [])"
+  (testing "removes multi-line def ^:private form"
+    (with-temp-file "(ns foo)\n\n(def ^:private\n  default-str\n  [:re \"^[a-z]+$\"])\n\n(defn public [] :ok)"
       (fn [f]
         (let [result (assert-fix fixes/fix-unused-private-var-in-file f [:unused-private-var] 1)]
           (is (= 1 (:fixed result)))
-          (is (str/includes? (:content result) "_my-helper"))))))
+          (is (not (str/includes? (:content result) "default-str")))
+          (is (str/includes? (:content result) "(defn public [] :ok)"))))))
 
-  (testing "renames two private vars independently on same line"
-    (with-temp-file "(defn- foo [] (foo)) (defn- bar ([] (bar 1)) ([_]))"
+  (testing "removes two independent private vars"
+    (with-temp-file "(ns foo)\n\n(defn- foo-helper [])\n\n(defn- bar-helper [])\n\n(defn public [] :ok)"
       (fn [f]
         (let [result (assert-fix fixes/fix-unused-private-var-in-file f [:unused-private-var] 2)]
           (is (= 2 (:fixed result)))
-          (is (str/includes? (:content result) "defn- _foo"))
-          (is (str/includes? (:content result) "defn- _bar")))))))
+          (is (not (str/includes? (:content result) "foo-helper")))
+          (is (not (str/includes? (:content result) "bar-helper")))
+          (is (str/includes? (:content result) "(defn public [] :ok)")))))))
 
 ;; ============================================================
 ;; :redundant-do
