@@ -193,11 +193,13 @@
       lines
       (let [line (nth lines i)]
         (cond
-          ;; Empty clause on one line: (:require ) or (:require )) etc.
+          ;; Empty ns-form clause on one line: (:require ) or (:require )) etc.
+          ;; Restrict to known ns clause keywords to avoid matching keyword lookups
+          ;; like (:count))) in threading macros.
           ;; The first ) closes the clause; any extra )s close outer forms
           ;; and must be attached to the preceding line.
-          (re-find #"^\s*\(\s*:\w+\s*\)+\s*$" line)
-          (let [extras (let [[_ ps] (re-find #"^\s*\(\s*:\w+\s*(\)+)\s*$" line)]
+          (re-find #"^\s*\(\s*:(?:require|import|use|refer|refer-clojure|load|gen-class)\s*\)+\s*$" line)
+          (let [extras (let [[_ ps] (re-find #"^\s*\(\s*:(?:require|import|use|refer|refer-clojure|load|gen-class)\s*(\)+)\s*$" line)]
                          (subs ps 1))]  ; parens beyond the clause's own )
             (if (and (pos? i) (not (str/blank? extras)))
               (let [prev (nth lines (dec i))]
@@ -206,7 +208,7 @@
                                             (drop (inc i) lines)))))
               (recur i (vec (concat (take i lines) (drop (inc i) lines))))))
 
-          (and (re-find #"^\s*\(\s*:\w+\s*$" line)
+          (and (re-find #"^\s*\(\s*:(?:require|import|use|refer|refer-clojure|load|gen-class)\s*$" line)
                (< (inc i) (count lines))
                (re-find #"^\s*\)+" (nth lines (inc i))))
           (let [next-line (nth lines (inc i))

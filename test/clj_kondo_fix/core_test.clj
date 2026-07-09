@@ -156,6 +156,16 @@
           (is (not (str/includes? (:content result) "clojure.string")))
           (is (not (str/includes? (:content result) "clojure.set")))))))
 
+  (testing "keyword lookups like (:count) in threading macros are not touched"
+    ;; Regression: cleanup-empty-clauses must not match (:count)))) in function bodies.
+    ;; Only ns-form clause keywords (require/import/use/refer/...) should be cleaned.
+    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]))\n(defn f [m]\n  (-> m\n      first\n      (:count)))"
+      (fn [f]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
+          (is (= 1 (:fixed result)))
+          ;; (:count) must survive — it's a keyword lookup, not a clause
+          (is (str/includes? (:content result) "(:count)"))))))
+
   (testing "trailing comment on the removed entry line — no corruption"
     ;; [clojure.set :as cs] ;; for set ops — comment becomes a straggler but
     ;; the linter no longer fires (the entry is gone) and source is valid.
