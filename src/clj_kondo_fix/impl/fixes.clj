@@ -413,6 +413,76 @@
 ;; referred-var section below but is also used for :keys-destr removal here.
 (declare remove-referred-var-from-line)
 
+;; ------------------------------------------------------------
+;; Destructuring map collapse helpers
+;; ------------------------------------------------------------
+
+(defn- map-collapses-to [content]
+  "Given the string content between { and } (inclusive whitespace), decide if
+   the map can be collapsed to a simpler form.  Returns the target string or nil.
+   Rules:
+   - All 'concrete' bindings (non-`:as`, non-`:keys/strs/syms []`) must be
+     _-prefixed (unused).
+   - If an :as binding is present, collapse to that name (drop the `_` if the
+     binding itself doesn't start with it, i.e. `state` not `_state`).
+   - If no :as binding, collapse to `_`."
+  (let [;; extract :as binding name (with or without _ prefix)
+        as-name   (second (re-find #":as\s+([a-zA-Z_][a-zA-Z0-9*!?_-]*)" content))
+        ;; strip :as clause from analysis
+        no-as     (if as-name
+                    (str/replace content
+                                 (re-pattern (str ":as\\s+" (java.util.regex.Pattern/quote as-name)))
+                                 "")
+                    content)
+        ;; strip empty :foo/keys [], :keys [], etc.
+        no-empty  (str/replace no-as #":[\w./]+\s*\[\s*\]" "")
+        ;; strip :or {} and similar empty sub-maps
+        no-empty2 (str/replace no-empty #":[\w./]+\s*\{\s*\}" "")
+        remaining (str/trim no-empty2)]
+    (cond
+      ;; nothing meaningful left — all was empty vectors / :as
+      (str/blank? remaining)
+      (or as-name "_")
+
+      ;; only _-prefixed concrete bindings remain: `_x :keyword` pairs
+      (re-matches #"(?:\s*_[a-zA-Z][a-zA-Z0-9*!?-]*\s+:[\w./]+\s*)+" remaining)
+      (or as-name "_")
+
+      :else nil)))
+
+(defn collapse-destr-maps [lines]
+  "Post-pass: replace destructuring maps whose bindings are all effectively
+   unused (_-prefixed or empty) with either their :as name or plain `_`."
+  (loop [i 0, current-lines (vec lines)]
+    (if (>= i (count current-lines))
+      current-lines
+      (let [line (nth current-lines i)]
+        ;; scan the line for { chars
+        (if-let [j (some (fn [j] (when (= \{ (nth line j)) j))
+                         (range (count line)))]
+          (if-let [[cl cc] (find-matching-bracket-across-lines current-lines i j)]
+            (let [;; extract full content between { and }
+                  content (if (= i cl)
+                            (subs line (inc j) cc)
+                            (str (subs line (inc j))
+                                 (str/join "\n" (map #(nth current-lines %) (range (inc i) cl)))
+                                 (subs (nth current-lines cl) 0 cc)))
+                  target (map-collapses-to content)]
+              (if target
+                ;; replace the {…} span with target
+                (let [before    (subs line 0 j)
+                      after-cc  (subs (nth current-lines cl) (inc cc))
+                      new-line  (str before target after-cc)
+                      ;; remove lines i+1..cl, replace line i with new-line
+                      new-lines (vec (concat (take i current-lines)
+                                             [new-line]
+                                             (drop (inc cl) current-lines)))]
+                  (recur i new-lines))          ; retry same line (more { may remain)
+                (recur (inc i) current-lines))) ; no collapse — move on
+            (recur (inc i) current-lines))
+          (recur (inc i) current-lines))))))
+
+
 (defn fix-unused-binding-in-file
   "Fix unused bindings.  fix-contexts controls which binding types to handle:
      :as-clause    — remove the :as clause from destructuring (always safe)
@@ -432,7 +502,9 @@
             current-lines lines
             fixed 0]
        (if (nil? f)
-         {:fixed fixed :lines current-lines :changed? (pos? fixed)}
+          ;; Post-passes: collapse destructuring maps that can be simplified
+          (let [collapsed (collapse-destr-maps current-lines)]
+            {:fixed fixed :lines collapsed :changed? (or (pos? fixed) (not= collapsed lines))})
          (let [binding-name (extract-binding-name (:message f))
                line-idx     (dec (:line f))
                col-idx      (dec (:col f))]
@@ -451,13 +523,14 @@
                      (if (and (pos? idx) (= \/ (nth line (dec idx))))
                        (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: binding " binding-name " is part of a namespaced key"))
                            (recur more current-lines fixed))
-                       (let [ctx (detect-binding-context current-lines line-idx idx)]
-                         (cond
-                           ;; :as clause — remove whole clause
-                           (and (= ctx :as-clause) (fix-contexts :as-clause))
-                           (let [new-line (remove-as-clause-from-line line binding-name idx word-end)]
-                             (swap! log conj (str "  " file-url ":" (:line f) "  remove unused :as binding: " binding-name))
-                             (recur more (assoc current-lines line-idx new-line) (inc fixed)))
+                        (let [ctx (detect-binding-context current-lines line-idx idx)]
+                          (cond
+                            ;; :as clause — rename to _name (keep in place so post-pass can
+                            ;; collapse the whole map if all concrete bindings become unused)
+                            (and (= ctx :as-clause) (fix-contexts :as-clause))
+                            (let [new-line (str (subs line 0 idx) "_" (subs line idx))]
+                              (swap! log conj (str "  " file-url ":" (:line f) "  rename unused :as binding: " binding-name " -> _" binding-name))
+                              (recur more (assoc current-lines line-idx new-line) (inc fixed)))
 
                            ;; :keys/:strs/:syms destructuring in fn param — remove from vector
                            (and (= ctx :keys-destr-fn) (fix-contexts :keys-destr-fn))
