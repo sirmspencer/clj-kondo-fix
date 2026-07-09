@@ -21,26 +21,56 @@
   "Run clj-kondo on file-path with the given linters enabled (all others off).
    Returns findings normalized to {:line :col :message}."
   [file-path & {:keys [linters]}]
-  (let [all-off {:linters {:namespace-name-mismatch {:level :off}
-                           :unused-binding {:level :off}
-                           :unused-referred-var {:level :off}
-                           :refer-all {:level :off}
-                           :redundant-do {:level :off}
-                           :redundant-let {:level :off}
-                           :unused-import {:level :off}
-                           :misplaced-docstring {:level :off}
-                           :missing-else-branch {:level :off}
-                           :unused-private-var {:level :off}
-                           :duplicate-require {:level :off}
-                           :unused-namespace {:level :off}}}
+  (let [all-off {:linters {:namespace-name-mismatch    {:level :off}
+                           :syntax                     {:level :off}
+                           :datalog-syntax             {:level :off}
+                           :invalid-arity              {:level :off}
+                           :unresolved-symbol          {:level :off}
+                           :unresolved-var             {:level :off}
+                           :unresolved-namespace       {:level :off}
+                           :unresolved-excluded-var    {:level :off}
+                           :unresolved-protocol-method {:level :off}
+                           :unused-binding             {:level :off}
+                           :unused-referred-var        {:level :off}
+                           :unused-namespace           {:level :off}
+                           :unused-private-var         {:level :off}
+                           :unused-import              {:level :off}
+                           :duplicate-require          {:level :off}
+                           :redundant-do               {:level :off}
+                           :redundant-let              {:level :off}
+                           :redundant-let-binding      {:level :off}
+                           :redundant-expression       {:level :off}
+                           :redundant-call             {:level :off}
+                           :redundant-declare          {:level :off}
+                           :redundant-fn-wrapper       {:level :off}
+                           :redundant-nested-call      {:level :off}
+                           :refer-all                  {:level :off}
+                           :misplaced-docstring        {:level :off}
+                           :missing-docstring          {:level :off}
+                           :missing-else-branch        {:level :off}
+                           :missing-body-in-when       {:level :off}
+                           :missing-test-assertion     {:level :off}
+                           :unused-value               {:level :off}
+                           :not-a-function             {:level :off}
+                           :type-mismatch              {:level :off}
+                           :shadowed-var               {:level :off}
+                           :shadowed-fn-param          {:level :off}
+                           :loop-without-recur         {:level :off}
+                           :uninitialized-var          {:level :off}
+                           :inline-def                 {:level :off}
+                           :cond-else                  {:level :off}
+                           :condition-always-true      {:level :off}
+                           :earmuffed-var-not-dynamic  {:level :off}
+                           :unknown-require-option     {:level :off}
+                           :invalid-ref                {:level :off}}}
         enabled {:linters (into {:namespace-name-mismatch {:level :off}}
                                 (map (fn [k] [k {:level :warning}]) linters))}
         config  {:linters (merge (:linters all-off) (:linters enabled))}
         result  (kondo/run! {:lint [file-path] :config config})]
-    (for [f (:findings result)]
-      {:line    (:row f)
-       :col     (:col f)
-       :message (:message f)})))
+    (vec (for [f (:findings result)]
+           {:line    (:row f)
+            :col     (:col f)
+            :message (:message f)}))))
 
 (defn apply-fix
   "Apply fix-fn to file-path and return {:fixed N :content string}.
@@ -53,68 +83,94 @@
       (spit file-path (str/join "\n" (:lines result))))
     {:fixed (:fixed result) :content (slurp file-path)}))
 
+(defn assert-fix
+  "Assert: expected-count matching findings exist before fix; none after.
+   Optional filter-fn narrows which findings count (for partial-fix cases).
+   Returns the apply-fix result map for additional content assertions."
+  ([fix-fn file-path linters expected-count]
+   (assert-fix fix-fn file-path linters expected-count nil))
+  ([fix-fn file-path linters expected-count filter-fn]
+   (let [all-before (lint-file file-path :linters linters)
+         before     (if filter-fn (filter filter-fn all-before) all-before)]
+     (is (= expected-count (count before))
+         (str "expected " expected-count " finding(s) before fix, got " (count before)))
+     (let [result    (apply-fix fix-fn file-path before)
+           all-after (lint-file file-path :linters linters)
+           after     (if filter-fn (filter filter-fn all-after) all-after)]
+       (is (empty? after) "expected no matching findings after fix")
+       result))))
+
+(defn assert-skip
+  "Assert: linter fires before; fix makes no changes; linter still fires after.
+   Returns the apply-fix result map."
+  [fix-fn file-path linters]
+  (let [before (lint-file file-path :linters linters)]
+    (is (pos? (count before)) "expected linter to fire before skip")
+    (let [result (apply-fix fix-fn file-path before)]
+      (is (zero? (:fixed result)) "expected no changes (deliberate skip)")
+      (is (pos? (count (lint-file file-path :linters linters)))
+          "expected linter to still fire after skip")
+      result)))
+
+(defn assert-no-finding
+  "Assert: linter does not fire — input is already correct.
+   Returns the apply-fix result map."
+  [fix-fn file-path linters]
+  (let [before (lint-file file-path :linters linters)]
+    (is (empty? before) "expected no findings for already-correct code")
+    (apply-fix fix-fn file-path before)))
+
 ;; ============================================================
 ;; :unused-namespace
 ;; ============================================================
 
 (deftest test-unused-namespace
   (testing "removes unused namespace from require"
-    (with-temp-file "(ns foo (:require [clojure.string :as s]))"
+    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-ns-in-file f
-                                (lint-file f :linters [:unused-namespace]))]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "clojure.string")))))))
 
   (testing "leaves used namespace untouched"
     (with-temp-file "(ns foo (:require [clojure.string :as s])) (s/join [\"\"] \"\")"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-ns-in-file f
-                                (lint-file f :linters [:unused-namespace]))]
+        (let [result (assert-no-finding fixes/fix-unused-ns-in-file f [:unused-namespace])]
           (is (zero? (:fixed result)))))))
 
-  (testing "removes one of two unused namespaces, same line"
+  (testing "removes both of two unused namespaces on same line"
     (with-temp-file "(ns foo (:require [clojure.string :as s] [clojure.set :as cs]))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-ns-in-file f
-                                (lint-file f :linters [:unused-namespace]))]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 2)]
           (is (= 2 (:fixed result)))
           (is (not (str/includes? (:content result) "clojure.string")))
           (is (not (str/includes? (:content result) "clojure.set")))))))
 
-  (testing "trailing comment on the removed entry line becomes a straggler — no corruption"
-    ;; [clojure.set :as cs] ;; for set ops — after removal the comment text
-    ;; stays on that line.  The important thing is the code is not corrupted
-    ;; and the remaining require is intact.
+  (testing "trailing comment on the removed entry line — no corruption"
+    ;; [clojure.set :as cs] ;; for set ops — comment becomes a straggler but
+    ;; the linter no longer fires (the entry is gone) and source is valid.
     (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            [clojure.set :as cs] ;; for set ops\n))\n(s/join [\"\"] \"\")"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-ns-in-file f
-                                (lint-file f :linters [:unused-namespace]))]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "clojure.set :as cs")))
-          ;; used require must survive intact
           (is (str/includes? (:content result) "clojure.string :as s"))))))
 
   (testing "comment-only line before removed entry stays as orphan — no corruption"
-    ;; The comment on the line before the unused entry is not removed.
-    ;; Result is a harmless orphan comment, not corrupt source.
     (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            ;; this one is unused\n            [clojure.set :as cs]))\n(s/join [\"\"] \"\")"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-ns-in-file f
-                                (lint-file f :linters [:unused-namespace]))]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "clojure.set :as cs")))
-          (is (str/includes? (:content result) "clojure.string :as s")))))  )
+          (is (str/includes? (:content result) "clojure.string :as s"))))))
 
-  (testing "inline single-line ns: after removal leaves (:require ) straggler — no corruption"
-    ;; cleanup-empty-clauses only matches (:require) when alone on its own line.
-    ;; For the inline format the straggler is harmless but stays.
+  (testing "inline single-line ns: entry removed, (:require ) straggler stays — no corruption"
+    ;; cleanup-empty-clauses only matches (:require) when alone on its own line;
+    ;; the straggler is harmless and the linter no longer fires.
     (with-temp-file "(ns foo (:require [clojure.string :as s]))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-ns-in-file f
-                                (lint-file f :linters [:unused-namespace]))]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
           (is (= 1 (:fixed result)))
-          ;; clojure.string must be gone
           (is (not (str/includes? (:content result) "clojure.string"))))))))
 
 ;; ============================================================
@@ -123,37 +179,29 @@
 
 (deftest test-duplicate-require
   (testing "removes the duplicate (second) entry, keeps the first"
-    ;; Both entries on same line — col points to the second [clojure.string.
-    ;; The first entry is actively used via s/join; only the duplicate :as str
-    ;; should be removed.
+    ;; s/join is used so only the duplicate :as str entry should be removed.
     (with-temp-file "(ns foo (:require [clojure.string :as s] [clojure.string :as str])) (s/join [\"\"] \"\")"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-ns-in-file f
-                                (lint-file f :linters [:duplicate-require]))]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:duplicate-require] 1)]
           (is (= 1 (:fixed result)))
-          ;; first entry must survive
           (is (str/includes? (:content result) "clojure.string :as s"))
-          ;; duplicate must be gone
           (is (not (str/includes? (:content result) ":as str")))))))
 
   (testing "removes duplicate when both are on separate lines"
     (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            [clojure.string :as str])) (s/join [\"\"] \"\")"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-ns-in-file f
-                                (lint-file f :linters [:duplicate-require]))]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:duplicate-require] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "clojure.string :as s"))
           (is (not (str/includes? (:content result) ":as str")))))))
 
-  (testing "single clojure.string occurrence — removes it when unused"
+  (testing "removes the duplicate when both entries are unused"
+    ;; kondo reports duplicate-require for the second entry only;
+    ;; after removal, no more duplicates (one entry remains).
     (with-temp-file "(ns foo (:require [clojure.string :as s] [clojure.string :as str]))"
       (fn [f]
-        ;; Both are unused here; kondo reports the duplicate entry.
-        ;; We should still remove the right one (the duplicate).
-        (let [findings (lint-file f :linters [:duplicate-require])
-              result   (apply-fix fixes/fix-unused-ns-in-file f findings)]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:duplicate-require] 1)]
           (is (pos? (:fixed result)))
-          ;; only one [clojure.string entry should remain
           (is (= 1 (count (re-seq #"\[clojure\.string" (:content result))))))))))
 
 ;; ============================================================
@@ -164,51 +212,41 @@
   (testing "prefixes simple unused binding with underscore"
     (with-temp-file "(defn foo [x])"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-binding-in-file f
-                                (lint-file f :linters [:unused-binding]))]
+        (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "_x"))))))
 
   (testing "prefixes unused let binding"
     (with-temp-file "(let [x 1])"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-binding-in-file f
-                                (lint-file f :linters [:unused-binding]))]
+        (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "_x"))))))
 
   (testing "no change when binding is used"
     (with-temp-file "(defn foo [x] x)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-binding-in-file f
-                                (lint-file f :linters [:unused-binding]))]
+        (let [result (assert-no-finding fixes/fix-unused-binding-in-file f [:unused-binding])]
           (is (zero? (:fixed result)))))))
 
-  (testing "skips namespaced key destructuring (patient/id) — inserting _ would corrupt source"
-    ;; clj-kondo reports col pointing into 'id' inside 'patient/id'.
+  (testing "skips namespaced key destructuring — inserting _ would corrupt source"
+    ;; kondo reports col pointing into 'id' inside 'patient/id'.
     ;; We must NOT produce {:keys [patient/_id]}.
     (with-temp-file "(let [{:keys [patient/id order/id]} {}] id)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-binding-in-file f
-                                (lint-file f :linters [:unused-binding]))]
-          (is (zero? (:fixed result)))
-          ;; source must be unmodified
+        (let [result (assert-skip fixes/fix-unused-binding-in-file f [:unused-binding])]
           (is (not (str/includes? (:content result) "_id")))))))
 
-  (testing "skips :as binding — removes the whole :as clause instead"
+  (testing ":as bindings are not reported by :unused-binding"
     (with-temp-file "(ns foo (:require [clojure.string :as s]))"
       (fn [f]
-        ;; :as bindings are reported by :unused-namespace, not :unused-binding.
-        ;; This is just confirming we don't accidentally touch them here.
-        (let [result (apply-fix fixes/fix-unused-binding-in-file f
-                                (lint-file f :linters [:unused-binding]))]
+        (let [result (assert-no-finding fixes/fix-unused-binding-in-file f [:unused-binding])]
           (is (zero? (:fixed result)))))))
 
   (testing "prefixes multiple unused bindings in same let"
     (with-temp-file "(loop [x 1 y 2])"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-binding-in-file f
-                                (lint-file f :linters [:unused-binding]))]
+        (let [result (assert-fix fixes/fix-unused-binding-in-file f [:unused-binding] 2)]
           (is (= 2 (:fixed result)))
           (is (str/includes? (:content result) "_x"))
           (is (str/includes? (:content result) "_y")))))))
@@ -221,18 +259,20 @@
   (testing "removes one unused import from group, leaves the other"
     (with-temp-file "(ns foo (:import [java.util Date List]))"
       (fn [f]
-        (let [findings (filter #(str/ends-with? (:message %) "List")
-                               (lint-file f :linters [:unused-import]))
-              result   (apply-fix fixes/fix-unused-import-in-file f findings)]
+        (let [list-pred #(str/ends-with? (:message %) "List")
+              result    (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1 list-pred)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "List")))
-          (is (str/includes? (:content result) "Date"))))))
+          ;; Date is still present (we only fixed List)
+          (is (str/includes? (:content result) "Date"))
+          ;; Date finding still fires
+          (is (= 1 (count (filter #(str/ends-with? (:message %) "Date")
+                                  (lint-file f :linters [:unused-import])))))))))
 
   (testing "removes all unused imports from group"
     (with-temp-file "(ns foo (:import [java.util Date List]))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-import-in-file f
-                                (lint-file f :linters [:unused-import]))]
+        (let [result (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 2)]
           (is (= 2 (:fixed result)))
           (is (not (str/includes? (:content result) "Date")))
           (is (not (str/includes? (:content result) "List")))))))
@@ -240,9 +280,8 @@
   (testing "removes unused import from vector-style standalone import"
     (with-temp-file "(import '[java.util Foo Bar])"
       (fn [f]
-        (let [findings (filter #(str/ends-with? (:message %) "Foo")
-                               (lint-file f :linters [:unused-import]))
-              result   (apply-fix fixes/fix-unused-import-in-file f findings)]
+        (let [foo-pred #(str/ends-with? (:message %) "Foo")
+              result   (assert-fix fixes/fix-unused-import-in-file f [:unused-import] 1 foo-pred)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "Foo")))
           (is (str/includes? (:content result) "Bar")))))))
@@ -255,8 +294,8 @@
   (testing "removes single unused referred var, keeps used one"
     (with-temp-file "(ns foo (:require [clojure.string :refer [join ends-with?]]))\n(join [\"\"] \"\")"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-referred-var-in-file f
-                                (lint-file f :linters [:unused-referred-var]))]
+        (let [pred   #(str/includes? (:message %) "ends-with?")
+              result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1 pred)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "ends-with?")))
           (is (str/includes? (:content result) "join"))))))
@@ -264,29 +303,24 @@
   (testing "works with vars whose names end in ? (word boundary)"
     (with-temp-file "(ns foo (:require [clojure.string :refer [starts-with? ends-with?]]))"
       (fn [f]
-        (let [findings (filter #(str/includes? (:message %) "ends-with?")
-                               (lint-file f :linters [:unused-referred-var]))
-              result   (apply-fix fixes/fix-unused-referred-var-in-file f findings)]
+        (let [pred   #(str/includes? (:message %) "ends-with?")
+              result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1 pred)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "ends-with?")))
-          ;; starts-with? must survive
           (is (str/includes? (:content result) "starts-with?"))))))
 
   (testing "removes :refer clause when all vars removed"
     (with-temp-file "(ns foo (:require [clojure.string :refer [join]]))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-referred-var-in-file f
-                                (lint-file f :linters [:unused-referred-var]))]
+        (let [result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) ":refer")))))))
 
   (testing "multi-line :refer vector: removes var from its own line"
-    ;; Each var is on its own line; the fix operates per-line using :col,
-    ;; so multi-line layout is handled correctly.
     (with-temp-file "(ns foo\n  (:require\n   [clojure.string :refer [join\n                            ends-with?]]))\n(join [\"\"] \"\")"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-referred-var-in-file f
-                                (lint-file f :linters [:unused-referred-var]))]
+        (let [pred   #(str/includes? (:message %) "ends-with?")
+              result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1 pred)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "ends-with?")))
           (is (str/includes? (:content result) "join")))))))
@@ -299,8 +333,7 @@
   (testing "removes :refer :all leaving bare require"
     (with-temp-file "(ns foo (:require [clojure.string :refer :all]))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-refer-all-in-file f
-                                (lint-file f :linters [:refer-all]))]
+        (let [result (assert-fix fixes/fix-refer-all-in-file f [:refer-all] 1)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) ":refer :all")))
           (is (str/includes? (:content result) "clojure.string"))))))
@@ -308,21 +341,17 @@
   (testing "removes :refer :all when :as alias also present"
     (with-temp-file "(ns foo (:require [clojure.string :as s :refer :all]))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-refer-all-in-file f
-                                (lint-file f :linters [:refer-all]))]
+        (let [result (assert-fix fixes/fix-refer-all-in-file f [:refer-all] 1)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) ":refer :all")))
           (is (str/includes? (:content result) ":as s"))))))
 
   (testing "multi-line: :refer :all on separate line from ns — safe skip"
-    ;; find-require-entry-start scans backward on the :all line only.
-    ;; The opening [ is on the previous line so it returns nil → no-op.
+    ;; find-require-entry-start scans backward on the :all line only;
+    ;; the opening [ is on the previous line so it returns nil → no-op.
     (with-temp-file "(ns foo\n  (:require [clojure.string\n             :refer :all]))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-refer-all-in-file f
-                                (lint-file f :linters [:refer-all]))]
-          (is (zero? (:fixed result)))
-          ;; source must be unmodified
+        (let [result (assert-skip fixes/fix-refer-all-in-file f [:refer-all])]
           (is (str/includes? (:content result) ":refer :all")))))))
 
 ;; ============================================================
@@ -333,54 +362,40 @@
   (testing "moves docstring before param vector (multi-line form)"
     (with-temp-file "(defn my-fn [x y]\n  \"does something\"\n  (+ x y))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-misplaced-docstring-in-file f
-                                (lint-file f :linters [:misplaced-docstring]))]
+        (let [result (assert-fix fixes/fix-misplaced-docstring-in-file f [:misplaced-docstring] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "\"does something\""))
           (is (str/includes? (:content result) "[x y]"))))))
 
-  (testing "single-line form is skipped (safe no-op — defn and docstring on same line)"
-    ;; (defn f [x] "doc" x) — finding on row 1, def-line-idx = -1 → skip
+  (testing "single-line form is skipped — finding is on row 1, def-line-idx = -1"
     (with-temp-file "(defn f [x] \"dude\" x)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-misplaced-docstring-in-file f
-                                (lint-file f :linters [:misplaced-docstring]))]
-          (is (zero? (:fixed result)))
-          ;; source must be unmodified
+        (let [result (assert-skip fixes/fix-misplaced-docstring-in-file f [:misplaced-docstring])]
           (is (str/includes? (:content result) "(defn f [x] \"dude\" x)"))))))
 
   (testing "correctly placed docstring is unchanged"
     (with-temp-file "(defn f \"doc\" [x] x)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-misplaced-docstring-in-file f
-                                (lint-file f :linters [:misplaced-docstring]))]
+        (let [result (assert-no-finding fixes/fix-misplaced-docstring-in-file f [:misplaced-docstring])]
           (is (zero? (:fixed result)))))))
 
-  (testing "comment between params and docstring — safe no-op (def-line-idx points to comment, not defn)"
-    ;; (defn f [x]\n  ;; comment\n  "doc"\n  body) — docstring is on row 3.
-    ;; def-line-idx = row3 - 1 = row 2 (the comment line).
-    ;; find-bracket finds no [ in the comment → silently skips.
+  (testing "comment between params and docstring — safe skip"
+    ;; def-line-idx points to the comment line; find-bracket finds no [ there.
     (with-temp-file "(defn f [x]\n  ;; explains x\n  \"doc\"\n  x)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-misplaced-docstring-in-file f
-                                (lint-file f :linters [:misplaced-docstring]))]
-          (is (zero? (:fixed result)))
-          ;; source must be unmodified
+        (let [result (assert-skip fixes/fix-misplaced-docstring-in-file f [:misplaced-docstring])]
           (is (str/includes? (:content result) ";; explains x"))
-          (is (str/includes? (:content result) "\"doc\""   ))))))
+          (is (str/includes? (:content result) "\"doc\""))))))
 
-  (testing "multi-line defn signature: params on separate line from defn name — safe skip"
-    ;; (defn f\n  [x]\n  "doc"\n  body) — def-line is "  [x]", prefix is blank.
-    ;; The blank-prefix guard prevents emitting a malformed defn form.
+  (testing "multi-line defn signature: params on separate line — safe skip"
+    ;; def-line is \"  [x]\", prefix is blank; blank-prefix guard skips
+    ;; to avoid emitting a malformed defn with an injected empty line.
     (with-temp-file "(defn f\n  [x]\n  \"doc\"\n  x)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-misplaced-docstring-in-file f
-                                (lint-file f :linters [:misplaced-docstring]))]
-          (is (zero? (:fixed result)))
-          ;; source must be unmodified — no empty line injected between name and params
+        (let [result (assert-skip fixes/fix-misplaced-docstring-in-file f [:misplaced-docstring])]
           (is (str/includes? (:content result) "(defn f"))
           (is (str/includes? (:content result) "  [x]"))
-          (is (str/includes? (:content result) "\"doc\""  ))))))  )
+          (is (str/includes? (:content result) "\"doc\"")))))))
 
 ;; ============================================================
 ;; :missing-else-branch
@@ -390,40 +405,35 @@
   (testing "converts (if ...) to (when ...)"
     (with-temp-file "(if true 1)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-missing-else-branch-in-file f
-                                (lint-file f :linters [:missing-else-branch]))]
+        (let [result (assert-fix fixes/fix-missing-else-branch-in-file f [:missing-else-branch] 1)]
           (is (= 1 (:fixed result)))
           (is (str/starts-with? (:content result) "(when "))))))
 
   (testing "converts (if-not ...) to (when-not ...)"
     (with-temp-file "(if-not true 1)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-missing-else-branch-in-file f
-                                (lint-file f :linters [:missing-else-branch]))]
+        (let [result (assert-fix fixes/fix-missing-else-branch-in-file f [:missing-else-branch] 1)]
           (is (= 1 (:fixed result)))
           (is (str/starts-with? (:content result) "(when-not "))))))
 
   (testing "converts (if-let ...) to (when-let ...)"
     (with-temp-file "(if-let [x 1] x)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-missing-else-branch-in-file f
-                                (lint-file f :linters [:missing-else-branch]))]
+        (let [result (assert-fix fixes/fix-missing-else-branch-in-file f [:missing-else-branch] 1)]
           (is (= 1 (:fixed result)))
           (is (str/starts-with? (:content result) "(when-let "))))))
 
   (testing "converts (if-some ...) to (when-some ...)"
     (with-temp-file "(if-some [x 1] x)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-missing-else-branch-in-file f
-                                (lint-file f :linters [:missing-else-branch]))]
+        (let [result (assert-fix fixes/fix-missing-else-branch-in-file f [:missing-else-branch] 1)]
           (is (= 1 (:fixed result)))
           (is (str/starts-with? (:content result) "(when-some "))))))
 
   (testing "multiple if variants on same line all converted"
     (with-temp-file "(if true 1) (if-not true 1) (if-let [x 1] x) (if-some [x 1] x)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-missing-else-branch-in-file f
-                                (lint-file f :linters [:missing-else-branch]))]
+        (let [result (assert-fix fixes/fix-missing-else-branch-in-file f [:missing-else-branch] 4)]
           (is (= 4 (:fixed result)))
           (is (str/includes? (:content result) "(when "))
           (is (str/includes? (:content result) "(when-not "))
@@ -433,8 +443,7 @@
   (testing "no change when else branch is present"
     (with-temp-file "(if true 1 2)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-missing-else-branch-in-file f
-                                (lint-file f :linters [:missing-else-branch]))]
+        (let [result (assert-no-finding fixes/fix-missing-else-branch-in-file f [:missing-else-branch])]
           (is (zero? (:fixed result))))))))
 
 ;; ============================================================
@@ -443,25 +452,18 @@
 
 (deftest test-unused-private-var
   (testing "prefixes defn- var name, not an earlier same-letter substring"
-    ;; Bug target: (ns foo) (defn- f []) — 'f' also appears in 'foo'.
-    ;; .indexOf('f') from 0 would find 'foo' first.  With col-based search it
-    ;; must find the definition site.
+    ;; 'f' also appears in 'foo'; col-based search must land on the definition.
     (with-temp-file "(ns foo) (defn- f [])"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-private-var-in-file f
-                                (lint-file f :linters [:unused-private-var]))]
+        (let [result (assert-fix fixes/fix-unused-private-var-in-file f [:unused-private-var] 1)]
           (is (= 1 (:fixed result)))
-          ;; 'foo' must be untouched
           (is (str/includes? (:content result) "(ns foo)"))
-          ;; def site must be renamed
           (is (str/includes? (:content result) "defn- _f"))))))
 
   (testing "prefixes def ^:private var, not earlier substring"
-    ;; (ns foo) (def ^:private f) — same issue: 'f' in 'foo' comes first.
     (with-temp-file "(ns foo) (def ^:private f)"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-private-var-in-file f
-                                (lint-file f :linters [:unused-private-var]))]
+        (let [result (assert-fix fixes/fix-unused-private-var-in-file f [:unused-private-var] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "(ns foo)"))
           (is (str/includes? (:content result) "^:private _f"))))))
@@ -469,17 +471,14 @@
   (testing "handles multi-char var name correctly"
     (with-temp-file "(ns foo) (defn- my-helper [])"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-private-var-in-file f
-                                (lint-file f :linters [:unused-private-var]))]
+        (let [result (assert-fix fixes/fix-unused-private-var-in-file f [:unused-private-var] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "_my-helper"))))))
 
-  (testing "renames second private var independently on same line"
-    ;; col points to each var separately; neither should clobber the other
+  (testing "renames two private vars independently on same line"
     (with-temp-file "(defn- foo [] (foo)) (defn- bar ([] (bar 1)) ([_]))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-unused-private-var-in-file f
-                                (lint-file f :linters [:unused-private-var]))]
+        (let [result (assert-fix fixes/fix-unused-private-var-in-file f [:unused-private-var] 2)]
           (is (= 2 (:fixed result)))
           (is (str/includes? (:content result) "defn- _foo"))
           (is (str/includes? (:content result) "defn- _bar")))))))
@@ -492,21 +491,18 @@
   (testing "removes redundant do wrapper (single-line)"
     (with-temp-file "(when true (do (println \"a\") (println \"b\")))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-redundant-do-in-file f
-                                (lint-file f :linters [:redundant-do]))]
+        (let [result (assert-fix fixes/fix-redundant-do-in-file f [:redundant-do] 1)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "(do")))))))
 
   (testing "removes redundant do wrapper (multi-line)"
     (with-temp-file "(when true\n  (do\n    (println \"a\")\n    (println \"b\")))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-redundant-do-in-file f
-                                (lint-file f :linters [:redundant-do]))]
+        (let [result (assert-fix fixes/fix-redundant-do-in-file f [:redundant-do] 1)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "(do")))
-          ;; body expressions must survive
           (is (str/includes? (:content result) "(println \"a\")"))
-          (is (str/includes? (:content result) "(println \"b\")"))))  )))
+          (is (str/includes? (:content result) "(println \"b\")")))))))
 
 ;; ============================================================
 ;; :redundant-let
@@ -514,49 +510,40 @@
 
 (deftest test-redundant-let
   (testing "single-line: no body"
-    ;; (let [x 2] (let [y 1])) → (let [x 2 y 1])
     (with-temp-file "(let [x 2] (let [y 1]))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-redundant-let-in-file f
-                                (lint-file f :linters [:redundant-let]))]
+        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "(let [x 2 y 1])"))))))
 
   (testing "single-line: with body"
-    ;; (let [x 2] (let [y 1] (+ x y))) → (let [x 2 y 1] (+ x y))
     (with-temp-file "(let [x 2] (let [y 1] (+ x y)))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-redundant-let-in-file f
-                                (lint-file f :linters [:redundant-let]))]
+        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "(let [x 2 y 1] (+ x y))"))))))
 
   (testing "multi-line: no body"
     (with-temp-file "(let [x 1]\n  (let [y 2]))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-redundant-let-in-file f
-                                (lint-file f :linters [:redundant-let]))]
+        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) "(let [y 2])")))
-          (is (str/includes? (:content result) "y 2")))))  )
+          (is (str/includes? (:content result) "y 2"))))))
 
   (testing "multi-line: with body on its own line"
     (with-temp-file "(let [x 1]\n  (let [y 2]\n    (+ x y)))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-redundant-let-in-file f
-                                (lint-file f :linters [:redundant-let]))]
+        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "y 2]"))
           (is (str/includes? (:content result) "(+ x y)"))
-          ;; only one ) at the end, not ))
           (is (str/ends-with? (str/trim (:content result)) ")"))))))
 
   (testing "multi-line: body inline with inner binding close"
-    ;; (let [x 1]\n  (let [y 2] body)) — inner let all on one line
     (with-temp-file "(let [x 1]\n  (let [y 2] (+ x y)))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-redundant-let-in-file f
-                                (lint-file f :linters [:redundant-let]))]
+        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "y 2]"))
           (is (str/includes? (:content result) "(+ x y)"))))))
@@ -564,8 +551,7 @@
   (testing "multi-line: multiple inner bindings"
     (with-temp-file "(let [a 1]\n  (let [b 2\n        c 3]\n    (+ a b c)))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-redundant-let-in-file f
-                                (lint-file f :linters [:redundant-let]))]
+        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
           (is (= 1 (:fixed result)))
           (is (str/includes? (:content result) "b 2"))
           (is (str/includes? (:content result) "c 3]"))
@@ -574,11 +560,9 @@
   (testing "intermediate #_ discard form: moved before merged let"
     (with-temp-file "(let [x 1]\n  #_(println \"hello\")\n  (let [y 2]))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-redundant-let-in-file f
-                                (lint-file f :linters [:redundant-let]))]
+        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
           (is (= 1 (:fixed result)))
-          ;; discard form must appear before the let
-          (let [lines (str/split-lines (:content result))
+          (let [lines      (str/split-lines (:content result))
                 discard-idx (first (keep-indexed #(when (str/includes? %2 "#_") %1) lines))
                 let-idx     (first (keep-indexed #(when (str/starts-with? (str/trimr %2) "(let") %1) lines))]
             (is (some? discard-idx))
@@ -588,24 +572,21 @@
   (testing "intermediate comment line: moved before merged let"
     (with-temp-file "(let [x 1]\n  ;; important note\n  (let [y 2]\n    body))"
       (fn [f]
-        (let [result (apply-fix fixes/fix-redundant-let-in-file f
-                                (lint-file f :linters [:redundant-let]))]
+        (let [result (assert-fix fixes/fix-redundant-let-in-file f [:redundant-let] 1)]
           (is (= 1 (:fixed result)))
-          (let [lines (str/split-lines (:content result))
+          (let [lines       (str/split-lines (:content result))
                 comment-idx (first (keep-indexed #(when (str/includes? %2 ";;") %1) lines))
                 let-idx     (first (keep-indexed #(when (str/starts-with? (str/trimr %2) "(let") %1) lines))]
             (is (some? comment-idx))
             (is (some? let-idx))
             (is (< comment-idx let-idx)))
-          (is (str/includes? (:content result) "body")))))  )
+          (is (str/includes? (:content result) "body"))))))
 
   (testing "skip: outer let with multi-line binding vector"
-    ;; (let [x 1\n      y 2]\n  (let [z 3])) — outer binding spans two lines → no-op
+    ;; outer binding spans two lines — unsupported structure, safe no-op
     (with-temp-file "(let [x 1\n      y 2]\n  (let [z 3]))"
       (fn [f]
-        (let [findings (lint-file f :linters [:redundant-let])
-              result   (apply-fix fixes/fix-redundant-let-in-file f findings)]
-          ;; should be a safe no-op
+        (let [result (assert-skip fixes/fix-redundant-let-in-file f [:redundant-let])]
           (is (zero? (:fixed result))))))))
 
 ;; ============================================================
