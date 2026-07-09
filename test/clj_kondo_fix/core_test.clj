@@ -426,6 +426,46 @@
           (is (= 1 (:fixed result)))
           (is (not (str/includes? (:content result) ":refer")))))))
 
+  (testing "removes entire require entry when only referred var is removed"
+    ;; [clojure.set :refer [rename-keys]] with rename-keys unused:
+    ;; after removing rename-keys, :refer [] is cleaned, leaving bare [clojure.set]
+    ;; which should also be removed since it was only required for the :refer.
+    (with-temp-file "(ns foo\n  (:require [clojure.string :as s]\n            [clojure.set :refer [rename-keys]]))\n(s/join [\"\"] \"\")"
+      (fn [f]
+        (let [result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "clojure.set")))
+          (is (str/includes? (:content result) "clojure.string :as s"))))))
+
+  (testing "space preserved when removing middle var from :refer vector"
+    ;; [step run-cucumber hook] remove run-cucumber → [step hook], not [stephook]
+    (with-temp-file "(ns foo (:require [burpless :refer [step run-cucumber hook]]))\n(step) (hook)"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) "run-cucumber")
+              result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1 pred)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "run-cucumber")))
+          ;; step and hook must remain with a space between them
+          (is (str/includes? (:content result) "step hook")))))  )
+
+  (testing "space preserved when removing first var from :refer vector"
+    (with-temp-file "(ns foo (:require [clojure.string :refer [join split starts-with?]]))\n(split \"\" #\",\") (starts-with? \"\" \"\")"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) "clojure.string/join")
+              result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1 pred)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) " join")))
+          (is (str/includes? (:content result) "split starts-with?")))))  )
+
+  (testing "space preserved when removing last var from :refer vector"
+    (with-temp-file "(ns foo (:require [clojure.string :refer [join split]]))\n(join [\"\"] \"\")"
+      (fn [f]
+        (let [pred   #(str/includes? (:message %) "clojure.string/split")
+              result (assert-fix fixes/fix-unused-referred-var-in-file f [:unused-referred-var] 1 pred)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "split")))
+          (is (str/includes? (:content result) "[join]")))))  )
+
   (testing "multi-line :refer vector: removes var from its own line"
     (with-temp-file "(ns foo\n  (:require\n   [clojure.string :refer [join\n                            ends-with?]]))\n(join [\"\"] \"\")"
       (fn [f]

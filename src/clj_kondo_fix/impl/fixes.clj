@@ -384,13 +384,15 @@
         (let [match-end (+ col-idx (count simple-name))
               before (subs line 0 col-idx)
               after (subs line match-end)
-              cleaned-before (if (re-find #"[\s,]$" before)
-                               (subs before 0 (dec (count before)))
-                               before)
-              cleaned-after (if (re-find #"^[\s,]" after)
-                              (subs after 1)
-                              after)]
-          (str cleaned-before cleaned-after))
+              ;; Strip whitespace from only one side to preserve the separator
+              ;; between remaining vars.  Prefer stripping trailing space from
+              ;; before; only touch after's leading space when before has none.
+              cleaned (if (re-find #"[\s,]$" before)
+                        (str (subs before 0 (dec (count before))) after)
+                        (str before (if (re-find #"^[\s,]" after)
+                                      (subs after 1)
+                                      after)))]
+          cleaned)
         line))))
 
 (defn fix-unused-import-in-file [file-path lines findings log]
@@ -414,13 +416,40 @@
                            (assoc current-lines line-idx new-line)
                            (inc fixed)))))))))))
 
+(defn- extract-ns-from-referred-var-msg [msg]
+  "Extract namespace from '#'clojure.set/rename-keys is referred but never used'."
+  (some-> (re-find #"^#'(.+)/[^/]+ is referred but never used$" msg) second))
+
+(defn remove-bare-requires [lines ns-names file-url log]
+  "Remove bare [ns-name] require entries (no :as, no :refer) for each ns-name.
+   Reuses remove-require-finding so all edge-case handling is shared."
+  (reduce (fn [current-lines ns-name]
+            (let [pat (re-pattern (str "\\[" (java.util.regex.Pattern/quote ns-name) "\\s*\\]"))
+                  hit (first (keep-indexed #(when (re-find pat %2) %1) current-lines))]
+              (if (nil? hit)
+                current-lines
+                (let [synthetic {:line    (inc hit)
+                                 :col     1
+                                 :message (str "namespace " ns-name
+                                               " is required but never used")}
+                      [new-lines changed] (remove-require-finding current-lines synthetic file-url log)]
+                  (if changed new-lines current-lines)))))
+          lines
+          ns-names))
+
 (defn fix-unused-referred-var-in-file [file-path lines findings log]
   (let [file-url (str/replace file-path (str (System/getProperty "user.home")) "~")
         sorted (sort-by (juxt :line :col) #(compare %2 %1) (distinct findings))]
     (loop [[f & more] sorted current-lines lines fixed 0]
       (if (nil? f)
-        (let [cleaned (cleanup-empty-clauses current-lines)]
-          {:fixed fixed :lines cleaned :changed? (or (pos? fixed) (not= cleaned lines))})
+        (let [cleaned  (cleanup-empty-clauses current-lines)
+              ;; remove any bare [ns-name] entries left after :refer cleanup
+              ns-names (->> (distinct findings)
+                            (map #(extract-ns-from-referred-var-msg (:message %)))
+                            (filter some?)
+                            distinct)
+              final    (remove-bare-requires cleaned ns-names file-url log)]
+          {:fixed fixed :lines final :changed? (or (pos? fixed) (not= final lines))})
         (let [msg (:message f)
               var-name (some-> (re-find #"^#'(.+) is referred but never used$" msg) second)
               line-idx (dec (:line f))
