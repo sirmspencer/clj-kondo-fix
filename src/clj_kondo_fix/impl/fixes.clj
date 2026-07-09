@@ -97,54 +97,95 @@
     (if (or (nil? ns-name) (< line-idx 0) (>= line-idx (count lines)))
       [lines nil]
       (let [line (nth lines line-idx)
-            idx (find-ns-on-line line ns-name col-start)]
+            idx  (find-ns-on-line line ns-name col-start)]
         (if (nil? idx)
           (do (swap! log conj (str "  " file-url ":" (:line finding) "  skip: can't find [" ns-name))
               [lines nil])
-          (let [end-idx (find-matching-bracket line idx)]
-            (if (nil? end-idx)
+          ;; Try single-line bracket match first; fall back to across-lines for
+          ;; multi-line entries like [ns.name\n :as alias].
+          (let [single-end (find-matching-bracket line idx)
+                [end-line end-col]
+                (if single-end
+                  [line-idx single-end]
+                  (find-matching-bracket-across-lines lines line-idx idx))]
+            (if (nil? end-line)
               (do (swap! log conj (str "  " file-url ":" (:line finding) "  skip: unmatched bracket for " ns-name))
                   [lines nil])
-              (let [before (subs line 0 idx)
-                    after (subs line (inc end-idx))]
+              (let [before     (subs line 0 idx)
+                    after      (subs (nth lines end-line) (inc end-col))
+                    ;; Remove the entry span (line-idx..end-line) entirely.
+                    remove-span  (fn [ls]
+                                   (vec (concat (take line-idx ls)
+                                                (drop (inc end-line) ls))))
+                    ;; Replace the entry span with a single new line.
+                    replace-span (fn [ls new-line]
+                                   (vec (concat (take line-idx ls)
+                                                [new-line]
+                                                (drop (inc end-line) ls))))]
                 (cond
+                  ;; Entry is alone on its line(s) — just remove the span.
                   (and (re-find #"^\s*$" before)
                        (re-find #"^\s*,?\s*$" after))
                   (do (swap! log conj (str "  " file-url ":" (:line finding) "  remove require: " ns-name))
-                      [(vec (concat (take line-idx lines)
-                                    (drop (inc line-idx) lines)))
-                       true])
+                      [(remove-span lines) true])
 
+                  ;; Last entry — closing paren follows immediately after ].
                   (re-find #"^\s*\)" after)
                   (let [prev-idx (dec line-idx)]
                     (if (and (>= prev-idx 0)
                              (re-find #"^\s*$" before)
                              (re-find #"^\s*\[" (nth lines prev-idx)))
+                      ;; Sub-branch A: prev line starts with [ — merge ) there.
                       (let [prev-line (nth lines prev-idx)]
                         (swap! log conj (str "  " file-url ":" (:line finding) "  remove require: " ns-name " (last entry)"))
-                        [(-> (vec (concat (take line-idx lines)
-                                          (drop (inc line-idx) lines)))
+                        [(-> (remove-span lines)
                              (assoc prev-idx (str prev-line after)))
                          true])
-                      (let [new-line (str before after)]
-                        (swap! log conj (str "  " file-url ":" (:line finding) "  remove require: " ns-name " (last entry)"))
-                        [(assoc lines line-idx new-line) true])))
+                      ;; Sub-branch B: scan backward for nearest ]-ending line
+                      ;; (handles (:require on prev line or multi-line prev entry).
+                      (if (and (re-find #"^\s*$" before)
+                               (re-find #"^\s*\)+$" (str/trim after)))
+                        (let [close-str  (str/trim after)
+                              attach-idx (loop [j (dec line-idx)]
+                                           (when (>= j 0)
+                                             (if (str/ends-with? (str/trim (nth lines j)) "]")
+                                               j
+                                               (recur (dec j)))))]
+                          (if attach-idx
+                            (let [new-attach (str (nth lines attach-idx) close-str)]
+                              (swap! log conj (str "  " file-url ":" (:line finding) "  remove require: " ns-name " (last entry)"))
+                              [(vec (concat (take attach-idx lines)
+                                            [new-attach]
+                                            (subvec lines (inc attach-idx) line-idx)
+                                            (drop (inc end-line) lines)))
+                               true])
+                            (let [new-line (str before after)]
+                              (swap! log conj (str "  " file-url ":" (:line finding) "  remove require: " ns-name " (last entry)"))
+                              [(replace-span lines new-line) true])))
+                        (let [new-line (str before after)]
+                          (swap! log conj (str "  " file-url ":" (:line finding) "  remove require: " ns-name " (last entry)"))
+                          [(replace-span lines new-line) true]))))
 
                   :else
                   (let [new-line (str before after)]
                     (swap! log conj (str "  " file-url ":" (:line finding) "  remove require: " ns-name))
+                    ;; If removing the entry left an empty (:require, absorb the
+                    ;; next sibling entry onto this line.  Use end-line+1 so that
+                    ;; multi-line entries don't accidentally grab a continuation line.
                     (if (re-find #"^\s*\(\s*:\w+\s*$" new-line)
-                      (let [next-idx (inc line-idx)]
+                      (let [next-idx (inc end-line)]
                         (if (and (< next-idx (count lines))
                                  (re-find #"^\s*\[" (nth lines next-idx)))
                           (let [indent (re-find #"^\s*" new-line)
-                                entry (str/trim (nth lines next-idx))]
-                            [(-> (vec (concat (take next-idx lines)
-                                              (drop (inc next-idx) lines)))
-                                 (assoc line-idx (str indent "(:require " entry)))
+                                entry  (str/trim (nth lines next-idx))]
+                            [(vec (concat (take line-idx lines)
+                                          [(str indent "(:require " entry)]
+                                          (drop (inc next-idx) lines)))
                              true])
-                          [(assoc lines line-idx new-line) true]))
-                      [(assoc lines line-idx new-line) true])))))))))))
+                          [(replace-span lines new-line) true]))
+                      [(replace-span lines new-line) true])))))))))))
+
+
 
 (defn cleanup-empty-clauses [lines]
   (loop [i 0, lines lines]

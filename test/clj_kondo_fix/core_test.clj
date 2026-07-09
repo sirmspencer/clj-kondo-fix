@@ -171,11 +171,62 @@
       (fn [f]
         (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
           (is (= 1 (:fixed result)))
-          (is (not (str/includes? (:content result) "clojure.string"))))))))
+          (is (not (str/includes? (:content result) "clojure.string")))))))
 
-;; ============================================================
-;; :duplicate-require
-;; ============================================================
+  (testing "last entry removed when prev line is (:require — closing )) merged onto preceding ]"
+    ;; Reproduces change_detector.clj:
+    ;;   (:require [clojure.set :as set]
+    ;;             [clojure.tools.logging :as log]))   ← removed
+    ;; Must produce:   (:require [clojure.set :as set]))
+    ;; NOT:            (:require [clojure.set :as set]\n            ))
+    (with-temp-file "(ns foo\n  (:require [clojure.set :as set]\n            [clojure.tools.logging :as log]))\n(set/difference #{1} #{2})"
+      (fn [f]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "clojure.tools.logging")))
+          (is (str/includes? (:content result) "[clojure.set :as set]))"))))))
+
+  (testing "last entry removed when prev entry is multi-line — closing ) merged onto :as line"
+    ;; Reproduces outside_plant_multiplexer.clj:
+    ;;   [clojure.string
+    ;;    :as str]
+    ;;   [clojure.set :as cs])   ← removed
+    ;; Must produce:   [clojure.string\n   :as str])
+    ;; NOT:            [clojure.string\n   :as str]\n            )
+    (with-temp-file "(ns foo\n  (:require [clojure.string\n             :as str]\n            [clojure.set :as cs]))\n(str/join [\"\"] \"\")"
+      (fn [f]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "clojure.set")))
+          (is (str/includes? (:content result) ":as str]))"  ))))))
+
+  (testing "multi-line entry removed: middle entry between two single-line entries"
+    ;; [path.acceptance...\n :as scenarios] is in the middle; both siblings survive.
+    (with-temp-file "(ns foo\n  (:require [clojure.set :as cs]\n            [path.acceptance.augment.remote-phy-device.reserve-daas-port\n             :as scenarios]\n            [clojure.string :as str]))\n(cs/difference #{1} #{2})\n(str/join [\"\"] \"\")  "
+      (fn [f]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "reserve-daas-port")))
+          (is (str/includes? (:content result) "clojure.set :as cs"))
+          (is (str/includes? (:content result) "clojure.string :as str"))))))
+
+  (testing "multi-line entry removed: last entry — closing ) merged onto previous ]"
+    ;; [path.acceptance...\n :as scenarios]) is last; ) must land on [clojure.set] line.
+    (with-temp-file "(ns foo\n  (:require [clojure.set :as cs]\n            [path.acceptance.augment.remote-phy-device.reserve-daas-port\n             :as scenarios]))\n(cs/difference #{1} #{2})"
+      (fn [f]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "reserve-daas-port")))
+          ;; closing )) must be on the surviving entry's line, not dangling
+          (is (str/includes? (:content result) "[clojure.set :as cs]))"  ))))))
+
+  (testing "multi-line entry removed: only entry in require clause"
+    ;; [path.acceptance...\n :as scenarios] is the only require; clause is cleaned up.
+    (with-temp-file "(ns foo\n  (:require\n   [path.acceptance.augment.remote-phy-device.reserve-daas-port\n    :as scenarios]))"
+      (fn [f]
+        (let [result (assert-fix fixes/fix-unused-ns-in-file f [:unused-namespace] 1)]
+          (is (= 1 (:fixed result)))
+          (is (not (str/includes? (:content result) "reserve-daas-port"))))))  ))
 
 (deftest test-duplicate-require
   (testing "removes the duplicate (second) entry, keeps the first"
