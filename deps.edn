@@ -7,4 +7,6 @@
                       {:git/tag "v0.5.1" :git/sha "dfb30dd"}}}
   :run {:main-opts ["-m" "clj-kondo-fix.main"]}
   :gen-fixtures {:extra-paths ["local"]
-                 :main-opts ["-m" "gen-fixtures"]}}}
+                 :main-opts ["-m" "gen-fixtures"]}
+  :gen-rules    {:extra-paths ["local"]
+                 :main-opts ["-m" "gen-rules-md"]}}}

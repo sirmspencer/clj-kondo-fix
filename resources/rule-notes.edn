@@ -1,0 +1,144 @@
+;; Annotations for clj-kondo rules not implemented in clj-kondo-fix.
+;; Implemented rules are derived automatically from rules.clj.
+;;
+;; Statuses:
+;;   :skipped         — auto-fix attempted but not safe / incomplete
+;;   :not-applicable  — cannot be meaningfully auto-fixed
+;;   :not-implemented — could potentially be auto-fixed; not yet done
+;;
+;; Rules absent from this file and not in rules.clj default to :not-implemented.
+
+{;; ---- skipped ----------------------------------------------------------------
+ ;; refer-all: fix strips :refer :all but cannot produce an explicit refer list
+ ;; without clj-kondo analysis data (var-usages), which findings alone do not
+ ;; provide.
+ :refer-all {:status :skipped
+             :reason "Strips :refer :all but cannot determine which symbols are
+actually used without analysis data; produces broken namespaces for files that
+rely on referred symbols"}
+
+ ;; ---- not applicable ---------------------------------------------------------
+ ;; These rules either require human judgment, type inference, cross-file
+ ;; knowledge, or structural changes that cannot be expressed as a text-level
+ ;; transformation.
+
+ :await-without-async-fn
+ {:status :not-applicable
+  :reason "Structural fix (wrapping fn in async) requires understanding intent"}
+
+ :clj-kondo-config
+ {:status :not-applicable
+  :reason "Config validation errors need human correction"}
+
+ :consistent-alias
+ {:status :not-applicable
+  :reason "Requires a globally configured alias table; not deterministic from a single file"}
+
+ :datalog-syntax
+ {:status :not-applicable
+  :reason "Invalid datalog syntax requires domain knowledge to correct"}
+
+ :deprecated-namespace
+ {:status :not-applicable
+  :reason "Replacing a deprecated namespace requires knowing the recommended replacement"}
+
+ :deprecated-var
+ {:status :not-applicable
+  :reason "Replacing a deprecated var requires knowing the recommended replacement"}
+
+ :discouraged-java-method
+ {:status :not-applicable
+  :reason "Replacing a discouraged method requires knowing the configured replacement"}
+
+ :discouraged-namespace
+ {:status :not-applicable
+  :reason "Replacing a discouraged namespace requires knowing the configured replacement"}
+
+ :discouraged-var
+ {:status :not-applicable
+  :reason "Replacing a discouraged var requires knowing the configured replacement"}
+
+ :file
+ {:status :not-applicable
+  :reason "File I/O errors cannot be auto-fixed"}
+
+ :hook
+ {:status :not-applicable
+  :reason "Hook-related lint; not a code correctness issue"}
+
+ :loop-without-recur
+ {:status :not-applicable
+  :reason "Structural fix (adding recur) requires understanding loop semantics and intent"}
+
+ :main-without-gen-class
+ {:status :not-applicable
+  :reason "Requires adding :gen-class to ns form, which may change compilation behavior"}
+
+ :missing-docstring
+ {:status :not-applicable
+  :reason "Writing a meaningful docstring requires human authorship"}
+
+ :missing-protocol-method
+ {:status :not-applicable
+  :reason "Generating a protocol method implementation requires knowing the intended behavior"}
+
+ :missing-protocol-method-arity
+ {:status :not-applicable
+  :reason "Same as missing-protocol-method"}
+
+ :missing-test-assertion
+ {:status :not-applicable
+  :reason "Writing a test assertion requires human authorship"}
+
+ :namespace-name-mismatch
+ {:status :not-applicable
+  :reason "Renaming either the file or the ns declaration is a multi-file operation"}
+
+ :protocol-method-arity-mismatch
+ {:status :not-applicable
+  :reason "Resolving an arity mismatch requires understanding the intended protocol contract"}
+
+ :protocol-method-varargs
+ {:status :not-applicable
+  :reason "Varargs protocol methods require structural refactoring"}
+
+ :redefined-var
+ {:status :not-applicable
+  :reason "Deciding which definition to keep or merge requires human judgment"}
+
+ :schema-misplaced-return
+ {:status :not-applicable
+  :reason "Plumatic Schema placement requires understanding the schema structure"}
+
+ :self-requiring-namespace
+ {:status :not-applicable
+  :reason "Circular self-require must be resolved by removing the problematic require manually"}
+
+ :syntax
+ {:status :not-applicable
+  :reason "Syntax errors cannot be automatically corrected"}
+
+ :type-mismatch
+ {:status :not-applicable
+  :reason "Type errors require type inference context unavailable at text-transformation level"}
+
+ :unresolved-namespace
+ {:status :not-applicable
+  :reason "Cannot create or locate a missing namespace automatically"}
+
+ :unresolved-symbol
+ {:status :not-applicable
+  :reason "Cannot create or locate a missing symbol automatically"}
+
+ :unresolved-var
+ {:status :not-applicable
+  :reason "Cannot create or locate a missing var automatically"}
+
+ :unresolved-protocol-method
+ {:status :not-applicable
+  :reason "Resolving a missing protocol method requires human implementation"}
+
+ :warn-on-reflection
+ {:status :not-applicable
+  :reason "Requires adding *warn-on-reflection* binding; intent and placement are contextual"}
+ }
