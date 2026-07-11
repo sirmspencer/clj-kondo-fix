@@ -1123,8 +1123,8 @@
         outer-bv-open (find-bracket-open outer-line (+ OC 4))
         [OBL OBC]     (when outer-bv-open
                         (find-matching-bracket-across-lines lines OL outer-bv-open))]
-    ;; precondition: outer binding vector must be single-line
-    (when (and OBL (= OBL OL))
+    ;; precondition: outer binding vector close must have been found
+    (when OBL
       (let [IL            inner-line-idx
             IC            inner-col-idx
             inner-line    (nth lines IL)
@@ -1133,8 +1133,9 @@
                             (find-matching-bracket-across-lines lines IL inner-bv-open))
             [ICL ICC]     (find-matching-bracket-across-lines lines IL IC)]
         (when (and IBL ICL)
-          (let [outer-bind-col (+ OC 6)  ; column where outer bindings start (after "(let [")
-                single-line?  (= OL IL)] ; both lets on the same line
+          (let [outer-bind-col    (+ OC 6)  ; column where outer bindings start (after "(let [")
+                multi-line-outer? (not= OBL OL)
+                single-line?      (= OL IL)] ; both lets on the same line
 
             (if single-line?
               ;; ---- Single-line: pure string surgery on one line ----
@@ -1147,12 +1148,25 @@
                 (assoc lines OL (str (subs line 0 OC) merged)))
 
               ;; ---- Multi-line merge ----
-              (let [;; outer line: strip the closing ] of its binding vector
-                    new-outer-line (subs outer-line 0 OBC)
+              (let [;; outer line(s): either single-line outer binding (strip ])
+                    ;; or multi-line outer binding (keep first outer line, keep middle
+                    ;; outer binding lines, strip ] only from the OBL line).
+                    new-outer-line
+                    (if multi-line-outer?
+                      outer-line  ; first outer let line kept as-is (no ] on this line)
+                      (subs outer-line 0 OBC))
+                    ;; last outer binding line (OBL) with ] stripped — only for multi-line outer
+                    stripped-obl-line
+                    (when multi-line-outer?
+                      (str/trimr (subs (nth lines OBL) 0 OBC)))
+                    ;; lines between outer let start and OBL (middle binding lines, multi-line outer only)
+                    outer-middle-lines
+                    (when multi-line-outer?
+                      (subvec lines (inc OL) OBL))
 
-                    ;; intermediate lines (between outer binding close and inner let)
+                    ;; intermediate lines between outer binding close and inner let
                     ;; moved before the merged let, un-indented by 2
-                    intermediate (subvec lines (inc OL) IL)
+                    intermediate (subvec lines (inc (if multi-line-outer? OBL OL)) IL)
                     moved-lines  (mapv #(reindent-line % (+ OC 2) OC) intermediate)
 
                     ;; inner binding lines, re-indented to outer-bind-col
@@ -1207,6 +1221,8 @@
                       (take OL lines)
                       moved-lines
                       [new-outer-line]
+                      (when multi-line-outer? outer-middle-lines)
+                      (when multi-line-outer? [stripped-obl-line])
                       inner-bind-lines
                       body-close-lines
                       (drop (inc OCL) lines)))))))))))

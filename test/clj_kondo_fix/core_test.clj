@@ -793,11 +793,12 @@
         (is (< comment-idx let-idx)))
       (is (str/includes? (:content result) "body"))))
 
-  (testing "skip: outer let with multi-line binding vector"
-    (let [result (assert-skip fixes/fix-redundant-let-in-file
-                              (fixture-path "redundant-let" "skip-multiline-outer-binding")
-                              [:redundant-let])]
-      (is (zero? (:fixed result))))))
+  (testing "outer let with multi-line binding vector — merges inner bindings"
+    (let [result (assert-fix fixes/fix-redundant-let-in-file
+                             (fixture-path "redundant-let" "multiline-no-body-outer-binding-in")
+                             [:redundant-let] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "redundant-let" "multiline-no-body-outer-binding-out")) (:content result))))))
 
 ;; ============================================================
 ;; Integration tests — full pipeline
