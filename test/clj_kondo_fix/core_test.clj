@@ -186,6 +186,13 @@
       (is (= 1 (:fixed result)))
       (is (= (slurp (fixture-path "unused-namespace" "orphan-comment-out")) (:content result)))))
 
+  (testing "trailing comment on kept entry line is preserved"
+    (let [result (assert-fix fixes/fix-unused-ns-in-file
+                             (fixture-path "unused-namespace" "trailing-comment-stay-in")
+                             [:unused-namespace] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-namespace" "trailing-comment-stay-out")) (:content result)))))
+
   (testing "inline single-line ns: entry removed, (:require ) straggler stays — no corruption"
     (let [result (assert-fix fixes/fix-unused-ns-in-file
                              (fixture-path "unused-namespace" "inline-ns-in")

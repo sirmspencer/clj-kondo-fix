@@ -124,14 +124,43 @@
                                                 (drop (inc end-line) ls))))]
                 (cond
                   ;; Entry is alone on its line(s) — just remove the span.
+                  ;; A trailing inline comment (;; ...) counts as nothing —
+                  ;; it belongs to the removed entry and goes with it.
+                  ;; After removal, if straggling close-parens remain on the
+                  ;; new line-idx position (e.g. from a )) that closed the
+                  ;; require on its own line), pull them up to the nearest
+                  ;; preceding ]-ending line.
                   (and (re-find #"^\s*$" before)
-                       (re-find #"^\s*,?\s*$" after))
-                  (do (swap! log conj (str "  " file-url ":" (:line finding) "  remove require: " ns-name))
-                      [(remove-span lines) true])
+                       (re-find #"^\s*,?\s*(?:;.*)?$" after))
+                  (let [removed   (remove-span lines)
+                        straggler (when (< line-idx (count removed)) (nth removed line-idx))
+                        cleaned
+                        (if (and straggler (re-find #"^\s*\)+\s*$" straggler))
+                          (let [close-str  (str/trim straggler)
+                                attach-idx (loop [j (dec line-idx)]
+                                             (when (>= j 0)
+                                               (if (str/ends-with? (str/trim (nth removed j)) "]")
+                                                 j
+                                                 (recur (dec j)))))]
+                            (if attach-idx
+                              (vec (concat (take attach-idx removed)
+                                           [(str (nth removed attach-idx) close-str)]
+                                           (subvec removed (inc attach-idx) line-idx)
+                                           (drop (inc line-idx) removed)))
+                              removed))
+                          removed)]
+                    (swap! log conj (str "  " file-url ":" (:line finding) "  remove require: " ns-name))
+                    [cleaned true])
 
                   ;; Last entry — closing paren follows immediately after ].
                   (re-find #"^\s*\)" after)
-                  (let [prev-idx (dec line-idx)]
+                  (let [prev-idx (dec line-idx)
+                        ;; Helper: strip indentation from orphan comment-only lines
+                        ;; (lines between the surviving entry and the removed entry).
+                        strip-orphan-comments
+                        (fn [ls from to]
+                          (mapv (fn [l] (if (re-find #"^\s+;" l) (str/triml l) l))
+                                (subvec ls from to)))]
                     (if (and (>= prev-idx 0)
                              (re-find #"^\s*$" before)
                              (re-find #"^\s*\[" (nth lines prev-idx)))
@@ -152,11 +181,12 @@
                                                j
                                                (recur (dec j)))))]
                           (if attach-idx
-                            (let [new-attach (str (nth lines attach-idx) close-str)]
+                            (let [new-attach     (str (nth lines attach-idx) close-str)
+                                  orphan-lines   (strip-orphan-comments lines (inc attach-idx) line-idx)]
                               (swap! log conj (str "  " file-url ":" (:line finding) "  remove require: " ns-name " (last entry)"))
                               [(vec (concat (take attach-idx lines)
                                             [new-attach]
-                                            (subvec lines (inc attach-idx) line-idx)
+                                            orphan-lines
                                             (drop (inc end-line) lines)))
                                true])
                             (let [new-line (str before after)]
