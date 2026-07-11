@@ -1,3 +1,4 @@
+;;-; unused multi-line def ^:private form; entire form removed ;-;;
 (ns foo)
 
 (def ^:private

@@ -7,8 +7,43 @@
 ;;   :not-implemented — could potentially be auto-fixed; not yet done
 ;;
 ;; Rules absent from this file and not in rules.clj default to :not-implemented.
+;;
+;; Implemented rules may carry :example "<slug>" or :examples ["a" "b" ...] to
+;; select which fixture pair(s) to embed in rules.md.  When absent the generator
+;; picks the shortest -in/-out pair automatically.
 
-{;; ---- skipped ----------------------------------------------------------------
+{;; ---- implemented (examples for rules.md) ------------------------------------
+ :duplicate-require
+ {:examples ["first-alias-used" "both-aliases-used-keep-longer"]}
+
+ :misplaced-docstring
+ {:example "moves-before-params"}
+
+ :missing-else-branch
+ {:examples ["converts-if" "converts-multiple-variants"]}
+
+ :redundant-do
+ {:examples ["single-line" "multi-line"]}
+
+ :redundant-let
+ {:examples ["single-line-with-body" "multiline-multiple-inner-bindings"]}
+
+ :unused-binding
+ {:examples ["simple-fn-param" "as-clause-removed" "keys-destr-removes-first" "namespaced-key"]}
+
+ :unused-import
+ {:examples ["removes-one-from-group" "removes-last-class-removes-group"]}
+
+ :unused-namespace
+ {:examples ["removes-single" "all-requires-removed" "trailing-comment"]}
+
+ :unused-private-var
+ {:examples ["removes-defn-form" "removes-multiline-def-private"]}
+
+ :unused-referred-var
+ {:examples ["removes-one-keeps-other" "removes-entire-entry-when-only-referred"]}
+
+ ;; ---- skipped ----------------------------------------------------------------
  ;; refer-all: fix strips :refer :all but cannot produce an explicit refer list
  ;; without clj-kondo analysis data (var-usages), which findings alone do not
  ;; provide.

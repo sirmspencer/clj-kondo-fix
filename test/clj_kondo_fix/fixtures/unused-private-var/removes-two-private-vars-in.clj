@@ -1,3 +1,4 @@
+;;-; two independent unused private vars; both forms removed ;-;;
 (ns foo)
 
 (defn- foo-helper [])

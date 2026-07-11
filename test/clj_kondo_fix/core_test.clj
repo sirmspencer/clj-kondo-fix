@@ -80,14 +80,23 @@
             :col     (:col f)
             :message (:message f)}))))
 
+(defn strip-doc-tag
+  "Remove a leading ;;-; ... ;-;; documentation line from content if present.
+   These lines appear only in -in.clj fixture files and are not present in
+   -out.clj files, so they must be stripped before exact-match comparison."
+  [content]
+  (str/replace content #"\A;;-;.*?;-;;\n" ""))
+
 (defn apply-fix
   "Apply fix-fn to file-path purely in memory.
-   Returns {:fixed N :content string}.  Never writes to disk."
+   Returns {:fixed N :content string}.  Never writes to disk.
+   Strips any leading ;;-; ... ;-;; doc-tag block from the output content
+   so that exact comparison against -out.clj files (which have no tag) works."
   [fix-fn file-path findings]
   (let [lines  (read-lines file-path)
         log    (atom [])
         result (fix-fn file-path lines findings log)]
-    {:fixed (:fixed result) :content (str (str/join "\n" (:lines result)) "\n")}))
+    {:fixed (:fixed result) :content (strip-doc-tag (str (str/join "\n" (:lines result)) "\n"))}))
 
 (defn assert-fix
   "Assert: expected-count matching findings exist before fix; none after.

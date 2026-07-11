@@ -1,3 +1,4 @@
+;;-; multi-line entry in the middle of three; removed, both single-line siblings preserved ;-;;
 (ns foo
   (:require [clojure.set :as cs]
             [my.app.some.long-unused-ns
