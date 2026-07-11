@@ -912,19 +912,35 @@
             (let [line (nth current-lines line-idx)]
               (if (= "(do" (subs line col-idx (+ col-idx 3)))
                 (if-let [[match-line match-col] (find-matching-bracket-across-lines current-lines line-idx col-idx)]
-                  (let [start-line (str (subs line 0 col-idx) " " (subs line (+ col-idx 3)))
-                        match-line-str (nth current-lines match-line)
-                        new-match (str (subs match-line-str 0 match-col) (subs match-line-str (inc match-col)))
-                        new-lines (if (= line-idx match-line)
-                                    (assoc current-lines line-idx
-                                           (str (subs line 0 col-idx) " " (subs line (+ col-idx 3) match-col) (subs line (inc match-col))))
-                                    (-> current-lines
-                                        (assoc line-idx start-line)
-                                        (assoc match-line new-match)))]
+                  (let [match-line-str (nth current-lines match-line)
+                        new-match      (str (subs match-line-str 0 match-col) (subs match-line-str (inc match-col)))
+                        dedent         (fn [l] (if (str/starts-with? l "  ") (subs l 2) l))
+                        new-lines
+                        (if (= line-idx match-line)
+                          ;; single-line: (parent (do a b)) → (parent a b)
+                          ;; trimr/triml to collapse spaces left by removing (do
+                          (assoc current-lines line-idx
+                                 (str (str/trimr (subs line 0 col-idx))
+                                      " "
+                                      (str/triml (subs line (+ col-idx 3) match-col))
+                                      (subs line (inc match-col))))
+                          ;; multi-line
+                          (let [start-line (str (subs line 0 col-idx) (subs line (+ col-idx 3)))]
+                            (if (str/blank? start-line)
+                              ;; (do occupies its own line — remove it and dedent body
+                              (vec (concat
+                                     (subvec current-lines 0 line-idx)
+                                     (mapv dedent (subvec current-lines (inc line-idx) match-line))
+                                     [(dedent new-match)]
+                                     (subvec current-lines (inc match-line))))
+                              ;; (do is inline on a content line — keep existing behaviour
+                              (-> current-lines
+                                  (assoc line-idx start-line)
+                                  (assoc match-line new-match)))))]
                     (swap! log conj (str "  " file-url ":" (:line f) "  remove redundant do"))
-                     (recur more new-lines (inc fixed)))
-                   (recur more current-lines fixed))
-                 (recur more current-lines fixed)))))))))
+                    (recur more new-lines (inc fixed)))
+                  (recur more current-lines fixed))
+                (recur more current-lines fixed)))))))))
 
 ;; ------------------------------------------------------------
 ;; Fix: redundant-let — merge nested lets into one
