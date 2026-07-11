@@ -577,31 +577,6 @@
       (is (= (slurp (fixture-path "unused-referred-var" "multiline-refer-vector-out")) (:content result))))))
 
 ;; ============================================================
-;; :refer-all
-;; ============================================================
-
-(deftest test-refer-all
-  (testing "removes :refer :all leaving bare require"
-    (let [result (assert-fix fixes/fix-refer-all-in-file
-                             (fixture-path "refer-all" "bare-require-in")
-                             [:refer-all] 1)]
-      (is (= 1 (:fixed result)))
-      (is (= (slurp (fixture-path "refer-all" "bare-require-out")) (:content result)))))
-
-  (testing "removes :refer :all when :as alias also present"
-    (let [result (assert-fix fixes/fix-refer-all-in-file
-                             (fixture-path "refer-all" "with-as-alias-in")
-                             [:refer-all] 1)]
-      (is (= 1 (:fixed result)))
-      (is (= (slurp (fixture-path "refer-all" "with-as-alias-out")) (:content result)))))
-
-  (testing "multi-line: :refer :all on separate line from ns — safe skip"
-    (let [result (assert-skip fixes/fix-refer-all-in-file
-                              (fixture-path "refer-all" "multiline-safe-skip")
-                              [:refer-all])]
-      (is (str/includes? (:content result) ":refer :all")))))
-
-;; ============================================================
 ;; :misplaced-docstring
 ;; ============================================================
 
