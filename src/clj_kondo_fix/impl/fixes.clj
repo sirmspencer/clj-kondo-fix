@@ -169,10 +169,10 @@
                   :else
                   (let [new-line (str before after)]
                     (swap! log conj (str "  " file-url ":" (:line finding) "  remove require: " ns-name))
-                    ;; If removing the entry left an empty (:require, absorb the
-                    ;; next sibling entry onto this line.  Use end-line+1 so that
-                    ;; multi-line entries don't accidentally grab a continuation line.
-                    (if (re-find #"^\s*\(\s*:\w+\s*$" new-line)
+                    (cond
+                      ;; Dedicated-line empty clause: (:require\n   [next-entry])
+                      ;; Rebuild the clause line with the next entry pulled up.
+                      (re-find #"^\s*\(\s*:\w+\s*$" new-line)
                       (let [next-idx (inc end-line)]
                         (if (and (< next-idx (count lines))
                                  (re-find #"^\s*\[" (nth lines next-idx)))
@@ -183,6 +183,21 @@
                                           (drop (inc next-idx) lines)))
                              true])
                           [(replace-span lines new-line) true]))
+
+                      ;; Inline empty clause on (ns ...) line: (ns foo (:require [next-entry])
+                      ;; Pull the next line's entry up onto the same line.
+                      (re-find #"^\(ns\b.*\(\s*:\w+\s*$" new-line)
+                      (let [next-idx (inc end-line)]
+                        (if (and (< next-idx (count lines))
+                                 (re-find #"^\s*\[" (nth lines next-idx)))
+                          (let [entry (str/trim (nth lines next-idx))]
+                            [(vec (concat (take line-idx lines)
+                                          [(str new-line " " entry)]
+                                          (drop (inc next-idx) lines)))
+                             true])
+                          [(replace-span lines new-line) true]))
+
+                      :else
                       [(replace-span lines new-line) true])))))))))))
 
 

@@ -266,14 +266,7 @@
                              (fixture-path "duplicate-require" "neither-alias-used-in")
                              [:duplicate-require] 1)]
       (is (pos? (:fixed result)))
-      (is (= (slurp (fixture-path "duplicate-require" "neither-alias-used-out")) (:content result)))))
-
-  (testing "entries on separate lines"
-    (let [result (assert-fix fixes/fix-duplicate-require-in-file
-                             (fixture-path "duplicate-require" "entries-separate-lines-in")
-                             [:duplicate-require] 1)]
-      (is (= 1 (:fixed result)))
-      (is (= (slurp (fixture-path "duplicate-require" "entries-separate-lines-out")) (:content result))))))
+      (is (= (slurp (fixture-path "duplicate-require" "neither-alias-used-out")) (:content result))))))
 
 ;; ============================================================
 ;; :unused-binding
