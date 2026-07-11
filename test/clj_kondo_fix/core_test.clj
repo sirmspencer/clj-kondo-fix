@@ -537,6 +537,13 @@
       (is (= 1 (:fixed result)))
       (is (= (slurp (fixture-path "unused-referred-var" "removes-refer-clause-when-all-removed-out")) (:content result)))))
 
+  (testing "removes :refer clause when all vars removed — multi-require ns"
+    (let [result (assert-fix fixes/fix-unused-referred-var-in-file
+                             (fixture-path "unused-referred-var" "removes-refer-clause-when-all-removed-multi-in")
+                             [:unused-referred-var] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-referred-var" "removes-refer-clause-when-all-removed-multi-out")) (:content result)))))
+
   (testing "removes entire require entry when only referred var is removed"
     (let [result (assert-fix fixes/fix-unused-referred-var-in-file
                              (fixture-path "unused-referred-var" "removes-entire-entry-when-only-referred-in")

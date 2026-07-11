@@ -802,7 +802,9 @@
                             (map #(extract-ns-from-referred-var-msg (:message %)))
                             (filter some?)
                             distinct)
-              final    (remove-bare-requires cleaned ns-names file-url log)]
+              after-bare (remove-bare-requires cleaned ns-names file-url log)
+              ;; second cleanup pass: bare-require removal may have left empty clauses
+              final      (cleanup-empty-clauses after-bare)]
           {:fixed fixed :lines final :changed? (or (pos? fixed) (not= final lines))})
         (let [msg (:message f)
               var-name (some-> (re-find #"^#'(.+) is referred but never used$" msg) second)
@@ -811,13 +813,24 @@
           (if (or (nil? var-name) (< line-idx 0) (>= line-idx (count current-lines)))
             (recur more current-lines fixed)
             (let [line (nth current-lines line-idx)
-                  new-line (remove-referred-var-from-line line var-name col-idx)]
-              (if (= new-line line)
-                (recur more current-lines fixed)
-                (do (swap! log conj (str "  " file-url ":" (:line f) "  remove referred var: " var-name))
-                    (recur more
-                           (assoc current-lines line-idx new-line)
-                           (inc fixed)))))))))))
+                   new-line (remove-referred-var-from-line line var-name col-idx)]
+               (if (= new-line line)
+                 (recur more current-lines fixed)
+                 ;; If only closing brackets/parens remain on the line after removal
+                 ;; (e.g. ]]) from a multi-line :refer vector), pull them up onto the
+                 ;; preceding line instead of leaving a straggler.
+                 (let [new-lines
+                       (if (re-find #"^\s*[\]\)]+\s*$" new-line)
+                         (if (pos? line-idx)
+                           (let [prev     (nth current-lines (dec line-idx))
+                                 brackets (str/trim new-line)]
+                             (vec (concat (take (dec line-idx) current-lines)
+                                          [(str prev brackets)]
+                                          (drop (inc line-idx) current-lines))))
+                           (assoc current-lines line-idx new-line))
+                         (assoc current-lines line-idx new-line))]
+                   (swap! log conj (str "  " file-url ":" (:line f) "  remove referred var: " var-name))
+                   (recur more new-lines (inc fixed)))))))))))
 
 (defn find-require-entry-start [line col-idx]
   (loop [i (dec col-idx) depth 0]
