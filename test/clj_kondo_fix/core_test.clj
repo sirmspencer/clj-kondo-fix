@@ -398,6 +398,14 @@
       (is (= 1 (:fixed result)))
       (is (= (slurp (fixture-path "unused-binding" "keys-destr-let-safe-out")) (:content result)))))
 
+  (testing ":strs destructuring in let: unused key removed — same safe behaviour as :keys"
+    (let [pred   #(str/includes? (:message %) " x")
+          result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "strs-destr-let-safe-in")
+                             [:unused-binding] 1 pred)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "strs-destr-let-safe-out")) (:content result)))))
+
   (testing "let scalar binding is still skipped — may be side-effectful"
     (assert-skip fixes/fix-unused-binding-in-file
                  (fixture-path "unused-binding" "let-binding-skip")
