@@ -1,3 +1,4 @@
 (let [x 1]
   #_(println "hello")
-  (let [y 2]))
+  (let [y 2]
+    body))

@@ -1,5 +1,5 @@
 (ns foo
   (:require
-   [clojure.string :refer [join
-                           ]]))
+   [clojure.string :refer [join]]))
+
 (join [""] "")

@@ -1,5 +1,6 @@
 (ns foo
   (:require
    [clojure.string :refer [join
-                            ends-with?]]))
+                           ends-with?]]))
+
 (join [""] "")

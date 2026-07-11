@@ -1,5 +1,4 @@
 (ns foo
-  (:require [clojure.string :as s]
-             ;; for set ops
-))
+  (:require [clojure.string :as s]))
+
 (s/join [""] "")

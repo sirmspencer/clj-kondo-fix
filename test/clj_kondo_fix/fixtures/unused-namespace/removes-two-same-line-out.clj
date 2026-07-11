@@ -1,1 +1,1 @@
-(ns foo (:require  ))
+(ns foo)

@@ -1,1 +1,1 @@
-(ns foo (:import))
+(ns foo)

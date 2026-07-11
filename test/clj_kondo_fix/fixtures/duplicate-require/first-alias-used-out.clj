@@ -1,1 +1,3 @@
-(ns foo (:require [clojure.string :as s] )) (s/join [""] "")
+(ns foo (:require [clojure.string :as s]))
+
+(s/join [""] "")

@@ -1,1 +1,1 @@
-(when true   (println "a") (println "b"))
+(when true (println "a") (println "b"))

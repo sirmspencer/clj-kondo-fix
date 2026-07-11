@@ -1,4 +1,3 @@
 (when true
-   
-    (println "a")
-    (println "b"))
+  (println "a")
+  (println "b"))

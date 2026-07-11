@@ -1,2 +1,1 @@
-(ns foo
-   )
+(ns foo)

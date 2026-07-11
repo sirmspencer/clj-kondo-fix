@@ -1,3 +1,2 @@
 (defn f [{:keys [x
-                 y
-                ]}] (+ x y))
+                 y]}] (+ x y))
