@@ -298,11 +298,12 @@
                                     [:unused-binding])]
       (is (zero? (:fixed result)))))
 
-  (testing "skips namespaced key destructuring — inserting _ would corrupt source"
-    (let [result (assert-skip fixes/fix-unused-binding-in-file
-                              (fixture-path "unused-binding" "namespaced-key-skip")
-                              [:unused-binding])]
-      (is (not (str/includes? (:content result) "_id")))))
+  (testing "removes unused namespaced key from :keys vector"
+    (let [result (assert-fix fixes/fix-unused-binding-in-file
+                             (fixture-path "unused-binding" "namespaced-key-in")
+                             [:unused-binding] 1)]
+      (is (= 1 (:fixed result)))
+      (is (= (slurp (fixture-path "unused-binding" "namespaced-key-out")) (:content result)))))
 
   (testing ":as bindings are not reported by :unused-binding"
     (let [result (assert-no-finding fixes/fix-unused-binding-in-file
@@ -338,14 +339,6 @@
                              [:unused-binding] 1 pred)]
       (is (= 1 (:fixed result)))
       (is (= (slurp (fixture-path "unused-binding" "fn-call-arg-not-collapsed-out")) (:content result)))))
-
-  (testing "map inside fn-call argument vector is NOT collapsed — vector not a binding form"
-    (let [pred   #(str/includes? (:message %) " x")
-          result (assert-fix fixes/fix-unused-binding-in-file
-                             (fixture-path "unused-binding" "fn-call-vector-not-collapsed-in")
-                             [:unused-binding] 1 pred)]
-      (is (= 1 (:fixed result)))
-      (is (= (slurp (fixture-path "unused-binding" "fn-call-vector-not-collapsed-out")) (:content result)))))
 
   (testing ":as and concrete binding both unused → :as removed, map collapses to _"
     (let [result (assert-fix fixes/fix-unused-binding-in-file

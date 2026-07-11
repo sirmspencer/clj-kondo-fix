@@ -470,6 +470,17 @@
 ;; Fix: unused-binding — rename to underscore prefix / remove
 ;; ------------------------------------------------------------
 
+(defn- remove-token-span
+  "Remove the token at [start, end) from line, adjusting surrounding whitespace."
+  [line start end]
+  (let [before (subs line 0 start)
+        after  (subs line end)]
+    (if (re-find #"[\s,]$" before)
+      (str (subs before 0 (dec (count before))) after)
+      (str before (if (re-find #"^[\s,]" after)
+                    (subs after 1)
+                    after)))))
+
 (defn remove-as-clause-from-line [line binding-name idx word-end]
   (if-let [m (re-find #"[\s,]:as\s+[\w-]+$" (subs line 0 word-end))]
     (let [match-str (if (string? m) m (first m))
@@ -634,16 +645,24 @@
                (if (nil? idx)
                  (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: can't find binding " binding-name " on line"))
                      (recur more current-lines fixed))
-                 (let [word-end (word-end-pos line idx)]
-                   (if (not= (subs line idx word-end) binding-name)
-                     (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: binding " binding-name " not found at column " (:col f)))
-                         (recur more current-lines fixed))
-                     ;; skip namespaced keys e.g. {:keys [ns/name]}
-                     (if (and (pos? idx) (= \/ (nth line (dec idx))))
-                       (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: binding " binding-name " is part of a namespaced key"))
-                           (recur more current-lines fixed))
-                        (let [ctx (detect-binding-context current-lines line-idx idx)]
-                          (cond
+                  (let [word-end (word-end-pos line idx)]
+                    (if (not= (subs line idx word-end) binding-name)
+                      (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: binding " binding-name " not found at column " (:col f)))
+                          (recur more current-lines fixed))
+                      ;; For namespaced keys e.g. {:keys [patient/id]}, kondo's col
+                      ;; points at the local name (id).  Walk backward to include the
+                      ;; full namespace/name token so removal doesn't leave "patient/" stranded.
+                      (let [effective-idx
+                            (if (and (pos? idx) (= \/ (nth line (dec idx))))
+                              ;; scan backward through symbol chars (stop at [ space , etc.)
+                              (loop [j (- idx 2)]
+                                (if (or (< j 0)
+                                        (not (re-find #"[a-zA-Z0-9_\-.*+?!]" (str (nth line j)))))
+                                  (inc j)
+                                  (recur (dec j))))
+                              idx)
+                            ctx (detect-binding-context current-lines line-idx effective-idx)]
+                        (cond
                             ;; :as clause — rename to _name (keep in place so post-pass can
                             ;; :as clause — remove the whole clause
                              (and (= ctx :as-clause) (fix-contexts :as-clause))
@@ -653,12 +672,23 @@
 
                            ;; :keys/:strs/:syms destructuring in fn param — remove from vector
                            (and (= ctx :keys-destr-fn) (fix-contexts :keys-destr-fn))
-                           (let [new-line  (remove-referred-var-from-line line binding-name idx)
+                           (let [new-line  (if (= effective-idx idx)
+                                             (remove-referred-var-from-line line binding-name idx)
+                                             ;; namespaced key: remove full [effective-idx, word-end) span
+                                             (remove-token-span line effective-idx word-end))
                                  new-lines (cond
                                              ;; key was the only item on its line — remove the line
                                              (str/blank? new-line)
                                              (vec (concat (take line-idx current-lines)
                                                           (drop (inc line-idx) current-lines)))
+                                             ;; line now starts with a closing bracket (e.g. ]}] ...) — merge
+                                             ;; it onto the preceding line so no bracket orphan is left behind.
+                                             (and (re-find #"^\s*[\]\)}]" new-line)
+                                                  (pos? line-idx))
+                                             (let [prev   (str/trimr (nth current-lines (dec line-idx)))]
+                                               (vec (concat (take (dec line-idx) current-lines)
+                                                            [(str prev (str/triml new-line))]
+                                                            (drop (inc line-idx) current-lines))))
                                              ;; key was first on a {:keys [ line — pull next line's content up
                                              (and (re-find #"\[\s*$" new-line)
                                                   (< (inc line-idx) (count current-lines)))
@@ -680,11 +710,20 @@
 
                            ;; :keys/:strs/:syms destructuring in let — also safe (just a deref, no side effects)
                            (and (= ctx :keys-destr-let) (fix-contexts :keys-destr-let))
-                           (let [new-line  (remove-referred-var-from-line line binding-name idx)
+                           (let [new-line  (if (= effective-idx idx)
+                                             (remove-referred-var-from-line line binding-name idx)
+                                             ;; namespaced key: remove full [effective-idx, word-end) span
+                                             (remove-token-span line effective-idx word-end))
                                  new-lines (cond
                                              (str/blank? new-line)
                                              (vec (concat (take line-idx current-lines)
                                                           (drop (inc line-idx) current-lines)))
+                                             (and (re-find #"^\s*[\]\)}]" new-line)
+                                                  (pos? line-idx))
+                                             (let [prev (str/trimr (nth current-lines (dec line-idx)))]
+                                               (vec (concat (take (dec line-idx) current-lines)
+                                                            [(str prev (str/triml new-line))]
+                                                            (drop (inc line-idx) current-lines))))
                                              (and (re-find #"\[\s*$" new-line)
                                                   (< (inc line-idx) (count current-lines)))
                                              (let [next-idx  (inc line-idx)
@@ -718,7 +757,7 @@
                            ;; anything else or context not in fix-contexts — skip
                            :else
                            (do (swap! log conj (str "  " file-url ":" (:line f) "  skip: binding " binding-name " in context " ctx " not enabled"))
-                               (recur more current-lines fixed))))))))))))))))
+                               (recur more current-lines fixed)))))))))))))))
 
 ;; ------------------------------------------------------------
 ;; Fix: referred var, refer-all, import
@@ -728,15 +767,15 @@
   (if (>= col-idx (count line))
     line
     (let [simple-name (or (second (re-find #"([^/]+)$" var-name)) var-name)
-          end (word-end-pos line col-idx)
-          actual (subs line col-idx end)]
-      (if (.startsWith actual simple-name)
-        (let [match-end (+ col-idx (count simple-name))
+          end    (word-end-pos line col-idx)
+          actual (subs line col-idx end)
+          ;; For namespaced keys passed as full token (e.g. "patient/id"),
+          ;; match the whole token rather than just the simple name.
+          match-name (if (= actual var-name) var-name simple-name)]
+      (if (.startsWith actual match-name)
+        (let [match-end (+ col-idx (count match-name))
               before (subs line 0 col-idx)
-              after (subs line match-end)
-              ;; Strip whitespace from only one side to preserve the separator
-              ;; between remaining vars.  Prefer stripping trailing space from
-              ;; before; only touch after's leading space when before has none.
+              after  (subs line match-end)
               cleaned (if (re-find #"[\s,]$" before)
                         (str (subs before 0 (dec (count before))) after)
                         (str before (if (re-find #"^[\s,]" after)
