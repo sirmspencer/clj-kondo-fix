@@ -193,6 +193,27 @@
       lines
       (let [line (nth lines i)]
         (cond
+          ;; Inline empty clause on the (ns ...) line: (ns foo (:require )) → (ns foo)
+          ;; Only fires when the clause has no entries — detected by no content between
+          ;; the clause keyword and its closing paren.
+          (re-find #"^\(ns\b.*\(\s*:(?:require|import|use|refer|refer-clojure|load|gen-class)\s*\)" line)
+          (recur i (assoc lines i
+                          (str/replace line
+                                       #"\s*\(\s*:(?:require|import|use|refer|refer-clojure|load|gen-class)\s*\)"
+                                       "")))
+
+          ;; Dangling close-paren after (ns ...) on its own line: (ns foo\n   ) → (ns foo)
+          ;; Arises when all clauses in a multi-line ns form have been cleaned out and
+          ;; only the ns form's closing ) remains on the next line.
+          (and (re-find #"^\(ns\b" line)
+               (not (str/includes? line ")"))
+               (< (inc i) (count lines))
+               (re-find #"^\s*\)+\s*$" (nth lines (inc i))))
+          (let [parens (re-find #"\)+" (nth lines (inc i)))]
+            (recur i (vec (concat (take i lines)
+                                  [(str line parens)]
+                                  (drop (+ i 2) lines)))))
+
           ;; Empty ns-form clause on one line: (:require ) or (:require )) etc.
           ;; Restrict to known ns clause keywords to avoid matching keyword lookups
           ;; like (:count))) in threading macros.
@@ -213,9 +234,11 @@
                (re-find #"^\s*\)+" (nth lines (inc i))))
           (let [next-line (nth lines (inc i))
                 reduced (str/replace-first next-line #"\)" "")]
-            (recur i (vec (concat (take i lines)
-                                  [reduced]
-                                  (drop (+ i 2) lines)))))
+            ;; Back up one position so the preceding (ns …) line can be
+            ;; re-checked by the dangling-close case if it now qualifies.
+            (recur (max 0 (dec i)) (vec (concat (take i lines)
+                                                [reduced]
+                                                (drop (+ i 2) lines)))))
 
           (re-find #":refer\s*\[\s*\]" line)
           (let [cleaned (str/replace line #"\s*:refer\s*\[\s*\]" "")]
