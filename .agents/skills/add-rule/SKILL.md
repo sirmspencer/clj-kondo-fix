@@ -7,52 +7,141 @@ description: How to add a new clj-kondo rule or edge-case fixture to clj-kondo-f
 
 ```
 src/clj_kondo_fix/impl/
-  rules.clj          — rule registry (keyword → fix-fn + message-re)
-  fixes.clj          — all fix functions
-  core.clj           — pipeline (lint → findings → fix → write)
-  utils.clj          — shared helpers (read-lines, find-matching-bracket-across-lines, etc.)
+  rules.clj            — rule registry (keyword → fix-fn + message-re)
+  core.clj             — pipeline (lint → findings → fix → write)
+  utils.clj            — shared low-level helpers (I/O, bracket, token)
+  driver.clj           — reduce-findings driver + ->display-path
+  require_entry.clj    — ns/require entry removal helpers (require-family rules)
+  fixes.clj            — aggregator: re-exports every fix-*-in-file fn (do not add logic here)
+  fixes/
+    unused_namespace.clj
+    duplicate_require.clj
+    unused_binding.clj
+    unused_import.clj
+    unused_referred_var.clj
+    refer_all.clj
+    missing_else_branch.clj
+    misplaced_docstring.clj
+    unused_private_var.clj
+    redundant_do.clj
+    redundant_let.clj
 
 test/clj_kondo_fix/
-  core_test.clj      — all tests; uses fixture files; never embeds code strings
+  core_test.clj        — all tests; uses fixture files; never embeds code strings
   fixtures/
-    <rule-name>/     — one directory per rule, named after the clj-kondo keyword
-      <slug>-in.clj  — input: real Clojure file with the kondo finding
-      <slug>-out.clj — expected output after fix (generated or hand-written)
-      <slug>.clj     — single file for no-change tests (skip / no-finding)
+    <rule-name>/       — one directory per rule, named after the clj-kondo keyword
+      <slug>-in.clj   — input: real Clojure file with the kondo finding
+      <slug>-out.clj  — expected output after fix (generated or hand-written)
+      <slug>.clj      — single file for no-change tests (skip / no-finding)
 
 resources/
-  rule-notes.edn     — status + reason for rules not in rules.clj; drives rules.md
+  rule-notes.edn       — status + reason for rules not in rules.clj; drives rules.md
 
-rules.md             — generated index; regenerate with `clojure -M:gen-rules`
-local/               — untracked scratch scripts (gen_fixtures.clj, gen_rules_md.clj)
+rules.md               — generated index; regenerate with `clojure -M:gen-rules`
+local/                 — untracked scratch scripts (gen_fixtures.clj, gen_rules_md.clj)
 ```
+
+---
+
+## Shared Helpers Reference
+
+### `utils.clj`
+
+Three sections (all public):
+
+**I/O**
+- `read-lines` / `write-lines!` — file ↔ line-vec conversion; used by the pipeline in `core.clj`
+
+**Bracket navigation**
+- `find-matching-bracket [s start-idx]` — single-line `[]` match
+- `find-matching-bracket-across-lines [lines line col]` — multi-line, handles `[` `(` `{`, string-aware; returns `[line col]` or nil
+- `find-opening-bracket [lines line-idx col-idx]` — scan left for the `[` containing the position; returns `{:line :col}` or nil
+- `enclosing-bracket-type [lines line-idx col-idx]` — returns the character (`[`, `(`, `{`) of the innermost enclosing bracket
+
+**Token helpers**
+- `word-end-pos [line col-idx]` — end index (exclusive) of the identifier at col-idx
+- `find-binding-on-line [line binding-name approx-col]` — whole-word search; returns start index or nil
+- `find-docstring-end [lines start-line-idx]` — returns the line index of the docstring's closing `"`
+- `remove-token-span [line start end]` — remove `[start, end)` from line, fixing surrounding whitespace
+- `remove-referred-var-from-line [line var-name col-idx]` — remove a var token at col-idx; handles namespaced tokens
+
+### `driver.clj`
+
+- `->display-path [file-path]` — rewrites absolute path to `~/…` for log messages
+- `reduce-findings [lines findings per-finding-fn]` / `[... post-fn]` — the loop driver (see below)
+
+### `require_entry.clj`
+
+Used only by require-family rules (unused-namespace, duplicate-require, unused-import, unused-referred-var):
+
+- `remove-require-entry [lines line-idx col-start ns-name log file-url finding-line-num]` — core entry removal; returns `[new-lines changed?]`
+- `remove-require-finding [lines finding file-url log]` — thin adapter over `remove-require-entry`
+- `cleanup-empty-clauses [lines]` — post-pass removing `(:require )`, `(:import )`, etc.
+- `remove-bare-requires [lines ns-names file-url log]` — remove bare `[ns-name]` entries with no `:as`/`:refer`
 
 ---
 
 ## Adding a New Rule
 
-### 1. Write the fix function in `fixes.clj`
+### 1. Create `src/clj_kondo_fix/impl/fixes/<rule-keyword>.clj`
 
-Convention: `fix-<rule-keyword>-in-file`
-
-Signature:
+File name matches the clj-kondo rule keyword exactly (e.g. `:unused-namespace` → `unused_namespace.clj`).
+Namespace name uses hyphens (e.g. `clj-kondo-fix.impl.fixes.unused-namespace`).
 
 ```clojure
-(defn fix-<rule>-in-file [file-path lines findings log]
-  ...)
+(ns clj-kondo-fix.impl.fixes.your-rule
+  (:require [clojure.string :as str]
+            [clj-kondo-fix.impl.driver :refer [->display-path reduce-findings]]
+            ;; add utils, require-entry etc. as needed
+            ))
+
+(defn fix-your-rule-in-file [file-path lines findings log]
+  (let [fu (->display-path file-path)]
+    (reduce-findings lines findings
+      (fn [current-lines f]
+        ;; per-finding logic
+        ;; return [current-lines nil]  — no change
+        ;; return [new-lines true]     — changed
+        )
+      ;; optional post-fn, e.g. cleanup-empty-clauses
+      )))
 ```
 
-- `file-path` — absolute path string; used only for log messages, never for I/O
-- `lines` — `vec` of strings, one per line, no trailing newlines
-- `findings` — seq of `{:line :col :message}` maps (1-indexed)
-- `log` — `atom [string]`; `(swap! log conj "  ~/path:N  description")`
-- Return: `{:fixed N :lines [...] :changed? bool}`
+**`reduce-findings` signature:**
+- `per-finding-fn` : `[current-lines finding] → [new-lines changed?]`
+- `post-fn` : `[lines] → lines` (optional)
+- Returns `{:fixed N :lines [...] :changed? bool}`
 
-Process findings in **reverse line order** (sort descending by `:line`) so earlier
-edits do not shift the indices of later ones. Use `find-matching-bracket-across-lines`
-and `find-opening-bracket` from `utils.clj` for bracket navigation.
+Findings are automatically sorted in reverse line order and deduplicated — do not sort manually.
 
-### 2. Register the rule in `rules.clj`
+For rules that remove `:require` or `:import` entries:
+
+```clojure
+(ns clj-kondo-fix.impl.fixes.your-require-rule
+  (:require [clj-kondo-fix.impl.driver :refer [->display-path reduce-findings]]
+            [clj-kondo-fix.impl.require-entry :refer [remove-require-finding
+                                                       cleanup-empty-clauses]]))
+
+(defn fix-your-require-rule-in-file [file-path lines findings log]
+  (let [fu (->display-path file-path)]
+    (reduce-findings lines findings
+      (fn [ls f] (remove-require-finding ls f fu log))
+      cleanup-empty-clauses)))
+```
+
+### 2. Re-export from `fixes.clj`
+
+Add one line to the `ns` `:require` block and one `def` at the bottom of `fixes.clj`:
+
+```clojure
+;; In the :require block:
+[clj-kondo-fix.impl.fixes.your-rule :as your-rule]
+
+;; After the existing defs:
+(def fix-your-rule-in-file your-rule/fix-your-rule-in-file)
+```
+
+### 3. Register the rule in `rules.clj`
 
 Add an entry to `rule-definitions`:
 
@@ -65,9 +154,9 @@ Add an entry to `rule-definitions`:
 ```
 
 Verify `:message-re` against real kondo output — the pattern must match the full
-message string from `(:message finding)`.
+`:message` string from the finding.
 
-### 3. Create fixture directories and input files
+### 4. Create fixture directories and input files
 
 ```
 test/clj_kondo_fix/fixtures/<rule-name>/
@@ -86,7 +175,7 @@ no-change-when-used.clj      ← single file, no -in/-out suffix
 Write `-in.clj` files as normal Clojure — the IDE will show kondo squiggles on them,
 which is intentional and useful for visual verification.
 
-### 4. Generate output fixture files
+### 5. Generate output fixture files
 
 For rules where all findings are fixed (no `filter-fn`):
 
@@ -94,17 +183,9 @@ For rules where all findings are fixed (no `filter-fn`):
 clojure -M:gen-fixtures
 ```
 
-This copies each `-in.clj` to `-out.clj` and runs the fix in-place.
+**For pred-based tests** (only a subset of findings fixed), write `-out.clj` by hand.
 
-**For pred-based tests** (where only a subset of findings is fixed), the generated
-`-out.clj` will be wrong — it applies all findings. Write the correct output by hand:
-
-```clojure
-;; Test uses pred: #(str/ends-with? (:message %) "List")
-;; gen-fixtures removes ALL imports; hand-write the file removing only List.
-```
-
-### 5. Write tests in `core_test.clj`
+### 6. Write tests in `core_test.clj`
 
 Add a `deftest` block. Use `fixture-path` — never embed code strings inline.
 
@@ -125,7 +206,7 @@ Add a `deftest` block. Use `fixture-path` — never embed code strings inline.
 
   (testing "deliberate skip — unsafe to auto-fix"
     (assert-skip fixes/fix-your-rule-in-file
-                 (fixture-path "your-rule" "skip-namespaced-key")
+                 (fixture-path "your-rule" "skip-case")
                  [:your-rule])))
 ```
 
@@ -137,29 +218,21 @@ Helper reference:
 | `assert-skip` | kondo fires, fix deliberately makes no change |
 | `assert-no-finding` | kondo does not fire at all (already correct code) |
 
-`assert-fix` accepts an optional 5th arg `filter-fn` to test partial fixes:
+`assert-fix` accepts an optional 5th arg `filter-fn` to test partial fixes.
 
-```clojure
-(let [pred   #(str/includes? (:message %) "specific-var")
-      result (assert-fix fix-fn path [:rule] 1 pred)]
-  ...)
-```
-
-### 6. Run the test suite
+### 7. Run the test suite
 
 ```bash
 clojure -M:test -m clj-kondo-fix.core-test
 ```
 
-All 14+ tests, 0 failures before committing.
+All tests, 0 failures before committing.
 
-### 7. Update `resources/rule-notes.edn`
+### 8. Update `resources/rule-notes.edn`
 
-Remove the rule's entry (or change its `:status` to `:implemented` if you want
-to keep a note). Rules absent from both `rule-definitions` and `rule-notes.edn`
-default to `:not-implemented` in the index.
+Remove the rule's entry (or set `:status :implemented`).
 
-### 8. Regenerate `rules.md`
+### 9. Regenerate `rules.md`
 
 ```bash
 clojure -M:gen-rules
@@ -173,9 +246,7 @@ with the implementation.
 ## Adding an Edge Case to an Existing Rule
 
 1. Write the new `<slug>-in.clj` file in the rule's fixture directory.
-2. Generate the output:
-   - Run `clojure -M:gen-fixtures` for full-fix cases.
-   - Write `<slug>-out.clj` by hand for pred-based partial-fix cases.
+2. Run `clojure -M:gen-fixtures` (or write `-out.clj` by hand for partial-fix cases).
 3. Add a `testing` block to the existing `deftest` in `core_test.clj`.
 4. Run tests: `clojure -M:test -m clj-kondo-fix.core-test`.
 
@@ -183,33 +254,21 @@ with the implementation.
 
 ## Key Invariants
 
-- **Fix functions are pure text transforms.** They never call kondo, never read from
-  disk, never write to disk. All I/O is handled by the pipeline in `core.clj` and
-  the test helpers in `core_test.clj`.
+- **Fix functions are pure text transforms.** No kondo calls, no disk I/O. All I/O lives in `core.clj` and the test helpers.
 
-- **`apply-fix` in tests is in-memory.** Fixture files are never modified by the
-  test suite. The after-lint check in `assert-fix` writes to a temp file internally
-  and deletes it immediately.
+- **`fixes.clj` is a dumb aggregator.** Never add logic there — put it in the rule file.
 
-- **Findings are 1-indexed.** `:line` and `:col` in findings are 1-indexed;
-  convert to 0-indexed with `(dec (:line f))` before indexing into `lines`.
+- **Findings are 1-indexed.** `:line` and `:col` in findings are 1-indexed; convert with `(dec (:line f))`.
 
-- **Process findings in reverse order.** Sort by line/col descending before looping
-  so that removing or replacing content on later lines does not corrupt indices for
-  earlier lines in the same pass.
+- **`reduce-findings` handles sort and dedup automatically.** Do not sort manually in the rule file.
 
-- **No trailing newlines in `lines`.** `read-lines` strips them. The pipeline joins
-  with `"\n"` and appends one final `"\n"` on write. `apply-fix` in tests does the
-  same: `(str (str/join "\n" (:lines result)) "\n")`.
+- **No trailing newlines in `lines`.** `read-lines` strips them. Join with `"\n"` and append one `"\n"` on write.
 
-- **Fixture `-in.clj` files intentionally have kondo findings.** The IDE will show
-  squiggles; that is expected. `-out.clj` files should be clean.
+- **Fixture `-in.clj` files intentionally have kondo findings.** Squiggles are expected.
 
-- **`local/` is untracked.** Scripts in `local/` (`gen_fixtures.clj`,
-  `gen_rules_md.clj`) are not committed. The outputs they produce (`rules.md`,
-  fixture `-out.clj` files) are committed.
+- **`local/` is untracked.** Scripts there are not committed; their outputs (`rules.md`, fixture `-out.clj` files) are.
 
-- **Run `cljfmt` after editing `fixes.clj` or `rules.clj`:**
+- **Run `cljfmt` after editing any source file:**
   ```bash
-  cljfmt fix --config clj-kondo-fix/.cljfmt.edn clj-kondo-fix/src/clj_kondo_fix/impl/fixes.clj
+  cljfmt fix src/clj_kondo_fix/impl/fixes/your_rule.clj
   ```

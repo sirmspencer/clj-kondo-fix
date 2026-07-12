@@ -8,26 +8,26 @@
 - [:aliased-namespace-symbol](#aliased-namespace-symbol)
 - [:aliased-namespace-var-usage](#aliased-namespace-var-usage)
 - [:aliased-referred-var](#aliased-referred-var)
-- [:await-without-async-fn](#await-without-async-fn) —
+- [:await-without-async-fn](#await-without-async-fn) ❌
 - [:case-duplicate-test](#case-duplicate-test)
 - [:case-quoted-test](#case-quoted-test)
 - [:case-symbol-test](#case-symbol-test)
-- [:clj-kondo-config](#clj-kondo-config) —
+- [:clj-kondo-config](#clj-kondo-config) ❌
 - [:cond-else](#cond-else)
 - [:condition-always-true](#condition-always-true)
 - [:conditional-build-up](#conditional-build-up)
 - [:conflicting-alias](#conflicting-alias)
-- [:consistent-alias](#consistent-alias) —
-- [:datalog-syntax](#datalog-syntax) —
+- [:consistent-alias](#consistent-alias) ❌
+- [:datalog-syntax](#datalog-syntax) ❌
 - [:def-fn](#def-fn)
-- [:deprecated-namespace](#deprecated-namespace) —
-- [:deprecated-var](#deprecated-var) —
+- [:deprecated-namespace](#deprecated-namespace) ❌
+- [:deprecated-var](#deprecated-var) ❌
 - [:destructured-or-always-evaluates](#destructured-or-always-evaluates)
 - [:destructured-or-binding-of-same-map](#destructured-or-binding-of-same-map)
-- [:discouraged-java-method](#discouraged-java-method) —
-- [:discouraged-namespace](#discouraged-namespace) —
+- [:discouraged-java-method](#discouraged-java-method) ❌
+- [:discouraged-namespace](#discouraged-namespace) ❌
 - [:discouraged-tag](#discouraged-tag)
-- [:discouraged-var](#discouraged-var) —
+- [:discouraged-var](#discouraged-var) ❌
 - [:do-template](#do-template)
 - [:docstring-blank](#docstring-blank)
 - [:docstring-leading-trailing-whitespace](#docstring-leading-trailing-whitespace)
@@ -45,36 +45,36 @@
 - [:equals-float](#equals-float)
 - [:equals-nil](#equals-nil)
 - [:equals-true](#equals-true)
-- [:file](#file) —
+- [:file](#file) ❌
 - [:format](#format)
-- [:hook](#hook) —
+- [:hook](#hook) ❌
 - [:if-nil-return](#if-nil-return)
 - [:if-x-x-y](#if-x-x-y)
 - [:inline-def](#inline-def)
 - [:is-message-not-string](#is-message-not-string)
 - [:java-static-field-call](#java-static-field-call)
 - [:line-length](#line-length)
-- [:loop-without-recur](#loop-without-recur) —
-- [:main-without-gen-class](#main-without-gen-class) —
+- [:loop-without-recur](#loop-without-recur) ❌
+- [:main-without-gen-class](#main-without-gen-class) ❌
 - [:minus-one](#minus-one)
 - [:misplaced-async-metadata](#misplaced-async-metadata)
 - [:misplaced-docstring](#misplaced-docstring) ✅
 - [:missing-body-in-when](#missing-body-in-when)
 - [:missing-clause-in-try](#missing-clause-in-try)
-- [:missing-docstring](#missing-docstring) —
+- [:missing-docstring](#missing-docstring) ❌
 - [:missing-else-branch](#missing-else-branch) ✅
 - [:missing-map-value](#missing-map-value)
-- [:missing-protocol-method](#missing-protocol-method) —
-- [:missing-protocol-method-arity](#missing-protocol-method-arity) —
-- [:missing-test-assertion](#missing-test-assertion) —
-- [:namespace-name-mismatch](#namespace-name-mismatch) —
+- [:missing-protocol-method](#missing-protocol-method) ❌
+- [:missing-protocol-method-arity](#missing-protocol-method-arity) ❌
+- [:missing-test-assertion](#missing-test-assertion) ❌
+- [:namespace-name-mismatch](#namespace-name-mismatch) ❌
 - [:non-arg-vec-return-type-hint](#non-arg-vec-return-type-hint)
 - [:plus-one](#plus-one)
 - [:private-call](#private-call)
-- [:protocol-method-arity-mismatch](#protocol-method-arity-mismatch) —
-- [:protocol-method-varargs](#protocol-method-varargs) —
+- [:protocol-method-arity-mismatch](#protocol-method-arity-mismatch) ❌
+- [:protocol-method-varargs](#protocol-method-varargs) ❌
 - [:quoted-case-test-constant](#quoted-case-test-constant)
-- [:redefined-var](#redefined-var) —
+- [:redefined-var](#redefined-var) ❌
 - [:redundant-call](#redundant-call)
 - [:redundant-declare](#redundant-declare)
 - [:redundant-do](#redundant-do) ✅
@@ -88,15 +88,15 @@
 - [:redundant-str-call](#redundant-str-call)
 - [:refer](#refer)
 - [:refer-all](#refer-all) ⚠️
-- [:schema-misplaced-return](#schema-misplaced-return) —
-- [:self-requiring-namespace](#self-requiring-namespace) —
+- [:schema-misplaced-return](#schema-misplaced-return) ❌
+- [:self-requiring-namespace](#self-requiring-namespace) ❌
 - [:shadowed-fn-param](#shadowed-fn-param)
 - [:shadowed-var](#shadowed-var)
 - [:single-key-in](#single-key-in)
 - [:single-logical-operand](#single-logical-operand)
 - [:single-operand-comparison](#single-operand-comparison)
-- [:syntax](#syntax) —
-- [:type-mismatch](#type-mismatch) —
+- [:syntax](#syntax) ❌
+- [:type-mismatch](#type-mismatch) ❌
 - [:unbound-destructuring-default](#unbound-destructuring-default)
 - [:underscore-in-namespace](#underscore-in-namespace)
 - [:unexpected-recur](#unexpected-recur)
@@ -106,10 +106,10 @@
 - [:unquote-not-syntax-quoted](#unquote-not-syntax-quoted)
 - [:unreachable-code](#unreachable-code)
 - [:unresolved-excluded-var](#unresolved-excluded-var)
-- [:unresolved-namespace](#unresolved-namespace) —
-- [:unresolved-protocol-method](#unresolved-protocol-method) —
-- [:unresolved-symbol](#unresolved-symbol) —
-- [:unresolved-var](#unresolved-var) —
+- [:unresolved-namespace](#unresolved-namespace) ❌
+- [:unresolved-protocol-method](#unresolved-protocol-method) ❌
+- [:unresolved-symbol](#unresolved-symbol) ❌
+- [:unresolved-var](#unresolved-var) ❌
 - [:unsorted-imports](#unsorted-imports)
 - [:unsorted-required-namespaces](#unsorted-required-namespaces)
 - [:unused-alias](#unused-alias)
@@ -123,7 +123,7 @@
 - [:use](#use)
 - [:used-underscored-binding](#used-underscored-binding)
 - [:var-same-name-except-case](#var-same-name-except-case)
-- [:warn-on-reflection](#warn-on-reflection) —
+- [:warn-on-reflection](#warn-on-reflection) ❌
 
 ## Implemented Rules
 

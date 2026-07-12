@@ -72,9 +72,8 @@
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
 
-(defn resolve-rules [config-rules cli-rule-keys]
+(defn resolve-rules [cli-rule-keys]
   (let [requested (or (seq cli-rule-keys)
-                      config-rules
                       (keys rule-definitions))
         expanded (mapcat (fn [k]
                            (if-let [alias-set (get category-aliases k)]

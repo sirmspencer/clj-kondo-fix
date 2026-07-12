@@ -1,6 +1,5 @@
 (ns clj-kondo-fix.impl.core
-  (:require [clojure.string :as str]
-            [clojure.java.io :as io]
+  (:require [clojure.java.io :as io]
             [clj-kondo.core :as kondo]
             [clj-kondo-fix.impl.rules :as rules]
             [clj-kondo-fix.impl.utils :refer [read-lines write-lines!]]))
@@ -44,9 +43,10 @@
                    acc)))
              {} active-rules))
 
-(defn apply-rules-to-file [file-path rule-findings log]
+(defn apply-rules-to-file
   "Read the file once, apply each applicable rule in sequence threading
    the modified line vector through, return {:fixed N :changed? bool :lines [...]}."
+  [file-path rule-findings log]
   (let [initial-lines (read-lines file-path)]
     (loop [[[_rule-key {:keys [rule-def findings]}] & more] (seq rule-findings)
            current-lines initial-lines
@@ -66,13 +66,12 @@
                                (fix-fn file-path current-lines file-findings log))]
           (recur more (:lines result) (+ total-fixed (:fixed result))))))))
 
-
 (defn fix!
   [{:keys [lint config dry-run rules]
     :or {dry-run false}}]
   (let [log (atom [])
         findings (run-kondo lint (or config {}))
-        active-rules (rules/resolve-rules nil (when rules (map keyword rules)))
+        active-rules (rules/resolve-rules (when rules (map keyword rules)))
         rule-findings (expand-findings-by-rule findings active-rules)
         files (->> findings (map :file) distinct sort)
         results (mapv (fn [file-path]
