@@ -67,7 +67,13 @@
    {:message-re #"^Redundant let expression\.$"
     :phase :default
     :fix-fn fixes/fix-redundant-let-in-file
-    :display "redundant let"}})
+    :display "redundant let"}
+
+   :equals-nil
+   {:message-re #"^Prefer \(nil\? x\) over \(= nil x\)$"
+    :phase       :default
+    :fix-fn      fixes/fix-equals-nil-in-file
+    :display     "equals nil"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})

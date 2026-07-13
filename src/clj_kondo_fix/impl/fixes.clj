@@ -12,7 +12,8 @@
             [clj-kondo-fix.impl.fixes.misplaced-docstring :as misplaced-docstring]
             [clj-kondo-fix.impl.fixes.unused-private-var  :as unused-private-var]
             [clj-kondo-fix.impl.fixes.redundant-do        :as redundant-do]
-            [clj-kondo-fix.impl.fixes.redundant-let       :as redundant-let]))
+             [clj-kondo-fix.impl.fixes.redundant-let       :as redundant-let]
+             [clj-kondo-fix.impl.fixes.equals-nil          :as equals-nil]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -25,3 +26,4 @@
 (def fix-unused-private-var-in-file  unused-private-var/fix-unused-private-var-in-file)
 (def fix-redundant-do-in-file        redundant-do/fix-redundant-do-in-file)
 (def fix-redundant-let-in-file       redundant-let/fix-redundant-let-in-file)
+(def fix-equals-nil-in-file          equals-nil/fix-equals-nil-in-file)

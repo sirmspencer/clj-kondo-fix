@@ -16,6 +16,9 @@
  :duplicate-require
  {:examples ["first-alias-used" "both-aliases-used-keep-longer"]}
 
+ :equals-nil
+ {:examples ["first-arg-nil" "second-arg-nil"]}
+
  :misplaced-docstring
  {:example "moves-before-params"}
 
