@@ -32,8 +32,7 @@
   (let [all-off {:linters {:namespace-name-mismatch    {:level :off}
                             :syntax                     {:level :off}
                             :datalog-syntax             {:level :off}
-                            :invalid-arity              {:level :off}
-                            :unresolved-symbol          {:level :off}
+                             :unresolved-symbol          {:level :off}
                             :unresolved-var             {:level :off}
                             :unresolved-namespace       {:level :off}
                             :unresolved-excluded-var    {:level :off}
@@ -56,12 +55,12 @@
                             :misplaced-docstring        {:level :off}
                             :missing-docstring          {:level :off}
                             :missing-else-branch        {:level :off}
-                            :missing-body-in-when       {:level :off}
-                            :missing-test-assertion     {:level :off}
+                             :missing-body-in-when       {:level :off}
+                             :missing-test-assertion     {:level :off}
+                             :redundant-str-call         {:level :off}
                             :unused-value               {:level :off}
                             :not-a-function             {:level :off}
-                            :type-mismatch              {:level :off}
-                            :shadowed-var               {:level :off}
+                             :shadowed-var               {:level :off}
                             :shadowed-fn-param          {:level :off}
                             :loop-without-recur         {:level :off}
                             :uninitialized-var          {:level :off}

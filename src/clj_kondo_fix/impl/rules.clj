@@ -65,9 +65,15 @@
 
    :redundant-let
    {:message-re #"^Redundant let expression\.$"
-    :phase :default
-    :fix-fn fixes/fix-redundant-let-in-file
-    :display "redundant let"}
+    :phase       :default
+    :fix-fn      fixes/fix-redundant-let-in-file
+    :display     "redundant let"}
+
+   :redundant-str-call
+   {:message-re #"^Single argument to str already is a string$"
+    :phase       :default
+    :fix-fn      fixes/fix-redundant-str-call-in-file
+    :display     "redundant str call"}
 
    :equals-nil
    {:message-re #"^Prefer \(nil\? x\) over \(= nil x\)$"
