@@ -97,7 +97,13 @@
    {:message-re #"^Prefer \(dec x\) over \(- x 1\)$"
     :phase       :default
     :fix-fn      fixes/fix-minus-one-in-file
-    :display     "minus one"}})
+    :display     "minus one"}
+
+   :single-logical-operand
+   {:message-re #"^Single arg use of (?:and|or) always returns the arg itself$"
+    :phase       :default
+    :fix-fn      fixes/fix-single-logical-operand-in-file
+    :display     "single logical operand"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
