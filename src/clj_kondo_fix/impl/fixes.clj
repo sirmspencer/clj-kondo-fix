@@ -16,7 +16,8 @@
              [clj-kondo-fix.impl.fixes.equals-nil          :as equals-nil]
              [clj-kondo-fix.impl.fixes.equals-true         :as equals-true]
              [clj-kondo-fix.impl.fixes.equals-false        :as equals-false]
-             [clj-kondo-fix.impl.fixes.plus-one           :as plus-one]))
+             [clj-kondo-fix.impl.fixes.plus-one           :as plus-one]
+             [clj-kondo-fix.impl.fixes.minus-one          :as minus-one]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -33,3 +34,4 @@
 (def fix-equals-true-in-file         equals-true/fix-equals-true-in-file)
 (def fix-equals-false-in-file        equals-false/fix-equals-false-in-file)
 (def fix-plus-one-in-file           plus-one/fix-plus-one-in-file)
+(def fix-minus-one-in-file          minus-one/fix-minus-one-in-file)

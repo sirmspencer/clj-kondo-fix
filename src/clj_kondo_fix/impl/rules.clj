@@ -91,7 +91,13 @@
    {:message-re #"^Prefer \(inc x\) over \(\+ 1 x\)$"
     :phase       :default
     :fix-fn      fixes/fix-plus-one-in-file
-    :display     "plus one"}})
+    :display     "plus one"}
+
+   :minus-one
+   {:message-re #"^Prefer \(dec x\) over \(- x 1\)$"
+    :phase       :default
+    :fix-fn      fixes/fix-minus-one-in-file
+    :display     "minus one"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
