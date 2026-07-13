@@ -12,13 +12,14 @@
             [clj-kondo-fix.impl.fixes.misplaced-docstring :as misplaced-docstring]
             [clj-kondo-fix.impl.fixes.unused-private-var  :as unused-private-var]
             [clj-kondo-fix.impl.fixes.redundant-do        :as redundant-do]
-             [clj-kondo-fix.impl.fixes.redundant-let       :as redundant-let]
-             [clj-kondo-fix.impl.fixes.equals-nil          :as equals-nil]
-             [clj-kondo-fix.impl.fixes.equals-true         :as equals-true]
-             [clj-kondo-fix.impl.fixes.equals-false        :as equals-false]
-             [clj-kondo-fix.impl.fixes.plus-one           :as plus-one]
-             [clj-kondo-fix.impl.fixes.minus-one          :as minus-one]
-             [clj-kondo-fix.impl.fixes.single-logical-operand :as single-logical-operand]))
+            [clj-kondo-fix.impl.fixes.redundant-let       :as redundant-let]
+            [clj-kondo-fix.impl.fixes.equals-nil          :as equals-nil]
+            [clj-kondo-fix.impl.fixes.equals-true         :as equals-true]
+            [clj-kondo-fix.impl.fixes.equals-false        :as equals-false]
+            [clj-kondo-fix.impl.fixes.plus-one           :as plus-one]
+            [clj-kondo-fix.impl.fixes.minus-one          :as minus-one]
+            [clj-kondo-fix.impl.fixes.single-logical-operand :as single-logical-operand]
+            [clj-kondo-fix.impl.fixes.single-key-in      :as single-key-in]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -37,3 +38,4 @@
 (def fix-plus-one-in-file           plus-one/fix-plus-one-in-file)
 (def fix-minus-one-in-file          minus-one/fix-minus-one-in-file)
 (def fix-single-logical-operand-in-file single-logical-operand/fix-single-logical-operand-in-file)
+(def fix-single-key-in-in-file          single-key-in/fix-single-key-in-in-file)

@@ -103,7 +103,13 @@
    {:message-re #"^Single arg use of (?:and|or) always returns the arg itself$"
     :phase       :default
     :fix-fn      fixes/fix-single-logical-operand-in-file
-    :display     "single logical operand"}})
+    :display     "single logical operand"}
+
+   :single-key-in
+   {:message-re #"^get-in with single key$"
+    :phase       :default
+    :fix-fn      fixes/fix-single-key-in-in-file
+    :display     "single key in"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
