@@ -85,7 +85,13 @@
    {:message-re #"^Prefer \(false\? x\) over \(= false x\)$"
     :phase       :default
     :fix-fn      fixes/fix-equals-false-in-file
-    :display     "equals false"}})
+    :display     "equals false"}
+
+   :plus-one
+   {:message-re #"^Prefer \(inc x\) over \(\+ 1 x\)$"
+    :phase       :default
+    :fix-fn      fixes/fix-plus-one-in-file
+    :display     "plus one"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
