@@ -63,6 +63,12 @@
     :fix-fn fixes/fix-redundant-do-in-file
     :display "redundant do"}
 
+   :redundant-format
+   {:message-re #"^Format string contains no format specifiers$"
+    :phase       :default
+    :fix-fn      fixes/fix-redundant-format-in-file
+    :display     "redundant format"}
+
    :redundant-let
    {:message-re #"^Redundant let expression\.$"
     :phase       :default

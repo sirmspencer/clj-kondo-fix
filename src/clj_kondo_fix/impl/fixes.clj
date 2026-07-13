@@ -14,6 +14,7 @@
             [clj-kondo-fix.impl.fixes.redundant-do        :as redundant-do]
             [clj-kondo-fix.impl.fixes.redundant-let       :as redundant-let]
             [clj-kondo-fix.impl.fixes.redundant-str-call  :as redundant-str-call]
+            [clj-kondo-fix.impl.fixes.redundant-format   :as redundant-format]
             [clj-kondo-fix.impl.fixes.if-x-x-y           :as if-x-x-y]
             [clj-kondo-fix.impl.fixes.if-nil-return      :as if-nil-return]
             [clj-kondo-fix.impl.fixes.condition-always-true :as condition-always-true]
@@ -44,6 +45,7 @@
 (def fix-single-logical-operand-in-file single-logical-operand/fix-single-logical-operand-in-file)
 (def fix-single-key-in-in-file          single-key-in/fix-single-key-in-in-file)
 (def fix-redundant-str-call-in-file     redundant-str-call/fix-redundant-str-call-in-file)
+(def fix-redundant-format-in-file      redundant-format/fix-redundant-format-in-file)
 (def fix-if-x-x-y-in-file              if-x-x-y/fix-if-x-x-y-in-file)
 (def fix-if-nil-return-in-file         if-nil-return/fix-if-nil-return-in-file)
 (def fix-condition-always-true-in-file condition-always-true/fix-condition-always-true-in-file)

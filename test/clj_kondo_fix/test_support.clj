@@ -58,7 +58,8 @@
                              :missing-body-in-when       {:level :off}
                              :missing-test-assertion     {:level :off}
                              :redundant-str-call         {:level :off}
-                            :unused-value               {:level :off}
+                             :redundant-format           {:level :off}
+                             :unused-value               {:level :off}
                             :not-a-function             {:level :off}
                              :shadowed-var               {:level :off}
                             :shadowed-fn-param          {:level :off}
