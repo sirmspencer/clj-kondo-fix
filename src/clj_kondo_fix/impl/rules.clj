@@ -79,7 +79,13 @@
    {:message-re #"^Prefer \(true\? x\) over \(= true x\)$"
     :phase       :default
     :fix-fn      fixes/fix-equals-true-in-file
-    :display     "equals true"}})
+    :display     "equals true"}
+
+   :equals-false
+   {:message-re #"^Prefer \(false\? x\) over \(= false x\)$"
+    :phase       :default
+    :fix-fn      fixes/fix-equals-false-in-file
+    :display     "equals false"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})

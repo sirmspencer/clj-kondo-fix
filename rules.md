@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-12 implemented · 77 not yet implemented · 30 not applicable · 1 skipped
+13 implemented · 76 not yet implemented · 30 not applicable · 1 skipped
 
 ## Index
 
@@ -41,7 +41,7 @@
 - [:dynamic-var-not-earmuffed](#dynamic-var-not-earmuffed)
 - [:earmuffed-var-not-dynamic](#earmuffed-var-not-dynamic)
 - [:equals-expected-position](#equals-expected-position)
-- [:equals-false](#equals-false)
+- [:equals-false](#equals-false) ✅
 - [:equals-float](#equals-float)
 - [:equals-nil](#equals-nil) ✅
 - [:equals-true](#equals-true) ✅
@@ -132,6 +132,14 @@
 **Duplicate require**
 
 warns on namespace that has been required more than once within a namespace
+
+---
+
+### :equals-false
+
+**Equals false**
+
+warn on usage of `(= false x)` or `(= x false)` rather than `(false? x)`
 
 ---
 
@@ -254,7 +262,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:dynamic-var-not-earmuffed` | warn when dynamic var doesn't have an earmuffed name |
 | `:earmuffed-var-not-dynamic` | warn when var with earmuffed name isn't declared dynamic |
 | `:equals-expected-position` | warn on usage of `=` with the expected value, a constant, that is not in the expected (first by default) position |
-| `:equals-false` | warn on usage of `(= false x)` or `(= x false)` rather than `(false? x)` |
 | `:equals-float` | warn on usage of comparison with `=` on floating point numbers, |
 | `:format` | warn on unexpected amount of arguments in `format` |
 | `:if-nil-return` | warn when if-like form explicitly returns nil from either |

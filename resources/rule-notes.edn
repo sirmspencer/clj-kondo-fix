@@ -22,6 +22,9 @@
  :equals-true
  {:examples ["first-arg-true" "second-arg-true"]}
 
+ :equals-false
+ {:examples ["first-arg-false" "second-arg-false"]}
+
  :misplaced-docstring
  {:example "moves-before-params"}
 
