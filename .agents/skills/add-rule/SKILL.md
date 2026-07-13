@@ -27,9 +27,12 @@ src/clj_kondo_fix/impl/
     redundant_let.clj
 
 test/clj_kondo_fix/
-  core_test.clj        — all tests; uses fixture files; never embeds code strings
-  fixtures/
-    <rule-name>/       — one directory per rule, named after the clj-kondo keyword
+  test_support.clj     — shared test helpers (fixture-path, assert-fix, assert-skip, assert-no-finding, …)
+  integration_test.clj — full-pipeline dry-run and fix tests
+  utils_test.clj       — utils unit tests
+  rules/
+    <rule_underscored>_test.clj  — one test file per rule
+    <rule_underscored>/          — fixture files colocated as a sibling directory
       <slug>-in.clj   — input: real Clojure file with the kondo finding
       <slug>-out.clj  — expected output after fix (generated or hand-written)
       <slug>.clj      — single file for no-change tests (skip / no-finding)
@@ -156,11 +159,16 @@ Add an entry to `rule-definitions`:
 Verify `:message-re` against real kondo output — the pattern must match the full
 `:message` string from the finding.
 
-### 4. Create fixture directories and input files
+### 4. Create fixture directory and input files
+
+Fixture files live colocated with the rule's test file:
 
 ```
-test/clj_kondo_fix/fixtures/<rule-name>/
+test/clj_kondo_fix/rules/<rule_underscored>/
 ```
+
+where `<rule_underscored>` is the rule keyword with hyphens replaced by underscores
+(e.g. `:unused-namespace` → `unused_namespace`).
 
 Name edge-case files after what they test, not after numbers:
 
@@ -185,11 +193,17 @@ clojure -M:gen-fixtures
 
 **For pred-based tests** (only a subset of findings fixed), write `-out.clj` by hand.
 
-### 6. Write tests in `core_test.clj`
+### 6. Create `test/clj_kondo_fix/rules/<rule_underscored>_test.clj`
 
-Add a `deftest` block. Use `fixture-path` — never embed code strings inline.
+One test file per rule, ns name `clj-kondo-fix.rules.<rule-keyword>-test`.
+Use `fixture-path` — never embed code strings inline.
 
 ```clojure
+(ns clj-kondo-fix.rules.your-rule-test
+  (:require [clojure.test :refer [deftest is testing]]
+            [clj-kondo-fix.impl.fixes :as fixes]
+            [clj-kondo-fix.test-support :refer [fixture-path assert-fix assert-no-finding assert-skip]]))
+
 (deftest test-your-rule
   (testing "basic case"
     (let [result (assert-fix fixes/fix-your-rule-in-file
@@ -210,7 +224,7 @@ Add a `deftest` block. Use `fixture-path` — never embed code strings inline.
                  [:your-rule])))
 ```
 
-Helper reference:
+Helper reference (all from `test-support`):
 
 | Helper | Use when |
 |---|---|
@@ -223,7 +237,7 @@ Helper reference:
 ### 7. Run the test suite
 
 ```bash
-clojure -M:test -m clj-kondo-fix.core-test
+clojure -M:test
 ```
 
 All tests, 0 failures before committing.
@@ -245,10 +259,10 @@ with the implementation.
 
 ## Adding an Edge Case to an Existing Rule
 
-1. Write the new `<slug>-in.clj` file in the rule's fixture directory.
+1. Write the new `<slug>-in.clj` file in the rule's fixture directory (`test/clj_kondo_fix/rules/<rule_underscored>/`).
 2. Run `clojure -M:gen-fixtures` (or write `-out.clj` by hand for partial-fix cases).
-3. Add a `testing` block to the existing `deftest` in `core_test.clj`.
-4. Run tests: `clojure -M:test -m clj-kondo-fix.core-test`.
+3. Add a `testing` block to the existing `deftest` in `test/clj_kondo_fix/rules/<rule_underscored>_test.clj`.
+4. Run tests: `clojure -M:test`.
 
 ---
 

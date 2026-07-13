@@ -80,7 +80,7 @@ Options:
 
 ```bash
 # run tests
-bb test
+clojure -M:test
 
 # run against a directory
 clojure -M:run --lint src/ --fix
