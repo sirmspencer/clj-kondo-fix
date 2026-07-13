@@ -15,9 +15,14 @@
             [clj-kondo-fix.impl.fixes.redundant-let       :as redundant-let]
             [clj-kondo-fix.impl.fixes.redundant-str-call  :as redundant-str-call]
             [clj-kondo-fix.impl.fixes.redundant-format   :as redundant-format]
+            [clj-kondo-fix.impl.fixes.redundant-fn-wrapper :as redundant-fn-wrapper]
+            [clj-kondo-fix.impl.fixes.redundant-primitive-coercion :as redundant-primitive-coercion]
             [clj-kondo-fix.impl.fixes.if-x-x-y           :as if-x-x-y]
             [clj-kondo-fix.impl.fixes.if-nil-return      :as if-nil-return]
+            [clj-kondo-fix.impl.fixes.keyword-binding    :as keyword-binding]
+            [clj-kondo-fix.impl.fixes.not-nil            :as not-nil]
             [clj-kondo-fix.impl.fixes.condition-always-true :as condition-always-true]
+            [clj-kondo-fix.impl.fixes.docstring-leading-trailing-whitespace :as docstring-leading-trailing-whitespace]
             [clj-kondo-fix.impl.fixes.equals-nil          :as equals-nil]
             [clj-kondo-fix.impl.fixes.equals-true         :as equals-true]
             [clj-kondo-fix.impl.fixes.equals-false        :as equals-false]
@@ -46,6 +51,11 @@
 (def fix-single-key-in-in-file          single-key-in/fix-single-key-in-in-file)
 (def fix-redundant-str-call-in-file     redundant-str-call/fix-redundant-str-call-in-file)
 (def fix-redundant-format-in-file      redundant-format/fix-redundant-format-in-file)
+(def fix-redundant-fn-wrapper-in-file redundant-fn-wrapper/fix-redundant-fn-wrapper-in-file)
+(def fix-redundant-primitive-coercion-in-file redundant-primitive-coercion/fix-redundant-primitive-coercion-in-file)
 (def fix-if-x-x-y-in-file              if-x-x-y/fix-if-x-x-y-in-file)
 (def fix-if-nil-return-in-file         if-nil-return/fix-if-nil-return-in-file)
+(def fix-keyword-binding-in-file      keyword-binding/fix-keyword-binding-in-file)
+(def fix-not-nil-in-file              not-nil/fix-not-nil-in-file)
 (def fix-condition-always-true-in-file condition-always-true/fix-condition-always-true-in-file)
+(def fix-docstring-leading-trailing-whitespace-in-file docstring-leading-trailing-whitespace/fix-docstring-leading-trailing-whitespace-in-file)

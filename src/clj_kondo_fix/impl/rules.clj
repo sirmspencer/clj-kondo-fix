@@ -135,11 +135,41 @@
     :fix-fn      fixes/fix-if-nil-return-in-file
     :display     "if nil return"}
 
-   :condition-always-true
-   {:message-re #"^Condition always true$"
+    :condition-always-true
+    {:message-re #"^Condition always true$"
+     :phase       :default
+     :fix-fn      fixes/fix-condition-always-true-in-file
+     :display     "condition always true"}
+
+   :docstring-leading-trailing-whitespace
+   {:message-re #"^Docstring should not have leading or trailing whitespace\.$"
     :phase       :default
-    :fix-fn      fixes/fix-condition-always-true-in-file
-    :display     "condition always true"}})
+    :fix-fn      fixes/fix-docstring-leading-trailing-whitespace-in-file
+    :display     "docstring leading/trailing whitespace"}
+
+   :keyword-binding
+   {:message-re #"^Keyword binding should be a symbol: "
+    :phase       :default
+    :fix-fn      fixes/fix-keyword-binding-in-file
+    :display     "keyword binding"}
+
+   :not-nil?
+   {:message-re #"^Use \(some\?"
+    :phase       :default
+    :fix-fn      fixes/fix-not-nil-in-file
+    :display     "not nil?"}
+
+   :redundant-fn-wrapper
+   {:message-re #"^Redundant fn wrapper$"
+    :phase       :default
+    :fix-fn      fixes/fix-redundant-fn-wrapper-in-file
+    :display     "redundant fn wrapper"}
+
+   :redundant-primitive-coercion
+   {:message-re #"^Redundant .* coercion - expression already has type .*$"
+    :phase       :default
+    :fix-fn      fixes/fix-redundant-primitive-coercion-in-file
+    :display     "redundant primitive coercion"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})

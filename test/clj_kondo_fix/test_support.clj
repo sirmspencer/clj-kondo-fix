@@ -67,8 +67,12 @@
                             :uninitialized-var          {:level :off}
                             :inline-def                 {:level :off}
                             :cond-else                  {:level :off}
-                            :condition-always-true      {:level :off}
-                            :earmuffed-var-not-dynamic  {:level :off}
+                             :condition-always-true      {:level :off}
+                             :docstring-leading-trailing-whitespace {:level :off}
+                             :earmuffed-var-not-dynamic  {:level :off}
+                             :keyword-binding            {:level :off}
+                             :not-nil?                   {:level :off}
+                             :redundant-primitive-coercion {:level :off}
                             :unknown-require-option     {:level :off}
                             :invalid-ref                {:level :off}}}
         enabled {:linters (into {:namespace-name-mismatch {:level :off}}
