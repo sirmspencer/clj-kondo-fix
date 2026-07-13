@@ -19,6 +19,9 @@
  :equals-nil
  {:examples ["first-arg-nil" "second-arg-nil"]}
 
+ :equals-true
+ {:examples ["first-arg-true" "second-arg-true"]}
+
  :misplaced-docstring
  {:example "moves-before-params"}
 

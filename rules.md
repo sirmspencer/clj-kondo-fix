@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-11 implemented · 78 not yet implemented · 30 not applicable · 1 skipped
+12 implemented · 77 not yet implemented · 30 not applicable · 1 skipped
 
 ## Index
 
@@ -44,7 +44,7 @@
 - [:equals-false](#equals-false)
 - [:equals-float](#equals-float)
 - [:equals-nil](#equals-nil) ✅
-- [:equals-true](#equals-true)
+- [:equals-true](#equals-true) ✅
 - [:file](#file) ❌
 - [:format](#format)
 - [:hook](#hook) ❌
@@ -133,46 +133,6 @@
 
 warns on namespace that has been required more than once within a namespace
 
-**only the first alias is used; duplicate (second) entry removed, no renames needed**
-
-```clojure
-(ns foo (:require [clojure.string :as s]
-                  [clojure.string :as str]))
-
-(s/join [""] "")
-```
-
-↓
-
-```clojure
-(ns foo (:require [clojure.string :as s]))
-
-(s/join [""] "")
-```
-
----
-
-**both aliases used; longer alias wins — shorter alias usages renamed and its entry removed**
-
-```clojure
-(ns foo
-  (:require [my.tools :as pt]
-            [my.tools :as toolz]))
-
-(pt/make-endpoint :x)
-(toolz/make-exception {})
-```
-
-↓
-
-```clojure
-(ns foo
-  (:require [my.tools :as toolz]))
-
-(toolz/make-endpoint :x)
-(toolz/make-exception {})
-```
-
 ---
 
 ### :equals-nil
@@ -181,35 +141,13 @@ warns on namespace that has been required more than once within a namespace
 
 warn on usage of `(= nil x)` or `(= x nil)` rather than `(nil? x)`
 
-**nil is the first argument; replaced with (nil? x)**
-
-```clojure
-(defn check [x]
-  (= nil x))
-```
-
-↓
-
-```clojure
-(defn check [x]
-  (nil? x))
-```
-
 ---
 
-**nil is the second argument; replaced with (nil? x)**
+### :equals-true
 
-```clojure
-(defn check [x]
-  (= x nil))
-```
+**Equals true**
 
-↓
-
-```clojure
-(defn check [x]
-  (nil? x))
-```
+warn on usage of `(= true x)` or `(= x true)` rather than `(true? x)`
 
 ---
 
@@ -219,23 +157,6 @@ warn on usage of `(= nil x)` or `(= x nil)` rather than `(nil? x)`
 
 warn when docstring appears after argument vector instead of before
 
-**docstring placed after the param vector; moved before it to correct position**
-
-```clojure
-(defn my-fn [x y]
-  "does something"
-  (+ x y))
-```
-
-↓
-
-```clojure
-(defn my-fn
-  "does something"
-  [x y]
-  (+ x y))
-```
-
 ---
 
 ### :missing-else-branch
@@ -243,32 +164,6 @@ warn when docstring appears after argument vector instead of before
 **Missing else branch**
 
 warns about missing else branch in `if` expression
-
-**bare (if cond then) with no else branch; converted to (when ...)**
-
-```clojure
-(if true 1)
-```
-
-↓
-
-```clojure
-(when true 1)
-```
-
----
-
-**multiple if-family forms on one line all lacking else branches; all converted to when-family**
-
-```clojure
-(if true 1) (if-not true 1) (if-let [x 1] x) (if-some [x 1] x)
-```
-
-↓
-
-```clojure
-(when true 1) (when-not true 1) (when-let [x 1] x) (when-some [x 1] x)
-```
 
 ---
 
@@ -278,37 +173,6 @@ warns about missing else branch in `if` expression
 
 warn on usage of do that is redundant. The warning usually arises
 
-**single-line (when (do ...)); do wrapper removed, extra spaces collapsed**
-
-```clojure
-(when true (do (println "a") (println "b")))
-```
-
-↓
-
-```clojure
-(when true (println "a") (println "b"))
-```
-
----
-
-**multi-line (when (do ...)); do line removed and body dedented two spaces**
-
-```clojure
-(when true
-  (do
-    (println "a")
-    (println "b")))
-```
-
-↓
-
-```clojure
-(when true
-  (println "a")
-  (println "b"))
-```
-
 ---
 
 ### :redundant-let
@@ -316,38 +180,6 @@ warn on usage of do that is redundant. The warning usually arises
 **Redundant let**
 
 warn on usage of let that is redundant. The warning usually arises
-
-**nested lets on one line with a body; inner bindings merged into outer, body preserved**
-
-```clojure
-(let [x 2] (let [y 1] (+ x y)))
-```
-
-↓
-
-```clojure
-(let [x 2 y 1] (+ x y))
-```
-
----
-
-**inner let has multiple bindings; all merged into outer binding vector**
-
-```clojure
-(let [a 1]
-  (let [b 2
-        c 3]
-    (+ a b c)))
-```
-
-↓
-
-```clojure
-(let [a 1
-      b 2
-      c 3]
-  (+ a b c))
-```
 
 ---
 
@@ -357,60 +189,6 @@ warn on usage of let that is redundant. The warning usually arises
 
 warn on unused binding
 
-**simple unused fn param; prefixed with _ to signal intentional non-use**
-
-```clojure
-(defn foo [x])
-```
-
-↓
-
-```clojure
-(defn foo [_x])
-```
-
----
-
-**:as config unused but :keys binding is used; :as clause removed entirely**
-
-```clojure
-(defn f [{:keys [a] :as config}] a)
-```
-
-↓
-
-```clojure
-(defn f [{:keys [a]}] a)
-```
-
----
-
-**first key in :keys vector unused; key removed, remaining keys preserved**
-
-```clojure
-(defn f [{:keys [x y z]}] (+ y z))
-```
-
-↓
-
-```clojure
-(defn f [{:keys [y z]}] (+ y z))
-```
-
----
-
-**unused namespaced key patient/id in :keys destructuring; full token removed, order/id kept**
-
-```clojure
-(let [{:keys [patient/id order/id]} {}] id)
-```
-
-↓
-
-```clojure
-(let [{:keys [order/id]} {}] id)
-```
-
 ---
 
 ### :unused-import
@@ -418,33 +196,6 @@ warn on unused binding
 **Unused import**
 
 warn on unused import
-
-**one of two classes in an import group unused; that class removed, other preserved**
-
-```clojure
-(ns foo (:import [java.util Date List]))
-```
-
-↓
-
-```clojure
-(ns foo (:import [java.util Date]))
-```
-
----
-
-**last remaining class in an import group unused; entire group removed, no bare [package] left**
-
-```clojure
-(ns foo
-  (:import [java.time Instant]))
-```
-
-↓
-
-```clojure
-(ns foo)
-```
 
 ---
 
@@ -454,57 +205,6 @@ warn on unused import
 
 warns on required but unused namespace
 
-**single unused require on its own line; entry removed and empty :require clause cleaned up**
-
-```clojure
-(ns foo
-  (:require [clojure.string :as s]))
-```
-
-↓
-
-```clojure
-(ns foo)
-```
-
----
-
-**both requires unused; entries and the entire :require block removed, ns closes cleanly**
-
-```clojure
-(ns foo
-  (:require [clojure.string :as s]
-            [clojure.set :as cs]))
-```
-
-↓
-
-```clojure
-(ns foo)
-```
-
----
-
-**removed entry has a trailing ;; comment on the same line; comment removed with the entry**
-
-```clojure
-(ns foo
-  (:require [clojure.string :as s]
-            [clojure.set :as cs] ;; for set ops
-            ))
-
-(s/join [""] "")
-```
-
-↓
-
-```clojure
-(ns foo
-  (:require [clojure.string :as s]))
-
-(s/join [""] "")
-```
-
 ---
 
 ### :unused-private-var
@@ -513,46 +213,6 @@ warns on required but unused namespace
 
 warns on unused private vars
 
-**unused defn- form; entire defn- removed including its preceding blank line**
-
-```clojure
-(ns foo)
-
-(defn- helper [])
-
-(defn public [] :ok)
-```
-
-↓
-
-```clojure
-(ns foo)
-
-(defn public [] :ok)
-```
-
----
-
-**unused multi-line def ^:private form; entire form removed**
-
-```clojure
-(ns foo)
-
-(def ^:private
-  default-str
-  [:re "^[a-z]+$"])
-
-(defn public [] :ok)
-```
-
-↓
-
-```clojure
-(ns foo)
-
-(defn public [] :ok)
-```
-
 ---
 
 ### :unused-referred-var
@@ -560,43 +220,6 @@ warns on unused private vars
 **Unused referred var**
 
 warns about unused referred vars
-
-**one referred var unused, other is used; unused var removed, used one stays**
-
-```clojure
-(ns foo (:require [clojure.string :refer [join ends-with?]]))
-
-(join [""] "")
-```
-
-↓
-
-```clojure
-(ns foo (:require [clojure.string :refer [join]]))
-
-(join [""] "")
-```
-
----
-
-**entry has no :as alias and all :refer vars removed; entire require entry removed**
-
-```clojure
-(ns foo
-  (:require [clojure.string :as s]
-            [clojure.set :refer [rename-keys]]))
-
-(s/join [""] "")
-```
-
-↓
-
-```clojure
-(ns foo
-  (:require [clojure.string :as s]))
-
-(s/join [""] "")
-```
 
 ## Not Yet Implemented
 
@@ -633,7 +256,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:equals-expected-position` | warn on usage of `=` with the expected value, a constant, that is not in the expected (first by default) position |
 | `:equals-false` | warn on usage of `(= false x)` or `(= x false)` rather than `(false? x)` |
 | `:equals-float` | warn on usage of comparison with `=` on floating point numbers, |
-| `:equals-true` | warn on usage of `(= true x)` or `(= x true)` rather than `(true? x)` |
 | `:format` | warn on unexpected amount of arguments in `format` |
 | `:if-nil-return` | warn when if-like form explicitly returns nil from either |
 | `:if-x-x-y` | warn on `(if x x y)` and suggest `(or x y)` instead when `x` is a |

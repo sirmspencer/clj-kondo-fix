@@ -73,7 +73,13 @@
    {:message-re #"^Prefer \(nil\? x\) over \(= nil x\)$"
     :phase       :default
     :fix-fn      fixes/fix-equals-nil-in-file
-    :display     "equals nil"}})
+    :display     "equals nil"}
+
+   :equals-true
+   {:message-re #"^Prefer \(true\? x\) over \(= true x\)$"
+    :phase       :default
+    :fix-fn      fixes/fix-equals-true-in-file
+    :display     "equals true"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
