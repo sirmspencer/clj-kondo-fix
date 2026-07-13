@@ -115,7 +115,25 @@
    {:message-re #"^get-in with single key$"
     :phase       :default
     :fix-fn      fixes/fix-single-key-in-in-file
-    :display     "single key in"}})
+    :display     "single key in"}
+
+   :if-x-x-y
+   {:message-re #"^If condition and then branch are the same; use \(or .+\)$"
+    :phase       :default
+    :fix-fn      fixes/fix-if-x-x-y-in-file
+    :display     "if x x y"}
+
+   :if-nil-return
+   {:message-re #"^For nil return, prefer when"
+    :phase       :default
+    :fix-fn      fixes/fix-if-nil-return-in-file
+    :display     "if nil return"}
+
+   :condition-always-true
+   {:message-re #"^Condition always true$"
+    :phase       :default
+    :fix-fn      fixes/fix-condition-always-true-in-file
+    :display     "condition always true"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
