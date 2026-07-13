@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-10 implemented · 79 not yet implemented · 30 not applicable · 1 skipped
+11 implemented · 78 not yet implemented · 30 not applicable · 1 skipped
 
 ## Index
 
@@ -43,7 +43,7 @@
 - [:equals-expected-position](#equals-expected-position)
 - [:equals-false](#equals-false)
 - [:equals-float](#equals-float)
-- [:equals-nil](#equals-nil)
+- [:equals-nil](#equals-nil) ✅
 - [:equals-true](#equals-true)
 - [:file](#file) ❌
 - [:format](#format)
@@ -171,6 +171,44 @@ warns on namespace that has been required more than once within a namespace
 
 (toolz/make-endpoint :x)
 (toolz/make-exception {})
+```
+
+---
+
+### :equals-nil
+
+**Equals nil**
+
+warn on usage of `(= nil x)` or `(= x nil)` rather than `(nil? x)`
+
+**nil is the first argument; replaced with (nil? x)**
+
+```clojure
+(defn check [x]
+  (= nil x))
+```
+
+↓
+
+```clojure
+(defn check [x]
+  (nil? x))
+```
+
+---
+
+**nil is the second argument; replaced with (nil? x)**
+
+```clojure
+(defn check [x]
+  (= x nil))
+```
+
+↓
+
+```clojure
+(defn check [x]
+  (nil? x))
 ```
 
 ---
@@ -595,7 +633,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:equals-expected-position` | warn on usage of `=` with the expected value, a constant, that is not in the expected (first by default) position |
 | `:equals-false` | warn on usage of `(= false x)` or `(= x false)` rather than `(false? x)` |
 | `:equals-float` | warn on usage of comparison with `=` on floating point numbers, |
-| `:equals-nil` | warn on usage of `(= nil x)` or `(= x nil)` rather than `(nil? x)` |
 | `:equals-true` | warn on usage of `(= true x)` or `(= x true)` rather than `(true? x)` |
 | `:format` | warn on unexpected amount of arguments in `format` |
 | `:if-nil-return` | warn when if-like form explicitly returns nil from either |

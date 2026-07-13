@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+# Symlink clj-kondo-fix into /usr/local/bin so it is available system-wide.
+# Usage: ./bin/link [dest-dir]
+#   dest-dir defaults to /usr/local/bin
+set -euo pipefail
+
+src="${BASH_SOURCE[0]}"
+while [ -h "$src" ]; do
+  dir="$(cd -P "$(dirname "$src")" && pwd)"
+  src="$(readlink "$src")"
+  [[ $src != /* ]] && src="$dir/$src"
+done
+bin_dir="$(cd -P "$(dirname "$src")" && pwd)"
+launcher="$bin_dir/clj-kondo-fix"
+
+dest_dir="${1:-/usr/local/bin}"
+dest="$dest_dir/clj-kondo-fix"
+
+mkdir -p "$dest_dir"
+ln -sf "$launcher" "$dest"
+echo "linked: $dest -> $launcher"
+echo "run 'clj-kondo-fix --help' to verify"

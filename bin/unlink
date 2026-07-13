@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Remove the clj-kondo-fix symlink from /usr/local/bin.
+# Usage: ./bin/unlink [dest-dir]
+#   dest-dir defaults to /usr/local/bin
+set -euo pipefail
+
+dest_dir="${1:-/usr/local/bin}"
+dest="$dest_dir/clj-kondo-fix"
+
+if [ -L "$dest" ]; then
+  rm "$dest"
+  echo "removed: $dest"
+elif [ -e "$dest" ]; then
+  echo "error: $dest exists but is not a symlink — remove it manually" >&2
+  exit 1
+else
+  echo "nothing to remove: $dest not found" >&2
+  exit 1
+fi

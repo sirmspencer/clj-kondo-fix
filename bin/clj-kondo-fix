@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# resolve this script's real location, following symlinks
+src="${BASH_SOURCE[0]}"
+while [ -h "$src" ]; do
+  dir="$(cd -P "$(dirname "$src")" && pwd)"
+  src="$(readlink "$src")"
+  [[ $src != /* ]] && src="$dir/$src"
+done
+bin_dir="$(cd -P "$(dirname "$src")" && pwd)"
+repo_root="$(dirname "$bin_dir")"
+
+command -v clojure >/dev/null 2>&1 || {
+  echo "error: clojure not found on PATH" >&2
+  exit 1
+}
+
+exec clojure -Sdeps "{:deps {clj-kondo-fix/clj-kondo-fix {:local/root \"$repo_root\"}}}" \
+  -M -m clj-kondo-fix.main "$@"

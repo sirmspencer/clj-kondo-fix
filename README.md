@@ -2,6 +2,37 @@
 
 clj-kondo doesn't have a fix option.  this is to create a tool that runs exactly the same as clj-kondo to give the option to fix the code.
 
+## Install
+
+Requires the [Clojure CLI](https://clojure.org/guides/install_clojure) (`clojure`) on your PATH.
+
+```bash
+git clone https://github.com/your-org/clj-kondo-fix
+cd clj-kondo-fix
+./bin/link          # symlinks bin/clj-kondo-fix into /usr/local/bin
+```
+
+Pass a custom destination if you prefer a different directory:
+
+```bash
+./bin/link ~/bin
+```
+
+Verify the install:
+
+```bash
+clj-kondo-fix --help
+```
+
+The first run resolves and caches dependencies via the Clojure CLI — subsequent runs are faster.
+
+To remove:
+
+```bash
+./bin/unlink        # removes the symlink from /usr/local/bin
+./bin/unlink ~/bin  # or wherever you installed it
+```
+
 ## Usage
 
 ### CLI
