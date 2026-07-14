@@ -183,11 +183,29 @@
     :fix-fn      fixes/fix-redundant-nested-call-in-file
     :display     "redundant nested call"}
 
-   :redundant-primitive-coercion
-   {:message-re #"^Redundant .* coercion - expression already has type .*$"
-    :phase       :default
-    :fix-fn      fixes/fix-redundant-primitive-coercion-in-file
-    :display     "redundant primitive coercion"}})
+    :redundant-primitive-coercion
+    {:message-re #"^Redundant .* coercion - expression already has type .*$"
+     :phase       :default
+     :fix-fn      fixes/fix-redundant-primitive-coercion-in-file
+     :display     "redundant primitive coercion"}
+
+    :cond-else
+    {:message-re #"^use :else as the catch-all test expression in cond$"
+     :phase       :default
+     :fix-fn      fixes/fix-cond-else-in-file
+     :display     "cond else"}
+
+    :docstring-blank
+    {:message-re #"^Docstring should not be blank\.$"
+     :phase       :default
+     :fix-fn      fixes/fix-docstring-blank-in-file
+     :display     "docstring blank"}
+
+    :redundant-declare
+    {:message-re #"^Redundant declare: "
+     :phase       :default
+     :fix-fn      fixes/fix-redundant-declare-in-file
+     :display     "redundant declare"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})

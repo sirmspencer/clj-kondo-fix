@@ -142,11 +142,15 @@ rely on referred symbols"}
  {:status :not-applicable
   :reason "Resolving an arity mismatch requires understanding the intended protocol contract"}
 
- :protocol-method-varargs
- {:status :not-applicable
-  :reason "Varargs protocol methods require structural refactoring"}
+  :protocol-method-varargs
+  {:status :not-applicable
+   :reason "Varargs protocol methods require structural refactoring"}
 
- :redefined-var
+  :quoted-case-test-constant
+  {:status :not-applicable
+   :reason "Fix is trivial (remove single quote) but safety depends on whether the quoted form is intentional behavior in a performance-sensitive code path"}
+
+  :redefined-var
  {:status :not-applicable
   :reason "Deciding which definition to keep or merge requires human judgment"}
 

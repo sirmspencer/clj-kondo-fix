@@ -32,7 +32,10 @@
             [clj-kondo-fix.impl.fixes.plus-one           :as plus-one]
             [clj-kondo-fix.impl.fixes.minus-one          :as minus-one]
             [clj-kondo-fix.impl.fixes.single-logical-operand :as single-logical-operand]
-             [clj-kondo-fix.impl.fixes.single-key-in      :as single-key-in]))
+             [clj-kondo-fix.impl.fixes.single-key-in      :as single-key-in]
+             [clj-kondo-fix.impl.fixes.cond-else       :as cond-else]
+             [clj-kondo-fix.impl.fixes.docstring-blank  :as docstring-blank]
+             [clj-kondo-fix.impl.fixes.redundant-declare :as redundant-declare]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -65,3 +68,6 @@
 (def fix-not-nil-in-file              not-nil/fix-not-nil-in-file)
 (def fix-condition-always-true-in-file condition-always-true/fix-condition-always-true-in-file)
 (def fix-docstring-leading-trailing-whitespace-in-file docstring-leading-trailing-whitespace/fix-docstring-leading-trailing-whitespace-in-file)
+(def fix-cond-else-in-file              cond-else/fix-cond-else-in-file)
+(def fix-docstring-blank-in-file        docstring-blank/fix-docstring-blank-in-file)
+(def fix-redundant-declare-in-file      redundant-declare/fix-redundant-declare-in-file)
