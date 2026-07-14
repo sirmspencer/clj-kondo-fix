@@ -70,6 +70,7 @@
                              :condition-always-true      {:level :off}
                              :docstring-leading-trailing-whitespace {:level :off}
                              :earmuffed-var-not-dynamic  {:level :off}
+                             :equals-float               {:level :off}
                              :keyword-binding            {:level :off}
                              :not-nil?                   {:level :off}
                              :redundant-primitive-coercion {:level :off}

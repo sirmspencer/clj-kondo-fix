@@ -57,13 +57,19 @@
     :fix-fn fixes/fix-unused-private-var-in-file
     :display "unused private var"}
 
-   :redundant-do
-   {:message-re #"^redundant do$"
-    :phase :default
-    :fix-fn fixes/fix-redundant-do-in-file
-    :display "redundant do"}
+    :redundant-call
+    {:message-re #"^Single arg use of .+ always returns the arg itself$"
+     :phase       :default
+     :fix-fn      fixes/fix-redundant-call-in-file
+     :display     "redundant call"}
 
-   :redundant-format
+    :redundant-do
+    {:message-re #"^redundant do$"
+     :phase :default
+     :fix-fn fixes/fix-redundant-do-in-file
+     :display "redundant do"}
+
+    :redundant-format
    {:message-re #"^Format string contains no format specifiers$"
     :phase       :default
     :fix-fn      fixes/fix-redundant-format-in-file
@@ -93,13 +99,19 @@
     :fix-fn      fixes/fix-equals-true-in-file
     :display     "equals true"}
 
-   :equals-false
-   {:message-re #"^Prefer \(false\? x\) over \(= false x\)$"
-    :phase       :default
-    :fix-fn      fixes/fix-equals-false-in-file
-    :display     "equals false"}
+    :equals-false
+    {:message-re #"^Prefer \(false\? x\) over \(= false x\)$"
+     :phase       :default
+     :fix-fn      fixes/fix-equals-false-in-file
+     :display     "equals false"}
 
-   :plus-one
+    :equals-float
+    {:message-re #"^Equality comparison of floating point numbers$"
+     :phase       :default
+     :fix-fn      fixes/fix-equals-float-in-file
+     :display     "equals float"}
+
+    :plus-one
    {:message-re #"^Prefer \(inc x\) over \(\+ 1 x\)$"
     :phase       :default
     :fix-fn      fixes/fix-plus-one-in-file

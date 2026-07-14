@@ -11,6 +11,7 @@
             [clj-kondo-fix.impl.fixes.missing-else-branch :as missing-else-branch]
             [clj-kondo-fix.impl.fixes.misplaced-docstring :as misplaced-docstring]
             [clj-kondo-fix.impl.fixes.unused-private-var  :as unused-private-var]
+            [clj-kondo-fix.impl.fixes.redundant-call      :as redundant-call]
             [clj-kondo-fix.impl.fixes.redundant-do        :as redundant-do]
             [clj-kondo-fix.impl.fixes.redundant-let       :as redundant-let]
             [clj-kondo-fix.impl.fixes.redundant-str-call  :as redundant-str-call]
@@ -27,6 +28,7 @@
             [clj-kondo-fix.impl.fixes.equals-nil          :as equals-nil]
             [clj-kondo-fix.impl.fixes.equals-true         :as equals-true]
             [clj-kondo-fix.impl.fixes.equals-false        :as equals-false]
+            [clj-kondo-fix.impl.fixes.equals-float       :as equals-float]
             [clj-kondo-fix.impl.fixes.plus-one           :as plus-one]
             [clj-kondo-fix.impl.fixes.minus-one          :as minus-one]
             [clj-kondo-fix.impl.fixes.single-logical-operand :as single-logical-operand]
@@ -41,11 +43,13 @@
 (def fix-missing-else-branch-in-file missing-else-branch/fix-missing-else-branch-in-file)
 (def fix-misplaced-docstring-in-file misplaced-docstring/fix-misplaced-docstring-in-file)
 (def fix-unused-private-var-in-file  unused-private-var/fix-unused-private-var-in-file)
+(def fix-redundant-call-in-file      redundant-call/fix-redundant-call-in-file)
 (def fix-redundant-do-in-file        redundant-do/fix-redundant-do-in-file)
 (def fix-redundant-let-in-file       redundant-let/fix-redundant-let-in-file)
 (def fix-equals-nil-in-file          equals-nil/fix-equals-nil-in-file)
 (def fix-equals-true-in-file         equals-true/fix-equals-true-in-file)
 (def fix-equals-false-in-file        equals-false/fix-equals-false-in-file)
+(def fix-equals-float-in-file       equals-float/fix-equals-float-in-file)
 (def fix-plus-one-in-file           plus-one/fix-plus-one-in-file)
 (def fix-minus-one-in-file          minus-one/fix-minus-one-in-file)
 (def fix-single-logical-operand-in-file single-logical-operand/fix-single-logical-operand-in-file)
