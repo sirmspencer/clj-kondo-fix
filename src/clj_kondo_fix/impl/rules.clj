@@ -165,6 +165,12 @@
     :fix-fn      fixes/fix-redundant-fn-wrapper-in-file
     :display     "redundant fn wrapper"}
 
+   :redundant-nested-call
+   {:message-re #"^Redundant nested call: "
+    :phase       :default
+    :fix-fn      fixes/fix-redundant-nested-call-in-file
+    :display     "redundant nested call"}
+
    :redundant-primitive-coercion
    {:message-re #"^Redundant .* coercion - expression already has type .*$"
     :phase       :default

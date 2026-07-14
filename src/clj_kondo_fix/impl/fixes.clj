@@ -16,6 +16,7 @@
             [clj-kondo-fix.impl.fixes.redundant-str-call  :as redundant-str-call]
             [clj-kondo-fix.impl.fixes.redundant-format   :as redundant-format]
             [clj-kondo-fix.impl.fixes.redundant-fn-wrapper :as redundant-fn-wrapper]
+            [clj-kondo-fix.impl.fixes.redundant-nested-call :as redundant-nested-call]
             [clj-kondo-fix.impl.fixes.redundant-primitive-coercion :as redundant-primitive-coercion]
             [clj-kondo-fix.impl.fixes.if-x-x-y           :as if-x-x-y]
             [clj-kondo-fix.impl.fixes.if-nil-return      :as if-nil-return]
@@ -52,6 +53,7 @@
 (def fix-redundant-str-call-in-file     redundant-str-call/fix-redundant-str-call-in-file)
 (def fix-redundant-format-in-file      redundant-format/fix-redundant-format-in-file)
 (def fix-redundant-fn-wrapper-in-file redundant-fn-wrapper/fix-redundant-fn-wrapper-in-file)
+(def fix-redundant-nested-call-in-file redundant-nested-call/fix-redundant-nested-call-in-file)
 (def fix-redundant-primitive-coercion-in-file redundant-primitive-coercion/fix-redundant-primitive-coercion-in-file)
 (def fix-if-x-x-y-in-file              if-x-x-y/fix-if-x-x-y-in-file)
 (def fix-if-nil-return-in-file         if-nil-return/fix-if-nil-return-in-file)
