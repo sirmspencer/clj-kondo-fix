@@ -235,7 +235,13 @@
      {:message-re #"^Redundant let binding: "
       :phase       :default
       :fix-fn      fixes/fix-redundant-let-binding-in-file
-      :display     "redundant let binding"}})
+      :display     "redundant let binding"}
+
+     :unsorted-imports
+     {:message-re #"^Unsorted import: "
+      :phase       :default
+      :fix-fn      fixes/fix-unsorted-imports-in-file
+      :display     "unsorted imports"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
