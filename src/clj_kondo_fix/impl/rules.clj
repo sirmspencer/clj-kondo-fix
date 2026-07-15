@@ -211,7 +211,13 @@
      {:message-re #"^Uninitialized var$"
       :phase       :default
       :fix-fn      fixes/fix-uninitialized-var-in-file
-      :display     "uninitialized var"}})
+      :display     "uninitialized var"}
+
+     :dynamic-var-not-earmuffed
+     {:message-re #"^Var is declared dynamic but name is not earmuffed: "
+      :phase       :default
+      :fix-fn      fixes/fix-dynamic-var-not-earmuffed-in-file
+      :display     "dynamic var not earmuffed"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})

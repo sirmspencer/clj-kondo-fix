@@ -36,7 +36,8 @@
               [clj-kondo-fix.impl.fixes.cond-else       :as cond-else]
               [clj-kondo-fix.impl.fixes.docstring-blank  :as docstring-blank]
               [clj-kondo-fix.impl.fixes.redundant-declare :as redundant-declare]
-              [clj-kondo-fix.impl.fixes.uninitialized-var :as uninitialized-var]))
+              [clj-kondo-fix.impl.fixes.uninitialized-var :as uninitialized-var]
+              [clj-kondo-fix.impl.fixes.dynamic-var-not-earmuffed :as dynamic-var-not-earmuffed]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -73,3 +74,4 @@
 (def fix-docstring-blank-in-file        docstring-blank/fix-docstring-blank-in-file)
 (def fix-redundant-declare-in-file      redundant-declare/fix-redundant-declare-in-file)
 (def fix-uninitialized-var-in-file     uninitialized-var/fix-uninitialized-var-in-file)
+(def fix-dynamic-var-not-earmuffed-in-file dynamic-var-not-earmuffed/fix-dynamic-var-not-earmuffed-in-file)
