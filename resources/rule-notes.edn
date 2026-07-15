@@ -70,6 +70,10 @@ rely on referred symbols"}
  {:status :not-applicable
   :reason "Structural fix (wrapping fn in async) requires understanding intent"}
 
+ :case-quoted-test
+ {:status :not-applicable
+  :reason "Removing the quote is trivial but the user may have intended the quoted symbol as a runtime value; requires human judgment"}
+
  :clj-kondo-config
  {:status :not-applicable
   :reason "Config validation errors need human correction"}
