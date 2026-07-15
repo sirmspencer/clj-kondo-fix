@@ -217,7 +217,13 @@
      {:message-re #"^Var is declared dynamic but name is not earmuffed: "
       :phase       :default
       :fix-fn      fixes/fix-dynamic-var-not-earmuffed-in-file
-      :display     "dynamic var not earmuffed"}})
+      :display     "dynamic var not earmuffed"}
+
+     :earmuffed-var-not-dynamic
+     {:message-re #"^Var has earmuffed name but is not declared dynamic: "
+      :phase       :default
+      :fix-fn      fixes/fix-earmuffed-var-not-dynamic-in-file
+      :display     "earmuffed var not dynamic"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
