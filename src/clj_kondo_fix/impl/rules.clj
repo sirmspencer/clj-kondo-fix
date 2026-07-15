@@ -223,7 +223,13 @@
      {:message-re #"^Var has earmuffed name but is not declared dynamic: "
       :phase       :default
       :fix-fn      fixes/fix-earmuffed-var-not-dynamic-in-file
-      :display     "earmuffed var not dynamic"}})
+      :display     "earmuffed var not dynamic"}
+
+     :equals-expected-position
+     {:message-re #"^Write expected value first$"
+      :phase       :default
+      :fix-fn      fixes/fix-equals-expected-position-in-file
+      :display     "equals expected position"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
