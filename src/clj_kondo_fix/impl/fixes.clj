@@ -39,7 +39,8 @@
               [clj-kondo-fix.impl.fixes.uninitialized-var :as uninitialized-var]
               [clj-kondo-fix.impl.fixes.dynamic-var-not-earmuffed :as dynamic-var-not-earmuffed]
               [clj-kondo-fix.impl.fixes.earmuffed-var-not-dynamic :as earmuffed-var-not-dynamic]
-              [clj-kondo-fix.impl.fixes.equals-expected-position :as equals-expected-position]))
+              [clj-kondo-fix.impl.fixes.equals-expected-position :as equals-expected-position]
+              [clj-kondo-fix.impl.fixes.redundant-let-binding :as redundant-let-binding]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -79,3 +80,4 @@
 (def fix-dynamic-var-not-earmuffed-in-file dynamic-var-not-earmuffed/fix-dynamic-var-not-earmuffed-in-file)
 (def fix-earmuffed-var-not-dynamic-in-file earmuffed-var-not-dynamic/fix-earmuffed-var-not-dynamic-in-file)
 (def fix-equals-expected-position-in-file equals-expected-position/fix-equals-expected-position-in-file)
+(def fix-redundant-let-binding-in-file redundant-let-binding/fix-redundant-let-binding-in-file)

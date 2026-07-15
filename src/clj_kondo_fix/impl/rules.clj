@@ -229,7 +229,13 @@
      {:message-re #"^Write expected value first$"
       :phase       :default
       :fix-fn      fixes/fix-equals-expected-position-in-file
-      :display     "equals expected position"}})
+      :display     "equals expected position"}
+
+     :redundant-let-binding
+     {:message-re #"^Redundant let binding: "
+      :phase       :default
+      :fix-fn      fixes/fix-redundant-let-binding-in-file
+      :display     "redundant let binding"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
