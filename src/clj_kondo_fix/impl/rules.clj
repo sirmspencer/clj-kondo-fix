@@ -201,11 +201,17 @@
      :fix-fn      fixes/fix-docstring-blank-in-file
      :display     "docstring blank"}
 
-    :redundant-declare
-    {:message-re #"^Redundant declare: "
-     :phase       :default
-     :fix-fn      fixes/fix-redundant-declare-in-file
-     :display     "redundant declare"}})
+     :redundant-declare
+     {:message-re #"^Redundant declare: "
+      :phase       :default
+      :fix-fn      fixes/fix-redundant-declare-in-file
+      :display     "redundant declare"}
+
+     :uninitialized-var
+     {:message-re #"^Uninitialized var$"
+      :phase       :default
+      :fix-fn      fixes/fix-uninitialized-var-in-file
+      :display     "uninitialized var"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
