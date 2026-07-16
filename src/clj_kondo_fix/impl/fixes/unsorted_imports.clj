@@ -26,17 +26,15 @@
              import-forms)))
 
 (defn- find-open-paren [lines line-idx col-idx]
-  (loop [l line-idx]
+  (loop [l line-idx j col-idx]
     (if (< l 0)
       nil
-      (let [line (nth lines l)
-            start-col (if (= l line-idx) col-idx (dec (count line)))]
-        (loop [j start-col]
-          (if (< j 0)
-            (recur (dec l))
-            (if (= \( (nth line j))
-              [l j]
-              (recur (dec j)))))))))
+      (if (< j 0)
+        (recur (dec l) (dec (count (nth lines (dec l)))))
+        (let [line (nth lines l)]
+          (if (= \( (nth line j))
+            [l j]
+            (recur l (dec j))))))))
 
 (defn fix-unsorted-imports-in-file [file-path lines findings log]
   (let [fu (->display-path file-path)]
