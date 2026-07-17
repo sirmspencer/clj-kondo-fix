@@ -51,19 +51,19 @@
     :fix-fn fixes/fix-unused-private-var-in-file
     :display "unused private var"}
 
-    :redundant-call
-    {:message-re #"^Single arg use of .+ always returns the arg itself$"
-     :phase       :default
-     :fix-fn      fixes/fix-redundant-call-in-file
-     :display     "redundant call"}
+   :redundant-call
+   {:message-re #"^Single arg use of .+ always returns the arg itself$"
+    :phase       :default
+    :fix-fn      fixes/fix-redundant-call-in-file
+    :display     "redundant call"}
 
-    :redundant-do
-    {:message-re #"^redundant do$"
-     :phase :default
-     :fix-fn fixes/fix-redundant-do-in-file
-     :display "redundant do"}
+   :redundant-do
+   {:message-re #"^redundant do$"
+    :phase :default
+    :fix-fn fixes/fix-redundant-do-in-file
+    :display "redundant do"}
 
-    :redundant-format
+   :redundant-format
    {:message-re #"^Format string contains no format specifiers$"
     :phase       :default
     :fix-fn      fixes/fix-redundant-format-in-file
@@ -93,19 +93,19 @@
     :fix-fn      fixes/fix-equals-true-in-file
     :display     "equals true"}
 
-    :equals-false
-    {:message-re #"^Prefer \(false\? x\) over \(= false x\)$"
-     :phase       :default
-     :fix-fn      fixes/fix-equals-false-in-file
-     :display     "equals false"}
+   :equals-false
+   {:message-re #"^Prefer \(false\? x\) over \(= false x\)$"
+    :phase       :default
+    :fix-fn      fixes/fix-equals-false-in-file
+    :display     "equals false"}
 
-    :equals-float
-    {:message-re #"^Equality comparison of floating point numbers$"
-     :phase       :default
-     :fix-fn      fixes/fix-equals-float-in-file
-     :display     "equals float"}
+   :equals-float
+   {:message-re #"^Equality comparison of floating point numbers$"
+    :phase       :default
+    :fix-fn      fixes/fix-equals-float-in-file
+    :display     "equals float"}
 
-    :plus-one
+   :plus-one
    {:message-re #"^Prefer \(inc x\) over \(\+ 1 x\)$"
     :phase       :default
     :fix-fn      fixes/fix-plus-one-in-file
@@ -141,11 +141,11 @@
     :fix-fn      fixes/fix-if-nil-return-in-file
     :display     "if nil return"}
 
-    :condition-always-true
-    {:message-re #"^Condition always true$"
-     :phase       :default
-     :fix-fn      fixes/fix-condition-always-true-in-file
-     :display     "condition always true"}
+   :condition-always-true
+   {:message-re #"^Condition always true$"
+    :phase       :default
+    :fix-fn      fixes/fix-condition-always-true-in-file
+    :display     "condition always true"}
 
    :docstring-leading-trailing-whitespace
    {:message-re #"^Docstring should not have leading or trailing whitespace\.$"
@@ -177,71 +177,71 @@
     :fix-fn      fixes/fix-redundant-nested-call-in-file
     :display     "redundant nested call"}
 
-    :redundant-primitive-coercion
-    {:message-re #"^Redundant .* coercion - expression already has type .*$"
-     :phase       :default
-     :fix-fn      fixes/fix-redundant-primitive-coercion-in-file
-     :display     "redundant primitive coercion"}
+   :redundant-primitive-coercion
+   {:message-re #"^Redundant .* coercion - expression already has type .*$"
+    :phase       :default
+    :fix-fn      fixes/fix-redundant-primitive-coercion-in-file
+    :display     "redundant primitive coercion"}
 
-    :cond-else
-    {:message-re #"^use :else as the catch-all test expression in cond$"
-     :phase       :default
-     :fix-fn      fixes/fix-cond-else-in-file
-     :display     "cond else"}
+   :cond-else
+   {:message-re #"^use :else as the catch-all test expression in cond$"
+    :phase       :default
+    :fix-fn      fixes/fix-cond-else-in-file
+    :display     "cond else"}
 
-    :docstring-blank
-    {:message-re #"^Docstring should not be blank\.$"
-     :phase       :default
-     :fix-fn      fixes/fix-docstring-blank-in-file
-     :display     "docstring blank"}
+   :docstring-blank
+   {:message-re #"^Docstring should not be blank\.$"
+    :phase       :default
+    :fix-fn      fixes/fix-docstring-blank-in-file
+    :display     "docstring blank"}
 
-     :redundant-declare
-     {:message-re #"^Redundant declare: "
-      :phase       :default
-      :fix-fn      fixes/fix-redundant-declare-in-file
-      :display     "redundant declare"}
+   :redundant-declare
+   {:message-re #"^Redundant declare: "
+    :phase       :default
+    :fix-fn      fixes/fix-redundant-declare-in-file
+    :display     "redundant declare"}
 
-     :uninitialized-var
-     {:message-re #"^Uninitialized var$"
-      :phase       :default
-      :fix-fn      fixes/fix-uninitialized-var-in-file
-      :display     "uninitialized var"}
+   :uninitialized-var
+   {:message-re #"^Uninitialized var$"
+    :phase       :default
+    :fix-fn      fixes/fix-uninitialized-var-in-file
+    :display     "uninitialized var"}
 
-     :dynamic-var-not-earmuffed
-     {:message-re #"^Var is declared dynamic but name is not earmuffed: "
-      :phase       :default
-      :fix-fn      fixes/fix-dynamic-var-not-earmuffed-in-file
-      :display     "dynamic var not earmuffed"}
+   :dynamic-var-not-earmuffed
+   {:message-re #"^Var is declared dynamic but name is not earmuffed: "
+    :phase       :default
+    :fix-fn      fixes/fix-dynamic-var-not-earmuffed-in-file
+    :display     "dynamic var not earmuffed"}
 
-     :earmuffed-var-not-dynamic
-     {:message-re #"^Var has earmuffed name but is not declared dynamic: "
-      :phase       :default
-      :fix-fn      fixes/fix-earmuffed-var-not-dynamic-in-file
-      :display     "earmuffed var not dynamic"}
+   :earmuffed-var-not-dynamic
+   {:message-re #"^Var has earmuffed name but is not declared dynamic: "
+    :phase       :default
+    :fix-fn      fixes/fix-earmuffed-var-not-dynamic-in-file
+    :display     "earmuffed var not dynamic"}
 
-     :equals-expected-position
-     {:message-re #"^Write expected value first$"
-      :phase       :default
-      :fix-fn      fixes/fix-equals-expected-position-in-file
-      :display     "equals expected position"}
+   :equals-expected-position
+   {:message-re #"^Write expected value first$"
+    :phase       :default
+    :fix-fn      fixes/fix-equals-expected-position-in-file
+    :display     "equals expected position"}
 
-     :redundant-let-binding
-     {:message-re #"^Redundant let binding: "
-      :phase       :default
-      :fix-fn      fixes/fix-redundant-let-binding-in-file
-      :display     "redundant let binding"}
+   :redundant-let-binding
+   {:message-re #"^Redundant let binding: "
+    :phase       :default
+    :fix-fn      fixes/fix-redundant-let-binding-in-file
+    :display     "redundant let binding"}
 
-      :unsorted-imports
-      {:message-re #"^Unsorted import: "
-       :phase       :default
-       :fix-fn      fixes/fix-unsorted-imports-in-file
-       :display     "unsorted imports"}
+   :unsorted-imports
+   {:message-re #"^Unsorted import: "
+    :phase       :default
+    :fix-fn      fixes/fix-unsorted-imports-in-file
+    :display     "unsorted imports"}
 
-      :unsorted-required-namespaces
-      {:message-re #"^Unsorted namespace: "
-       :phase       :default
-       :fix-fn      fixes/fix-unsorted-required-namespaces-in-file
-       :display     "unsorted required namespaces"}})
+   :unsorted-required-namespaces
+   {:message-re #"^Unsorted namespace: "
+    :phase       :default
+    :fix-fn      fixes/fix-unsorted-required-namespaces-in-file
+    :display     "unsorted required namespaces"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
