@@ -7,7 +7,6 @@
             [clj-kondo-fix.impl.fixes.unused-binding      :as unused-binding]
             [clj-kondo-fix.impl.fixes.unused-import       :as unused-import]
             [clj-kondo-fix.impl.fixes.unused-referred-var :as unused-referred-var]
-            [clj-kondo-fix.impl.fixes.refer-all           :as refer-all]
             [clj-kondo-fix.impl.fixes.missing-else-branch :as missing-else-branch]
             [clj-kondo-fix.impl.fixes.misplaced-docstring :as misplaced-docstring]
             [clj-kondo-fix.impl.fixes.unused-private-var  :as unused-private-var]
@@ -49,7 +48,6 @@
 (def fix-unused-binding-in-file     unused-binding/fix-unused-binding-in-file)
 (def fix-unused-import-in-file      unused-import/fix-unused-import-in-file)
 (def fix-unused-referred-var-in-file unused-referred-var/fix-unused-referred-var-in-file)
-(def fix-refer-all-in-file          refer-all/fix-refer-all-in-file)
 (def fix-missing-else-branch-in-file missing-else-branch/fix-missing-else-branch-in-file)
 (def fix-misplaced-docstring-in-file misplaced-docstring/fix-misplaced-docstring-in-file)
 (def fix-unused-private-var-in-file  unused-private-var/fix-unused-private-var-in-file)

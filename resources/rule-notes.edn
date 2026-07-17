@@ -52,19 +52,14 @@
  :unused-referred-var
  {:examples ["removes-one-keeps-other" "removes-entire-entry-when-only-referred"]}
 
- ;; ---- skipped ----------------------------------------------------------------
- ;; refer-all: fix strips :refer :all but cannot produce an explicit refer list
- ;; without clj-kondo analysis data (var-usages), which findings alone do not
- ;; provide.
- :refer-all {:status :skipped
-             :reason "Strips :refer :all but cannot determine which symbols are
-actually used without analysis data; produces broken namespaces for files that
-rely on referred symbols"}
-
  ;; ---- not applicable ---------------------------------------------------------
  ;; These rules either require human judgment, type inference, cross-file
  ;; knowledge, or structural changes that cannot be expressed as a text-level
  ;; transformation.
+
+ :refer-all
+ {:status :not-applicable
+  :reason "Cannot determine which symbols are actually used without analysis data; producing an explicit :refer list or :as alias requires domain knowledge"}
 
  :await-without-async-fn
  {:status :not-applicable

@@ -33,12 +33,6 @@
     :fix-fn fixes/fix-unused-referred-var-in-file
     :display "unused referred var"}
 
-   :refer-all
-   {:message-re #"^use alias or :refer"
-    :phase :refer
-    :fix-fn fixes/fix-refer-all-in-file
-    :display "refer :all"}
-
    :misplaced-docstring
    {:message-re #"^Misplaced docstring\.$"
     :phase :default
