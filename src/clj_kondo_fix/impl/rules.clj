@@ -237,11 +237,17 @@
       :fix-fn      fixes/fix-redundant-let-binding-in-file
       :display     "redundant let binding"}
 
-     :unsorted-imports
-     {:message-re #"^Unsorted import: "
-      :phase       :default
-      :fix-fn      fixes/fix-unsorted-imports-in-file
-      :display     "unsorted imports"}})
+      :unsorted-imports
+      {:message-re #"^Unsorted import: "
+       :phase       :default
+       :fix-fn      fixes/fix-unsorted-imports-in-file
+       :display     "unsorted imports"}
+
+      :unsorted-required-namespaces
+      {:message-re #"^Unsorted namespace: "
+       :phase       :default
+       :fix-fn      fixes/fix-unsorted-required-namespaces-in-file
+       :display     "unsorted required namespaces"}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})
