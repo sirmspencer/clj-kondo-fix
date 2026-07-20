@@ -7,24 +7,16 @@ description: How to add a new clj-kondo rule or edge-case fixture to clj-kondo-f
 
 ```
 src/clj_kondo_fix/impl/
-  rules.clj            — rule registry (keyword → fix-fn + message-re)
+  rules.clj            — single source of truth: rule-definitions (40 implemented rules),
+                         rule-metadata (all 82 rules, status + display name),
+                         stub-definitions (82 stubs for not-implemented / not-applicable rules),
+                         findings-matching-rule
   core.clj             — pipeline (lint → findings → fix → write)
   utils.clj            — shared low-level helpers (I/O, bracket, token)
   driver.clj           — reduce-findings driver + ->display-path
   require_entry.clj    — ns/require entry removal helpers (require-family rules)
   fixes.clj            — aggregator: re-exports every fix-*-in-file fn (do not add logic here)
-  fixes/
-    unused_namespace.clj
-    duplicate_require.clj
-    unused_binding.clj
-    unused_import.clj
-    unused_referred_var.clj
-    refer_all.clj
-    missing_else_branch.clj
-    misplaced_docstring.clj
-    unused_private_var.clj
-    redundant_do.clj
-    redundant_let.clj
+  fixes/               — one file per implemented rule (40 files, named <rule_underscored>.clj)
 
 test/clj_kondo_fix/
   test_support.clj     — shared test helpers (fixture-path, assert-fix, assert-skip, assert-no-finding, …)
@@ -37,11 +29,11 @@ test/clj_kondo_fix/
       <slug>-out.clj  — expected output after fix (generated or hand-written)
       <slug>.clj      — single file for no-change tests (skip / no-finding)
 
-resources/
-  rule-notes.edn       — status + reason for rules not in rules.clj; drives rules.md
-
 rules.md               — generated index; regenerate with `clojure -M:gen-rules`
-local/                 — untracked scratch scripts (gen_fixtures.clj, gen_rules_md.clj)
+README.md              — ## Rules section is generated; do not hand-edit that section
+local/
+  gen_rules_md.clj     — tracked; generator that writes rules.md and README.md ## Rules
+  gen_fixtures.clj     — untracked; generates -out.clj fixture files from -in.clj inputs
 ```
 
 ---
@@ -84,7 +76,7 @@ Used only by require-family rules (unused-namespace, duplicate-require, unused-i
 
 ---
 
-## Adding a New Rule
+## Adding an Implemented Rule
 
 ### 1. Create `src/clj_kondo_fix/impl/fixes/<rule-keyword>.clj`
 
@@ -144,9 +136,11 @@ Add one line to the `ns` `:require` block and one `def` at the bottom of `fixes.
 (def fix-your-rule-in-file your-rule/fix-your-rule-in-file)
 ```
 
-### 3. Register the rule in `rules.clj`
+### 3. Register in `rules.clj`
 
-Add an entry to `rule-definitions`:
+Two places to update:
+
+**a. Add to `rule-definitions`:**
 
 ```clojure
 :your-rule
@@ -158,6 +152,14 @@ Add an entry to `rule-definitions`:
 
 Verify `:message-re` against real kondo output — the pattern must match the full
 `:message` string from the finding.
+
+**b. Add to `rule-metadata`:**
+
+```clojure
+:your-rule {:status :implemented :display "human readable name"}
+```
+
+**c. Remove from `stub-definitions`** if the rule was previously stubbed there.
 
 ### 4. Create fixture directory and input files
 
@@ -242,18 +244,53 @@ clojure -M:test
 
 All tests, 0 failures before committing.
 
-### 8. Update `resources/rule-notes.edn`
-
-Remove the rule's entry (or set `:status :implemented`).
-
-### 9. Regenerate `rules.md`
+### 8. Regenerate `rules.md` and `README.md`
 
 ```bash
 clojure -M:gen-rules
 ```
 
-Commit `rules.md`, `resources/rule-notes.edn`, and all fixture files together
-with the implementation.
+This writes both `rules.md` and the `## Rules` section of `README.md` in one pass.
+
+Commit `rules.md`, `README.md`, and all fixture files together with the implementation.
+
+---
+
+## Registering a Stub Rule
+
+Use this path when a rule exists in clj-kondo but is not yet implemented (or is not
+applicable) in clj-kondo-fix. This keeps `rules.md` and `README.md` complete and
+eliminates the fallback icon.
+
+### 1. Add to `rule-metadata` in `rules.clj`
+
+```clojure
+;; Not yet implemented:
+:your-rule {:status :not-implemented :display "human readable name"}
+
+;; Not applicable (kondo fires but no auto-fix makes sense):
+:your-rule {:status :not-applicable :display "human readable name"}
+```
+
+### 2. Add to `stub-definitions` in `rules.clj`
+
+```clojure
+:your-rule
+{:message-re #"^Exact message pattern from kondo$"
+ :phase       :default
+ :fix-fn      stub-fix-fn
+ :display     "human readable name"}
+```
+
+`:fix-fn` must be `stub-fix-fn` (defined just above `stub-definitions` in `rules.clj`).
+
+### 3. Regenerate `rules.md` and `README.md`
+
+```bash
+clojure -M:gen-rules
+```
+
+No tests required for stubs — `stub-fix-fn` is a no-op.
 
 ---
 
@@ -268,6 +305,8 @@ with the implementation.
 
 ## Key Invariants
 
+- **`rules.clj` is the single source of truth.** All rule status and metadata lives in `rule-metadata` inside `rules.clj`. Do not maintain a separate EDN file.
+
 - **Fix functions are pure text transforms.** No kondo calls, no disk I/O. All I/O lives in `core.clj` and the test helpers.
 
 - **`fixes.clj` is a dumb aggregator.** Never add logic there — put it in the rule file.
@@ -280,7 +319,7 @@ with the implementation.
 
 - **Fixture `-in.clj` files intentionally have kondo findings.** Squiggles are expected.
 
-- **`local/` is untracked.** Scripts there are not committed; their outputs (`rules.md`, fixture `-out.clj` files) are.
+- **`local/gen_rules_md.clj` is tracked.** Commit it when the generator changes. `local/gen_fixtures.clj` remains untracked.
 
 - **Run `cljfmt` after editing any source file:**
   ```bash
