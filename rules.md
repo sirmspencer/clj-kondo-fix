@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-38 implemented · 49 not yet implemented · 33 not applicable · 0 skipped
+38 implemented · 48 not yet implemented · 34 not applicable · 0 skipped
 
 ## Index
 
@@ -80,7 +80,7 @@
 - [:redundant-do](#redundant-do) ✅
 - [:redundant-fn-wrapper](#redundant-fn-wrapper) ✅
 - [:redundant-format](#redundant-format) ✅
-- [:redundant-ignore](#redundant-ignore) ☹️
+- [:redundant-ignore](#redundant-ignore) ❌
 - [:redundant-let](#redundant-let) ✅
 - [:redundant-let-binding](#redundant-let-binding) ✅
 - [:redundant-nested-call](#redundant-nested-call) ✅
@@ -2263,7 +2263,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:missing-map-value` | warn on key with uneven amount of elements, i.e. one of the keys |
 | `:non-arg-vec-return-type-hint` | warn when a return type in `defn` is not placed on the argument vector (CLJ only) |
 | `:private-call` | warn when private var is used. The name of this linter should be |
-| `:redundant-ignore` | warn on redundant ignore, i.e. when an ignored expression doesn't trigger any lint warning |
 | `:refer` | warns when `:refer` is used. This can be used when one wants to |
 | `:shadowed-fn-param` | warn on fn param that has same name as previously defined one (in the same fn expression) |
 | `:shadowed-var` | warn on var that is shadowed by local |
@@ -2312,6 +2311,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:protocol-method-varargs` | Varargs protocol methods require structural refactoring |
 | `:quoted-case-test-constant` | Fix is trivial (remove single quote) but safety depends on whether the quoted form is intentional behavior in a performance-sensitive code path |
 | `:redefined-var` | Deciding which definition to keep or merge requires human judgment |
+| `:redundant-ignore` | Removing #_ changes argument positions in the enclosing form, which can alter semantics regardless of whether the ignored expression is pure |
 | `:refer-all` | Cannot determine which symbols are actually used without analysis data; producing an explicit :refer list or :as alias requires domain knowledge |
 | `:schema-misplaced-return` | Plumatic Schema placement requires understanding the schema structure |
 | `:self-requiring-namespace` | Circular self-require must be resolved by removing the problematic require manually |

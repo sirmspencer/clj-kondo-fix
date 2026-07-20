@@ -168,7 +168,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:redundant-do](rules.md#redundant-do) ✅
 - [:redundant-fn-wrapper](rules.md#redundant-fn-wrapper) ✅
 - [:redundant-format](rules.md#redundant-format) ✅
-- [:redundant-ignore](rules.md#redundant-ignore)
+- [:redundant-ignore](rules.md#redundant-ignore) ❌
 - [:redundant-let](rules.md#redundant-let) ✅
 - [:redundant-let-binding](rules.md#redundant-let-binding) ✅
 - [:redundant-nested-call](rules.md#redundant-nested-call) ✅

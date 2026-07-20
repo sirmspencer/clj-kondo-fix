@@ -354,12 +354,17 @@
    :reason "Fix is trivial (remove single quote) but safety depends on whether the quoted form is intentional behavior in a performance-sensitive code path"
    :display "quoted case test constant"}
 
-  :redefined-var
-  {:status :not-applicable
-   :reason "Deciding which definition to keep or merge requires human judgment"
-   :display "redefined var"}
+   :redefined-var
+   {:status :not-applicable
+    :reason "Deciding which definition to keep or merge requires human judgment"
+    :display "redefined var"}
 
-  :refer-all
+   :redundant-ignore
+   {:status :not-applicable
+    :reason "Removing #_ changes argument positions in the enclosing form, which can alter semantics regardless of whether the ignored expression is pure"
+    :display "redundant ignore"}
+
+   :refer-all
   {:status :not-applicable
    :reason "Cannot determine which symbols are actually used without analysis data; producing an explicit :refer list or :as alias requires domain knowledge"
    :display "refer all"}
@@ -530,11 +535,7 @@
   {:status :not-implemented
    :display "private call"}
 
-  :redundant-ignore
-  {:status :not-implemented
-   :display "redundant ignore"}
-
-  :refer
+   :refer
   {:status :not-implemented
    :display "refer"}
 
