@@ -98,11 +98,11 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:aliased-referred-var](rules.md#aliased-referred-var)
 - [:await-without-async-fn](rules.md#await-without-async-fn) ❌
 - [:case-duplicate-test](rules.md#case-duplicate-test)
-- [:case-quoted-test](rules.md#case-quoted-test)
+- [:case-quoted-test](rules.md#case-quoted-test) ❌
 - [:case-symbol-test](rules.md#case-symbol-test)
 - [:clj-kondo-config](rules.md#clj-kondo-config) ❌
-- [:cond-else](rules.md#cond-else)
-- [:condition-always-true](rules.md#condition-always-true)
+- [:cond-else](rules.md#cond-else) ✅
+- [:condition-always-true](rules.md#condition-always-true) ✅
 - [:conditional-build-up](rules.md#conditional-build-up)
 - [:conflicting-alias](rules.md#conflicting-alias)
 - [:consistent-alias](rules.md#consistent-alias) ❌
@@ -117,8 +117,8 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:discouraged-tag](rules.md#discouraged-tag)
 - [:discouraged-var](rules.md#discouraged-var) ❌
 - [:do-template](rules.md#do-template)
-- [:docstring-blank](rules.md#docstring-blank)
-- [:docstring-leading-trailing-whitespace](rules.md#docstring-leading-trailing-whitespace)
+- [:docstring-blank](rules.md#docstring-blank) ✅
+- [:docstring-leading-trailing-whitespace](rules.md#docstring-leading-trailing-whitespace) ✅
 - [:docstring-no-summary](rules.md#docstring-no-summary)
 - [:duplicate-field-name](rules.md#duplicate-field-name)
 - [:duplicate-key-args](rules.md#duplicate-key-args)
@@ -126,25 +126,25 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:duplicate-refer](rules.md#duplicate-refer)
 - [:duplicate-require](rules.md#duplicate-require) ✅
 - [:duplicate-set-key](rules.md#duplicate-set-key)
-- [:dynamic-var-not-earmuffed](rules.md#dynamic-var-not-earmuffed)
-- [:earmuffed-var-not-dynamic](rules.md#earmuffed-var-not-dynamic)
-- [:equals-expected-position](rules.md#equals-expected-position)
-- [:equals-false](rules.md#equals-false)
-- [:equals-float](rules.md#equals-float)
-- [:equals-nil](rules.md#equals-nil)
-- [:equals-true](rules.md#equals-true)
+- [:dynamic-var-not-earmuffed](rules.md#dynamic-var-not-earmuffed) ✅
+- [:earmuffed-var-not-dynamic](rules.md#earmuffed-var-not-dynamic) ✅
+- [:equals-expected-position](rules.md#equals-expected-position) ✅
+- [:equals-false](rules.md#equals-false) ✅
+- [:equals-float](rules.md#equals-float) ✅
+- [:equals-nil](rules.md#equals-nil) ✅
+- [:equals-true](rules.md#equals-true) ✅
 - [:file](rules.md#file) ❌
 - [:format](rules.md#format)
 - [:hook](rules.md#hook) ❌
-- [:if-nil-return](rules.md#if-nil-return)
-- [:if-x-x-y](rules.md#if-x-x-y)
+- [:if-nil-return](rules.md#if-nil-return) ✅
+- [:if-x-x-y](rules.md#if-x-x-y) ✅
 - [:inline-def](rules.md#inline-def)
 - [:is-message-not-string](rules.md#is-message-not-string)
 - [:java-static-field-call](rules.md#java-static-field-call)
 - [:line-length](rules.md#line-length)
 - [:loop-without-recur](rules.md#loop-without-recur) ❌
 - [:main-without-gen-class](rules.md#main-without-gen-class) ❌
-- [:minus-one](rules.md#minus-one)
+- [:minus-one](rules.md#minus-one) ✅
 - [:misplaced-async-metadata](rules.md#misplaced-async-metadata)
 - [:misplaced-docstring](rules.md#misplaced-docstring) ✅
 - [:missing-body-in-when](rules.md#missing-body-in-when)
@@ -157,38 +157,38 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:missing-test-assertion](rules.md#missing-test-assertion) ❌
 - [:namespace-name-mismatch](rules.md#namespace-name-mismatch) ❌
 - [:non-arg-vec-return-type-hint](rules.md#non-arg-vec-return-type-hint)
-- [:plus-one](rules.md#plus-one)
+- [:plus-one](rules.md#plus-one) ✅
 - [:private-call](rules.md#private-call)
 - [:protocol-method-arity-mismatch](rules.md#protocol-method-arity-mismatch) ❌
 - [:protocol-method-varargs](rules.md#protocol-method-varargs) ❌
-- [:quoted-case-test-constant](rules.md#quoted-case-test-constant)
+- [:quoted-case-test-constant](rules.md#quoted-case-test-constant) ❌
 - [:redefined-var](rules.md#redefined-var) ❌
-- [:redundant-call](rules.md#redundant-call)
-- [:redundant-declare](rules.md#redundant-declare)
+- [:redundant-call](rules.md#redundant-call) ✅
+- [:redundant-declare](rules.md#redundant-declare) ✅
 - [:redundant-do](rules.md#redundant-do) ✅
-- [:redundant-fn-wrapper](rules.md#redundant-fn-wrapper)
-- [:redundant-format](rules.md#redundant-format)
+- [:redundant-fn-wrapper](rules.md#redundant-fn-wrapper) ✅
+- [:redundant-format](rules.md#redundant-format) ✅
 - [:redundant-ignore](rules.md#redundant-ignore)
 - [:redundant-let](rules.md#redundant-let) ✅
-- [:redundant-let-binding](rules.md#redundant-let-binding)
-- [:redundant-nested-call](rules.md#redundant-nested-call)
-- [:redundant-primitive-coercion](rules.md#redundant-primitive-coercion)
-- [:redundant-str-call](rules.md#redundant-str-call)
+- [:redundant-let-binding](rules.md#redundant-let-binding) ✅
+- [:redundant-nested-call](rules.md#redundant-nested-call) ✅
+- [:redundant-primitive-coercion](rules.md#redundant-primitive-coercion) ✅
+- [:redundant-str-call](rules.md#redundant-str-call) ✅
 - [:refer](rules.md#refer)
-- [:refer-all](rules.md#refer-all) ⚠️
+- [:refer-all](rules.md#refer-all) ❌
 - [:schema-misplaced-return](rules.md#schema-misplaced-return) ❌
 - [:self-requiring-namespace](rules.md#self-requiring-namespace) ❌
 - [:shadowed-fn-param](rules.md#shadowed-fn-param)
 - [:shadowed-var](rules.md#shadowed-var)
-- [:single-key-in](rules.md#single-key-in)
-- [:single-logical-operand](rules.md#single-logical-operand)
+- [:single-key-in](rules.md#single-key-in) ✅
+- [:single-logical-operand](rules.md#single-logical-operand) ✅
 - [:single-operand-comparison](rules.md#single-operand-comparison)
 - [:syntax](rules.md#syntax) ❌
 - [:type-mismatch](rules.md#type-mismatch) ❌
 - [:unbound-destructuring-default](rules.md#unbound-destructuring-default)
 - [:underscore-in-namespace](rules.md#underscore-in-namespace)
 - [:unexpected-recur](rules.md#unexpected-recur)
-- [:uninitialized-var](rules.md#uninitialized-var)
+- [:uninitialized-var](rules.md#uninitialized-var) ✅
 - [:unknown-ns-option](rules.md#unknown-ns-option)
 - [:unknown-require-option](rules.md#unknown-require-option)
 - [:unquote-not-syntax-quoted](rules.md#unquote-not-syntax-quoted)
@@ -198,8 +198,8 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:unresolved-protocol-method](rules.md#unresolved-protocol-method) ❌
 - [:unresolved-symbol](rules.md#unresolved-symbol) ❌
 - [:unresolved-var](rules.md#unresolved-var) ❌
-- [:unsorted-imports](rules.md#unsorted-imports)
-- [:unsorted-required-namespaces](rules.md#unsorted-required-namespaces)
+- [:unsorted-imports](rules.md#unsorted-imports) ✅
+- [:unsorted-required-namespaces](rules.md#unsorted-required-namespaces) ✅
 - [:unused-alias](rules.md#unused-alias)
 - [:unused-binding](rules.md#unused-binding) ✅
 - [:unused-excluded-var](rules.md#unused-excluded-var)

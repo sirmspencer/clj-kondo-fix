@@ -4,40 +4,40 @@
 
 ## Index
 
-- [:alias-same-as-ns](#alias-same-as-ns)
-- [:aliased-namespace-symbol](#aliased-namespace-symbol)
-- [:aliased-namespace-var-usage](#aliased-namespace-var-usage)
-- [:aliased-referred-var](#aliased-referred-var)
+- [:alias-same-as-ns](#alias-same-as-ns) ☹️
+- [:aliased-namespace-symbol](#aliased-namespace-symbol) ☹️
+- [:aliased-namespace-var-usage](#aliased-namespace-var-usage) ☹️
+- [:aliased-referred-var](#aliased-referred-var) ☹️
 - [:await-without-async-fn](#await-without-async-fn) ❌
-- [:case-duplicate-test](#case-duplicate-test)
+- [:case-duplicate-test](#case-duplicate-test) ☹️
 - [:case-quoted-test](#case-quoted-test) ❌
-- [:case-symbol-test](#case-symbol-test)
+- [:case-symbol-test](#case-symbol-test) ☹️
 - [:clj-kondo-config](#clj-kondo-config) ❌
 - [:cond-else](#cond-else) ✅
 - [:condition-always-true](#condition-always-true) ✅
-- [:conditional-build-up](#conditional-build-up)
-- [:conflicting-alias](#conflicting-alias)
+- [:conditional-build-up](#conditional-build-up) ☹️
+- [:conflicting-alias](#conflicting-alias) ☹️
 - [:consistent-alias](#consistent-alias) ❌
 - [:datalog-syntax](#datalog-syntax) ❌
-- [:def-fn](#def-fn)
+- [:def-fn](#def-fn) ☹️
 - [:deprecated-namespace](#deprecated-namespace) ❌
 - [:deprecated-var](#deprecated-var) ❌
-- [:destructured-or-always-evaluates](#destructured-or-always-evaluates)
-- [:destructured-or-binding-of-same-map](#destructured-or-binding-of-same-map)
+- [:destructured-or-always-evaluates](#destructured-or-always-evaluates) ☹️
+- [:destructured-or-binding-of-same-map](#destructured-or-binding-of-same-map) ☹️
 - [:discouraged-java-method](#discouraged-java-method) ❌
 - [:discouraged-namespace](#discouraged-namespace) ❌
-- [:discouraged-tag](#discouraged-tag)
+- [:discouraged-tag](#discouraged-tag) ☹️
 - [:discouraged-var](#discouraged-var) ❌
-- [:do-template](#do-template)
+- [:do-template](#do-template) ☹️
 - [:docstring-blank](#docstring-blank) ✅
 - [:docstring-leading-trailing-whitespace](#docstring-leading-trailing-whitespace) ✅
-- [:docstring-no-summary](#docstring-no-summary)
-- [:duplicate-field-name](#duplicate-field-name)
-- [:duplicate-key-args](#duplicate-key-args)
-- [:duplicate-map-key](#duplicate-map-key)
-- [:duplicate-refer](#duplicate-refer)
+- [:docstring-no-summary](#docstring-no-summary) ☹️
+- [:duplicate-field-name](#duplicate-field-name) ☹️
+- [:duplicate-key-args](#duplicate-key-args) ☹️
+- [:duplicate-map-key](#duplicate-map-key) ☹️
+- [:duplicate-refer](#duplicate-refer) ☹️
 - [:duplicate-require](#duplicate-require) ✅
-- [:duplicate-set-key](#duplicate-set-key)
+- [:duplicate-set-key](#duplicate-set-key) ☹️
 - [:dynamic-var-not-earmuffed](#dynamic-var-not-earmuffed) ✅
 - [:earmuffed-var-not-dynamic](#earmuffed-var-not-dynamic) ✅
 - [:equals-expected-position](#equals-expected-position) ✅
@@ -46,31 +46,31 @@
 - [:equals-nil](#equals-nil) ✅
 - [:equals-true](#equals-true) ✅
 - [:file](#file) ❌
-- [:format](#format)
+- [:format](#format) ☹️
 - [:hook](#hook) ❌
 - [:if-nil-return](#if-nil-return) ✅
 - [:if-x-x-y](#if-x-x-y) ✅
-- [:inline-def](#inline-def)
-- [:is-message-not-string](#is-message-not-string)
-- [:java-static-field-call](#java-static-field-call)
-- [:line-length](#line-length)
+- [:inline-def](#inline-def) ☹️
+- [:is-message-not-string](#is-message-not-string) ☹️
+- [:java-static-field-call](#java-static-field-call) ☹️
+- [:line-length](#line-length) ☹️
 - [:loop-without-recur](#loop-without-recur) ❌
 - [:main-without-gen-class](#main-without-gen-class) ❌
 - [:minus-one](#minus-one) ✅
-- [:misplaced-async-metadata](#misplaced-async-metadata)
+- [:misplaced-async-metadata](#misplaced-async-metadata) ☹️
 - [:misplaced-docstring](#misplaced-docstring) ✅
-- [:missing-body-in-when](#missing-body-in-when)
-- [:missing-clause-in-try](#missing-clause-in-try)
+- [:missing-body-in-when](#missing-body-in-when) ☹️
+- [:missing-clause-in-try](#missing-clause-in-try) ☹️
 - [:missing-docstring](#missing-docstring) ❌
 - [:missing-else-branch](#missing-else-branch) ✅
-- [:missing-map-value](#missing-map-value)
+- [:missing-map-value](#missing-map-value) ☹️
 - [:missing-protocol-method](#missing-protocol-method) ❌
 - [:missing-protocol-method-arity](#missing-protocol-method-arity) ❌
 - [:missing-test-assertion](#missing-test-assertion) ❌
 - [:namespace-name-mismatch](#namespace-name-mismatch) ❌
-- [:non-arg-vec-return-type-hint](#non-arg-vec-return-type-hint)
+- [:non-arg-vec-return-type-hint](#non-arg-vec-return-type-hint) ☹️
 - [:plus-one](#plus-one) ✅
-- [:private-call](#private-call)
+- [:private-call](#private-call) ☹️
 - [:protocol-method-arity-mismatch](#protocol-method-arity-mismatch) ❌
 - [:protocol-method-varargs](#protocol-method-varargs) ❌
 - [:quoted-case-test-constant](#quoted-case-test-constant) ❌
@@ -80,49 +80,49 @@
 - [:redundant-do](#redundant-do) ✅
 - [:redundant-fn-wrapper](#redundant-fn-wrapper) ✅
 - [:redundant-format](#redundant-format) ✅
-- [:redundant-ignore](#redundant-ignore)
+- [:redundant-ignore](#redundant-ignore) ☹️
 - [:redundant-let](#redundant-let) ✅
 - [:redundant-let-binding](#redundant-let-binding) ✅
 - [:redundant-nested-call](#redundant-nested-call) ✅
 - [:redundant-primitive-coercion](#redundant-primitive-coercion) ✅
 - [:redundant-str-call](#redundant-str-call) ✅
-- [:refer](#refer)
+- [:refer](#refer) ☹️
 - [:refer-all](#refer-all) ❌
 - [:schema-misplaced-return](#schema-misplaced-return) ❌
 - [:self-requiring-namespace](#self-requiring-namespace) ❌
-- [:shadowed-fn-param](#shadowed-fn-param)
-- [:shadowed-var](#shadowed-var)
+- [:shadowed-fn-param](#shadowed-fn-param) ☹️
+- [:shadowed-var](#shadowed-var) ☹️
 - [:single-key-in](#single-key-in) ✅
 - [:single-logical-operand](#single-logical-operand) ✅
-- [:single-operand-comparison](#single-operand-comparison)
+- [:single-operand-comparison](#single-operand-comparison) ☹️
 - [:syntax](#syntax) ❌
 - [:type-mismatch](#type-mismatch) ❌
-- [:unbound-destructuring-default](#unbound-destructuring-default)
-- [:underscore-in-namespace](#underscore-in-namespace)
-- [:unexpected-recur](#unexpected-recur)
+- [:unbound-destructuring-default](#unbound-destructuring-default) ☹️
+- [:underscore-in-namespace](#underscore-in-namespace) ☹️
+- [:unexpected-recur](#unexpected-recur) ☹️
 - [:uninitialized-var](#uninitialized-var) ✅
-- [:unknown-ns-option](#unknown-ns-option)
-- [:unknown-require-option](#unknown-require-option)
-- [:unquote-not-syntax-quoted](#unquote-not-syntax-quoted)
-- [:unreachable-code](#unreachable-code)
-- [:unresolved-excluded-var](#unresolved-excluded-var)
+- [:unknown-ns-option](#unknown-ns-option) ☹️
+- [:unknown-require-option](#unknown-require-option) ☹️
+- [:unquote-not-syntax-quoted](#unquote-not-syntax-quoted) ☹️
+- [:unreachable-code](#unreachable-code) ☹️
+- [:unresolved-excluded-var](#unresolved-excluded-var) ☹️
 - [:unresolved-namespace](#unresolved-namespace) ❌
 - [:unresolved-protocol-method](#unresolved-protocol-method) ❌
 - [:unresolved-symbol](#unresolved-symbol) ❌
 - [:unresolved-var](#unresolved-var) ❌
 - [:unsorted-imports](#unsorted-imports) ✅
 - [:unsorted-required-namespaces](#unsorted-required-namespaces) ✅
-- [:unused-alias](#unused-alias)
+- [:unused-alias](#unused-alias) ☹️
 - [:unused-binding](#unused-binding) ✅
-- [:unused-excluded-var](#unused-excluded-var)
+- [:unused-excluded-var](#unused-excluded-var) ☹️
 - [:unused-import](#unused-import) ✅
 - [:unused-namespace](#unused-namespace) ✅
 - [:unused-private-var](#unused-private-var) ✅
 - [:unused-referred-var](#unused-referred-var) ✅
-- [:unused-value](#unused-value)
-- [:use](#use)
-- [:used-underscored-binding](#used-underscored-binding)
-- [:var-same-name-except-case](#var-same-name-except-case)
+- [:unused-value](#unused-value) ☹️
+- [:use](#use) ☹️
+- [:used-underscored-binding](#used-underscored-binding) ☹️
+- [:var-same-name-except-case](#var-same-name-except-case) ☹️
 - [:warn-on-reflection](#warn-on-reflection) ❌
 
 ## Implemented Rules
@@ -151,10 +151,10 @@ warn on `cond` with a different constant for the else branch than `:else`
 
 warn on a condition that evaluates to an always truthy constant,
 
-**(if 1 :then) → :then**
+**(if 1 :then :else) → :then**
 
 ```clojure
-(defn f [] (if 1 :then))
+(defn f [] (if 1 :then :else))
 ```
 
 ↓
@@ -179,10 +179,10 @@ warn on a condition that evaluates to an always truthy constant,
 
 ---
 
-**(if 1 :then :else) → :then**
+**(if 1 :then) → :then**
 
 ```clojure
-(defn f [] (if 1 :then :else))
+(defn f [] (if 1 :then))
 ```
 
 ↓
@@ -275,6 +275,63 @@ warns on namespace that has been required more than once within a namespace
 
 (toolz/make-endpoint :x)
 (toolz/make-exception {})
+```
+
+---
+
+**neither alias is used; the reported duplicate entry is removed, first entry kept**
+
+```clojure
+(ns foo (:require [clojure.string :as s]
+                  [clojure.string :as str]))
+```
+
+↓
+
+```clojure
+(ns foo (:require [clojure.string :as s]))
+```
+
+---
+
+**both aliases same length; first alias wins — second alias usages renamed and its entry removed**
+
+```clojure
+(ns foo
+  (:require [clojure.string :as aa]
+            [clojure.string :as bb]))
+
+(aa/join [""] "")
+(bb/upper-case "x")
+```
+
+↓
+
+```clojure
+(ns foo
+  (:require [clojure.string :as aa]))
+
+(aa/join [""] "")
+(aa/upper-case "x")
+```
+
+---
+
+**only the second alias is used; first entry removed and second entry pulled up inline**
+
+```clojure
+(ns foo (:require [clojure.string :as s]
+                  [clojure.string :as str]))
+
+(str/join [""] "")
+```
+
+↓
+
+```clojure
+(ns foo (:require  [clojure.string :as str]))
+
+(str/join [""] "")
 ```
 
 ---
@@ -411,11 +468,11 @@ warn on usage of comparison with `=` on floating point numbers,
 
 warn on usage of `(= nil x)` or `(= x nil)` rather than `(nil? x)`
 
-**nil is the first argument; replaced with (nil? x)**
+**nil is the second argument; replaced with (nil? x)**
 
 ```clojure
 (defn check [x]
-  (= nil x))
+  (= x nil))
 ```
 
 ↓
@@ -427,11 +484,11 @@ warn on usage of `(= nil x)` or `(= x nil)` rather than `(nil? x)`
 
 ---
 
-**nil is the second argument; replaced with (nil? x)**
+**nil is the first argument; replaced with (nil? x)**
 
 ```clojure
 (defn check [x]
-  (= x nil))
+  (= nil x))
 ```
 
 ↓
@@ -487,20 +544,6 @@ warn on usage of `(= true x)` or `(= x true)` rather than `(true? x)`
 
 warn when if-like form explicitly returns nil from either
 
-**(if x y nil) → (when x y)**
-
-```clojure
-(defn f [x y] (if x y nil))
-```
-
-↓
-
-```clojure
-(defn f [x y] (when x y))
-```
-
----
-
 **(if x nil y) → (when-not x y)**
 
 ```clojure
@@ -511,6 +554,20 @@ warn when if-like form explicitly returns nil from either
 
 ```clojure
 (defn f [x y] (when-not x y))
+```
+
+---
+
+**(if x y nil) → (when x y)**
+
+```clojure
+(defn f [x y] (if x y nil))
+```
+
+↓
+
+```clojure
+(defn f [x y] (when x y))
 ```
 
 ---
@@ -586,16 +643,30 @@ warn when docstring appears after argument vector instead of before
 
 warns about missing else branch in `if` expression
 
-**bare (if cond then) with no else branch; converted to (when ...)**
+**bare (if-some binding then) with no else branch; converted to (when-some ...)**
 
 ```clojure
-(if true 1)
+(if-some [x 1] x)
 ```
 
 ↓
 
 ```clojure
-(when true 1)
+(when-some [x 1] x)
+```
+
+---
+
+**bare (if-let binding then) with no else branch; converted to (when-let ...)**
+
+```clojure
+(if-let [x 1] x)
+```
+
+↓
+
+```clojure
+(when-let [x 1] x)
 ```
 
 ---
@@ -610,6 +681,34 @@ warns about missing else branch in `if` expression
 
 ```clojure
 (when true 1) (when-not true 1) (when-let [x 1] x) (when-some [x 1] x)
+```
+
+---
+
+**bare (if cond then) with no else branch; converted to (when ...)**
+
+```clojure
+(if true 1)
+```
+
+↓
+
+```clojure
+(when true 1)
+```
+
+---
+
+**bare (if-not cond then) with no else branch; converted to (when-not ...)**
+
+```clojure
+(if-not true 1)
+```
+
+↓
+
+```clojure
+(when-not true 1)
 ```
 
 ---
@@ -654,20 +753,6 @@ warn on usages of `+` that can be replaced with `inc`
 
 warn on redundant calls. The warning arises when a single argument
 
-**(-> 1) → 1**
-
-```clojure
-(-> 1)
-```
-
-↓
-
-```clojure
-1
-```
-
----
-
 **(merge {:a 1}) → {:a 1}**
 
 ```clojure
@@ -678,6 +763,20 @@ warn on redundant calls. The warning arises when a single argument
 
 ```clojure
 {:a 1}
+```
+
+---
+
+**(-> 1) → 1**
+
+```clojure
+(-> 1)
+```
+
+↓
+
+```clojure
+1
 ```
 
 ---
@@ -701,18 +800,6 @@ warn when `declare` is used after a var is already defined in the same namespace
 ---
 
 ```clojure
-(defn foo [] 1) (declare foo bar)
-```
-
-↓
-
-```clojure
-(defn foo [] 1) (declare bar)
-```
-
----
-
-```clojure
 (defn foo [] 1) (defn bar [] 2) (declare foo bar)
 ```
 
@@ -724,25 +811,23 @@ warn when `declare` is used after a var is already defined in the same namespace
 
 ---
 
-### :redundant-do
-
-**Redundant do**
-
-warn on usage of do that is redundant. The warning usually arises
-
-**single-line (when (do ...)); do wrapper removed, extra spaces collapsed**
-
 ```clojure
-(when true (do (println "a") (println "b")))
+(defn foo [] 1) (declare foo bar)
 ```
 
 ↓
 
 ```clojure
-(when true (println "a") (println "b"))
+(defn foo [] 1) (declare bar)
 ```
 
 ---
+
+### :redundant-do
+
+**Redundant do**
+
+warn on usage of do that is redundant. The warning usually arises
 
 **multi-line (when (do ...)); do line removed and body dedented two spaces**
 
@@ -759,6 +844,20 @@ warn on usage of do that is redundant. The warning usually arises
 (when true
   (println "a")
   (println "b"))
+```
+
+---
+
+**single-line (when (do ...)); do wrapper removed, extra spaces collapsed**
+
+```clojure
+(when true (do (println "a") (println "b")))
+```
+
+↓
+
+```clojure
+(when true (println "a") (println "b"))
 ```
 
 ---
@@ -809,16 +908,107 @@ warn when format strings contain no format specifiers
 
 warn on usage of let that is redundant. The warning usually arises
 
-**nested lets on one line with a body; inner bindings merged into outer, body preserved**
+**#_ discard form between outer and inner let; moved before the merged let**
 
 ```clojure
-(let [x 2] (let [y 1] (+ x y)))
+(let [x 1]
+  #_(println "hello")
+  (let [y 2]
+    body))
 ```
 
 ↓
 
 ```clojure
-(let [x 2 y 1] (+ x y))
+#_(println "hello")
+(let [x 1
+      y 2]
+  body)
+```
+
+---
+
+**nested lets across lines with no body; inner bindings merged into outer**
+
+```clojure
+(let [x 1]
+  (let [y 2]))
+```
+
+↓
+
+```clojure
+(let [x 1
+      y 2])
+```
+
+---
+
+**nested lets with body inline after inner binding close; merged correctly**
+
+```clojure
+(let [x 1]
+  (let [y 2] (+ x y)))
+```
+
+↓
+
+```clojure
+(let [x 1
+      y 2]
+  (+ x y))
+```
+
+---
+
+**nested lets with body on its own line; merged into one let with body preserved**
+
+```clojure
+(let [x 1]
+  (let [y 2]
+    (+ x y)))
+```
+
+↓
+
+```clojure
+(let [x 1
+      y 2]
+  (+ x y))
+```
+
+---
+
+**comment line between outer and inner let; moved before the merged let**
+
+```clojure
+(let [x 1]
+  ;; important note
+  (let [y 2]
+    body))
+```
+
+↓
+
+```clojure
+;; important note
+(let [x 1
+      y 2]
+  body)
+```
+
+---
+
+**nested lets on one line with no body; inner bindings merged into outer**
+
+```clojure
+(let [x 2] (let [y 1]))
+```
+
+↓
+
+```clojure
+(let [x 2 y 1])
 ```
 
 ---
@@ -839,6 +1029,38 @@ warn on usage of let that is redundant. The warning usually arises
       b 2
       c 3]
   (+ a b c))
+```
+
+---
+
+**outer let has a multi-line binding vector; inner bindings appended with matching indentation**
+
+```clojure
+(let [x 1
+      y 2]
+  (let [z 3]))
+```
+
+↓
+
+```clojure
+(let [x 1
+      y 2
+      z 3])
+```
+
+---
+
+**nested lets on one line with a body; inner bindings merged into outer, body preserved**
+
+```clojure
+(let [x 2] (let [y 1] (+ x y)))
+```
+
+↓
+
+```clojure
+(let [x 2 y 1] (+ x y))
 ```
 
 ---
@@ -985,10 +1207,10 @@ warn on associative path function with a single value path
 
 warn on single operand logical operators with always the same value
 
-**(or x) collapses to x**
+**(and x) collapses to x**
 
 ```clojure
-(defn f [x] (or x))
+(defn f [x] (and x))
 ```
 
 ↓
@@ -999,10 +1221,10 @@ warn on single operand logical operators with always the same value
 
 ---
 
-**(and x) collapses to x**
+**(or x) collapses to x**
 
 ```clojure
-(defn f [x] (and x))
+(defn f [x] (or x))
 ```
 
 ↓
@@ -1039,20 +1261,6 @@ warns on non-alphabetically sorted imports in `ns` and `require` forms
 
 ```clojure
 (ns test
-  (:import [java.util Date ArrayList] [java.io File]))
-```
-
-↓
-
-```clojure
-(ns test
-  (:import [java.io File] [java.util Date ArrayList]))
-```
-
----
-
-```clojure
-(ns test
   (:import
    [java.util Date ArrayList]
    [java.io File]))
@@ -1067,25 +1275,25 @@ warns on non-alphabetically sorted imports in `ns` and `require` forms
 
 ---
 
-### :unsorted-required-namespaces
-
-**Unsorted required namespaces**
-
-warns on non-alphabetically sorted libspecs in `ns` and `require` forms
-
 ```clojure
 (ns test
-  (:require [b.core] [a.core]))
+  (:import [java.util Date ArrayList] [java.io File]))
 ```
 
 ↓
 
 ```clojure
 (ns test
-  (:require [a.core] [b.core]))
+  (:import [java.io File] [java.util Date ArrayList]))
 ```
 
 ---
+
+### :unsorted-required-namespaces
+
+**Unsorted required namespaces**
+
+warns on non-alphabetically sorted libspecs in `ns` and `require` forms
 
 ```clojure
 (ns test
@@ -1121,11 +1329,71 @@ warns on non-alphabetically sorted libspecs in `ns` and `require` forms
 
 ---
 
+```clojure
+(ns test
+  (:require [b.core] [a.core]))
+```
+
+↓
+
+```clojure
+(ns test
+  (:require [a.core] [b.core]))
+```
+
+---
+
 ### :unused-binding
 
 **Unused binding**
 
 warn on unused binding
+
+**first key in :keys vector unused; key removed, remaining keys preserved**
+
+```clojure
+(defn f [{:keys [x y z]}] (+ y z))
+```
+
+↓
+
+```clojure
+(defn f [{:keys [y z]}] (+ y z))
+```
+
+---
+
+**multi-line form where :as and binding both unused; same collapse behaviour across lines**
+
+```clojure
+(defn f [{conn :db/conn
+          :as req}] {:status 501})
+```
+
+↓
+
+```clojure
+(defn f [_] {:status 501})
+```
+
+---
+
+**multi-line :keys vector, first key on its own line unused; line removed, next key pulled up**
+
+```clojure
+(defn f [{:keys [x
+                 y
+                 z]}] (+ y z))
+```
+
+↓
+
+```clojure
+(defn f [{:keys [y
+                 z]}] (+ y z))
+```
+
+---
 
 **simple unused fn param; prefixed with _ to signal intentional non-use**
 
@@ -1137,6 +1405,62 @@ warn on unused binding
 
 ```clojure
 (defn foo [_x])
+```
+
+---
+
+**last key in :keys vector unused; key removed, preceding keys preserved**
+
+```clojure
+(defn f [{:keys [x y z]}] (+ x y))
+```
+
+↓
+
+```clojure
+(defn f [{:keys [x y]}] (+ x y))
+```
+
+---
+
+**middle key in :keys vector unused; key removed, flanking keys and spacing preserved**
+
+```clojure
+(defn f [{:keys [x y z]}] (+ x z))
+```
+
+↓
+
+```clojure
+(defn f [{:keys [x z]}] (+ x z))
+```
+
+---
+
+**:as and the concrete binding both unused; :as removed and map collapses to _**
+
+```clojure
+(defn f [{conn :db/conn :as req}] {:status 501})
+```
+
+↓
+
+```clojure
+(defn f [_] {:status 501})
+```
+
+---
+
+**unused :keys binding but :as state is used; map collapses to the :as name**
+
+```clojure
+(defn f [{:keys [db] :as state} arg] (foo state arg))
+```
+
+↓
+
+```clojure
+(defn f [state arg] (foo state arg))
 ```
 
 ---
@@ -1155,16 +1479,32 @@ warn on unused binding
 
 ---
 
-**first key in :keys vector unused; key removed, remaining keys preserved**
+**only key in :keys vector unused; entire map collapses to plain _**
 
 ```clojure
-(defn f [{:keys [x y z]}] (+ y z))
+(defn f [{:keys [x]}])
 ```
 
 ↓
 
 ```clojure
-(defn f [{:keys [y z]}] (+ y z))
+(defn f [_])
+```
+
+---
+
+**multi-line :keys vector, unused key shares a line with other keys; unused key removed, others kept**
+
+```clojure
+(defn f [{:keys [x y
+                 z]}] (+ y z))
+```
+
+↓
+
+```clojure
+(defn f [{:keys [y
+                 z]}] (+ y z))
 ```
 
 ---
@@ -1179,6 +1519,86 @@ warn on unused binding
 
 ```clojure
 (let [{:keys [order/id]} {}] id)
+```
+
+---
+
+**multi-line :keys vector, last key on its own line unused; closing brackets merged onto preceding line**
+
+```clojure
+(defn f [{:keys [x
+                 y
+                 z]}] (+ x y))
+```
+
+↓
+
+```clojure
+(defn f [{:keys [x
+                 y]}] (+ x y))
+```
+
+---
+
+**:strs destructuring in a let binding; unused key removed (same behaviour as :keys)**
+
+```clojure
+(let [{:strs [x y]} some-map] (foo some-map y))
+```
+
+↓
+
+```clojure
+(let [{:strs [y]} some-map] (foo some-map y))
+```
+
+---
+
+**map inside a function-call let rhs is not a destructuring position; only the :keys key is removed**
+
+```clojure
+(defn f [{:keys [query]} vals]
+  (let [sql (some-fn/call {:results {:as vals}})]
+    sql))
+```
+
+↓
+
+```clojure
+(defn f [_ vals]
+  (let [sql (some-fn/call {:results {:as vals}})]
+    sql))
+```
+
+---
+
+**multi-line :keys vector, middle key on its own line unused; line removed**
+
+```clojure
+(defn f [{:keys [x
+                 y
+                 z]}] (+ x z))
+```
+
+↓
+
+```clojure
+(defn f [{:keys [x
+                 z]}] (+ x z))
+```
+
+---
+
+**:keys destructuring in a let binding; unused key removed (safe — no side effects on deref)**
+
+```clojure
+(let [{:keys [x y]} some-map] (foo some-map y))
+```
+
+↓
+
+```clojure
+(let [{:keys [y]} some-map] (foo some-map y))
 ```
 
 ---
@@ -1203,6 +1623,62 @@ warn on unused import
 
 ---
 
+**last class of three unused; removed, Date and Instant preserved**
+
+```clojure
+(ns foo (:import [java.util Date Instant List]))
+```
+
+↓
+
+```clojure
+(ns foo (:import [java.util Date Instant]))
+```
+
+---
+
+**middle class of three unused; removed with correct spacing, first and last preserved**
+
+```clojure
+(ns foo (:import [java.util Date Instant List]))
+```
+
+↓
+
+```clojure
+(ns foo (:import [java.util Date List]))
+```
+
+---
+
+**both classes in an import group unused; entire import group removed**
+
+```clojure
+(ns foo (:import [java.util Date List]))
+```
+
+↓
+
+```clojure
+(ns foo)
+```
+
+---
+
+**one class unused in a standalone (import ...) vector; that class removed**
+
+```clojure
+(import '[java.util Foo Bar])
+```
+
+↓
+
+```clojure
+(import '[java.util Bar])
+```
+
+---
+
 **last remaining class in an import group unused; entire group removed, no bare [package] left**
 
 ```clojure
@@ -1218,17 +1694,52 @@ warn on unused import
 
 ---
 
+**first class of three unused; removed, Instant and List preserved**
+
+```clojure
+(ns foo (:import [java.util Date Instant List]))
+```
+
+↓
+
+```clojure
+(ns foo (:import [java.util Instant List]))
+```
+
+---
+
 ### :unused-namespace
 
 **Unused namespace**
 
 warns on required but unused namespace
 
-**single unused require on its own line; entry removed and empty :require clause cleaned up**
+**multi-line last entry; removed and closing ) merged onto previous entry line**
 
 ```clojure
 (ns foo
-  (:require [clojure.string :as s]))
+  (:require [clojure.set :as cs]
+            [my.app.some.long-unused-ns
+             :as unused]))
+
+(cs/difference #{1} #{2})
+```
+
+↓
+
+```clojure
+(ns foo
+  (:require [clojure.set :as cs]))
+
+(cs/difference #{1} #{2})
+```
+
+---
+
+**single-line ns with inline require; entry removed and empty (:require) clause cleaned up**
+
+```clojure
+(ns foo (:require [clojure.string :as s]))
 ```
 
 ↓
@@ -1239,12 +1750,33 @@ warns on required but unused namespace
 
 ---
 
-**both requires unused; entries and the entire :require block removed, ns closes cleanly**
+**trailing comment belongs to the kept entry, not the removed one; comment stays in place**
 
 ```clojure
 (ns foo
-  (:require [clojure.string :as s]
+  (:require [clojure.string :as s] ;; for set ops
             [clojure.set :as cs]))
+
+(s/join [""] "")
+```
+
+↓
+
+```clojure
+(ns foo
+  (:require [clojure.string :as s] ;; for set ops
+            ))
+
+(s/join [""] "")
+```
+
+---
+
+**single unused require on its own line; entry removed and empty :require clause cleaned up**
+
+```clojure
+(ns foo
+  (:require [clojure.string :as s]))
 ```
 
 ↓
@@ -1277,20 +1809,47 @@ warns on required but unused namespace
 
 ---
 
-### :unused-private-var
+**two unused requires on the same line; both removed and empty :require clause cleaned up**
 
-**Unused private var**
+```clojure
+(ns foo (:require [clojure.string :as s] [clojure.set :as cs]))
+```
 
-warns on unused private vars
-
-**unused defn- form; entire defn- removed including its preceding blank line**
+↓
 
 ```clojure
 (ns foo)
+```
 
-(defn- helper [])
+---
 
-(defn public [] :ok)
+**multi-line entry is the only require; entry and entire :require block removed, (ns foo) left clean**
+
+```clojure
+(ns foo
+  (:require
+   [my.app.some.long-unused-ns
+    :as unused]))
+```
+
+↓
+
+```clojure
+(ns foo)
+```
+
+---
+
+**(:count) keyword lookup in a threading macro; must not be matched as an ns clause to clean up**
+
+```clojure
+(ns foo
+  (:require [clojure.string :as s]))
+
+(defn f [m]
+  (-> m
+      first
+      (:count)))
 ```
 
 ↓
@@ -1298,10 +1857,128 @@ warns on unused private vars
 ```clojure
 (ns foo)
 
-(defn public [] :ok)
+(defn f [m]
+  (-> m
+      first
+      (:count)))
 ```
 
 ---
+
+**comment-only line precedes the removed entry; comment de-indented and preserved outside require**
+
+```clojure
+(ns foo
+  (:require [clojure.string :as s]
+            ;; this one is unused
+            [clojure.set :as cs]))
+
+(s/join [""] "")
+```
+
+↓
+
+```clojure
+(ns foo
+  (:require [clojure.string :as s]))
+;; this one is unused
+
+(s/join [""] "")
+```
+
+---
+
+**last entry removed when preceding entry spans multiple lines; )) merged onto :as line**
+
+```clojure
+(ns foo
+  (:require [clojure.string
+             :as str]
+            [clojure.set :as cs]))
+
+(str/join [""] "")
+```
+
+↓
+
+```clojure
+(ns foo
+  (:require [clojure.string
+             :as str]))
+
+(str/join [""] "")
+```
+
+---
+
+**last entry removed when :require is on the preceding line; closing )) merged onto surviving ]**
+
+```clojure
+(ns foo
+  (:require [clojure.set :as set]
+            [clojure.tools.logging :as log]))
+
+(set/difference #{1} #{2})
+```
+
+↓
+
+```clojure
+(ns foo
+  (:require [clojure.set :as set]))
+
+(set/difference #{1} #{2})
+```
+
+---
+
+**both requires unused; entries and the entire :require block removed, ns closes cleanly**
+
+```clojure
+(ns foo
+  (:require [clojure.string :as s]
+            [clojure.set :as cs]))
+```
+
+↓
+
+```clojure
+(ns foo)
+```
+
+---
+
+**multi-line entry in the middle of three; removed, both single-line siblings preserved**
+
+```clojure
+(ns foo
+  (:require [clojure.set :as cs]
+            [my.app.some.long-unused-ns
+             :as unused]
+            [clojure.string :as str]))
+
+(cs/difference #{1} #{2})
+(str/join [""] "")
+```
+
+↓
+
+```clojure
+(ns foo
+  (:require [clojure.set :as cs]
+            [clojure.string :as str]))
+
+(cs/difference #{1} #{2})
+(str/join [""] "")
+```
+
+---
+
+### :unused-private-var
+
+**Unused private var**
+
+warns on unused private vars
 
 **unused multi-line def ^:private form; entire form removed**
 
@@ -1325,11 +2002,105 @@ warns on unused private vars
 
 ---
 
+**unused defn- form; entire defn- removed including its preceding blank line**
+
+```clojure
+(ns foo)
+
+(defn- helper [])
+
+(defn public [] :ok)
+```
+
+↓
+
+```clojure
+(ns foo)
+
+(defn public [] :ok)
+```
+
+---
+
+**two independent unused private vars; both forms removed**
+
+```clojure
+(ns foo)
+
+(defn- foo-helper [])
+
+(defn- bar-helper [])
+
+(defn public [] :ok)
+```
+
+↓
+
+```clojure
+(ns foo)
+
+(defn public [] :ok)
+```
+
+---
+
+**unused def ^:private form; entire def removed including its preceding blank line**
+
+```clojure
+(ns foo)
+
+(def ^:private threshold 42)
+
+(defn public [] :ok)
+```
+
+↓
+
+```clojure
+(ns foo)
+
+(defn public [] :ok)
+```
+
+---
+
 ### :unused-referred-var
 
 **Unused referred var**
 
 warns about unused referred vars
+
+**last var removed from :refer vector; preceding var and closing bracket correctly spaced**
+
+```clojure
+(ns foo (:require [clojure.string :refer [join split]]))
+
+(join [""] "")
+```
+
+↓
+
+```clojure
+(ns foo (:require [clojure.string :refer [join]]))
+
+(join [""] "")
+```
+
+---
+
+**var name ends with ? (e.g. ends-with?); word-boundary matching handles the ? correctly**
+
+```clojure
+(ns foo (:require [clojure.string :refer [starts-with? ends-with?]]))
+```
+
+↓
+
+```clojure
+(ns foo (:require [clojure.string :refer [starts-with?]]))
+```
+
+---
 
 **one referred var unused, other is used; unused var removed, used one stays**
 
@@ -1345,6 +2116,71 @@ warns about unused referred vars
 (ns foo (:require [clojure.string :refer [join]]))
 
 (join [""] "")
+```
+
+---
+
+**all referred vars removed; empty :refer [] clause cleaned up, bare require entry also removed**
+
+```clojure
+(ns foo (:require [clojure.string :refer [join]]))
+```
+
+↓
+
+```clojure
+(ns foo)
+```
+
+---
+
+**all referred vars removed from a multi-require ns; bare entry removed, sibling require preserved**
+
+```clojure
+(ns foo (:require [test :as t]
+                  [clojure.string :refer [join]]))
+```
+
+↓
+
+```clojure
+(ns foo (:require [test :as t]))
+```
+
+---
+
+**middle var removed from :refer vector; space between flanking vars preserved**
+
+```clojure
+(ns foo (:require [burpless :refer [step run-cucumber hook]]))
+
+(step) (hook)
+```
+
+↓
+
+```clojure
+(ns foo (:require [burpless :refer [step hook]]))
+
+(step) (hook)
+```
+
+---
+
+**first var removed from :refer vector; remaining vars shift left with correct spacing**
+
+```clojure
+(ns foo (:require [clojure.string :refer [join split starts-with?]]))
+
+(split "" #",") (starts-with? "" "")
+```
+
+↓
+
+```clojure
+(ns foo (:require [clojure.string :refer [split starts-with?]]))
+
+(split "" #",") (starts-with? "" "")
 ```
 
 ---
@@ -1366,6 +2202,29 @@ warns about unused referred vars
   (:require [clojure.string :as s]))
 
 (s/join [""] "")
+```
+
+---
+
+**multi-line :refer vector, unused var on its own line; line removed, closing bracket pulled up**
+
+```clojure
+(ns foo
+  (:require
+   [clojure.string :refer [join
+                           ends-with?]]))
+
+(join [""] "")
+```
+
+↓
+
+```clojure
+(ns foo
+  (:require
+   [clojure.string :refer [join]]))
+
+(join [""] "")
 ```
 
 ## Not Yet Implemented

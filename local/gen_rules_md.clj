@@ -4,9 +4,8 @@
 ;;
 ;; Sources:
 ;;   ~/ext-github/clj-kondo/doc/linters.md  — canonical rule list + descriptions
-;;   src/clj_kondo_fix/impl/rules.clj        — implemented rules (rule-definitions keys)
-;;   resources/rule-notes.edn               — :example/:examples hints + status/reason
-;;   test/clj_kondo_fix/fixtures/<rule>/     — fixture files with ;;-; ... ;-;; tags
+;;   src/clj_kondo_fix/impl/rules.clj        — rule-metadata (status/reason) + rule-definitions
+;;   test/clj_kondo_fix/rules/<rule>/       — fixture files with ;;-; ... ;-;; tags
 ;;
 ;; Output:
 ;;   rules.md  (project root)
@@ -59,13 +58,18 @@
             (recur rest current-heading rules)))))))
 
 ;; ---------------------------------------------------------------------------
-;; Parse rules.clj — extract implemented rule keys
+;; Parse rules.clj — extract rule-metadata (pure EDN block) + rule-definitions keys
 ;; ---------------------------------------------------------------------------
 
-(defn parse-implemented-rules [path]
+(defn parse-rule-metadata [path]
   (let [content (slurp path)]
-    (->> (re-seq #"(?m)^\s+\{?:([\w-]+)\n\s+\{?:message-re" content)
-         (map #(keyword (second %)))
+    (when-let [m (re-find #"\(def rule-metadata\n([\s\S]*?)\)\n\n\(defn stub-fix-fn" content)]
+      (edn/read-string (second m)))))
+
+(defn parse-implemented-keys [path]
+  (let [content (slurp path)]
+    (->> (re-seq #"(?m)^\s+\{?:([\w?-]+)\n\s+\{?:message-re" content)
+         (map second)
          set)))
 
 ;; ---------------------------------------------------------------------------
@@ -90,25 +94,16 @@
             m       (re-find #";;-;\s*(.+?)\s*;-;;" content)]
         (when m (second m))))))
 
-(defn choose-examples [rule-kw notes]
-  "Return a seq of slugs to showcase for this rule.
-   Uses :examples or :example from notes if present; otherwise returns all
-   -in/-out pairs."
+(defn choose-examples [rule-kw _notes]
   (let [dir (fixture-dir rule-kw)]
-    (if-let [ex (or (:examples (get notes rule-kw))
-                    (when-let [e (:example (get notes rule-kw))] [e]))]
-      ex
-      ;; default: shortest -in/-out pair
+    (when (.isDirectory dir)
       (let [pairs (->> (.listFiles dir)
                        (filter #(str/ends-with? (.getName %) "-in.clj"))
                        (keep (fn [f]
-                                (let [slug (str/replace (.getName f) #"-in\.clj$" "")
-                                      out  (io/file dir (str slug "-out.clj"))]
-                                  (when (.exists out)
-                                    {:slug slug
-                                     :len  (+ (count (slurp f)) (count (slurp out)))}))))
-                       (sort-by :len))]
-        (when (seq pairs) (mapv :slug pairs))))))
+                               (let [slug (str/replace (.getName f) #"-in\.clj$" "")
+                                     out  (io/file dir (str slug "-out.clj"))]
+                                 (when (.exists out) slug)))))]
+        (when (seq pairs) (vec pairs))))))
 
 ;; ---------------------------------------------------------------------------
 ;; Render sections
@@ -132,8 +127,8 @@
                          (str/trimr out-raw)
                          "```"])))))
 
-(defn render-implemented [rule-kw heading desc notes]
-  (let [examples (choose-examples rule-kw notes)
+(defn render-implemented [rule-kw heading desc]
+  (let [examples (choose-examples rule-kw nil)
         ex-blocks (keep #(render-example rule-kw %) examples)]
     (str/join "\n\n"
               (remove nil?
@@ -144,48 +139,75 @@
                          (str/join "\n\n---\n\n" ex-blocks))]))))
 
 ;; ---------------------------------------------------------------------------
+;; README.md ## Rules section
+;; ---------------------------------------------------------------------------
+
+(defn rules-anchor [rule-kw]
+  (str/replace (name rule-kw) #"[^a-z0-9-]" ""))
+
+(defn readme-status-icon [s]
+  (case s
+    :implemented " ✅"
+    :not-applicable " ❌"
+    :skipped " ⚠️"
+    ""))
+
+(defn render-readme-rules [enriched]
+  (str "## Rules\n\n"
+       "✅ implemented · ❌ not applicable · ⚠️ skipped · (no icon) not yet implemented\n\n"
+       "See [rules.md](rules.md) for implementation notes and before/after examples.\n\n"
+       (str/join "\n"
+                 (map (fn [r]
+                        (let [anchor (rules-anchor (:keyword r))]
+                          (str "- [:" (:keyword r) "](rules.md#" anchor ")"
+                               (readme-status-icon (:status r)))))
+                      enriched))))
+
+;; ---------------------------------------------------------------------------
 ;; Main
 ;; ---------------------------------------------------------------------------
 
 (defn -main [& _]
   (let [linters-path  (str (System/getProperty "user.home") "/ext-github/clj-kondo/doc/linters.md")
         rules-clj     "src/clj_kondo_fix/impl/rules.clj"
-        notes-path    "resources/rule-notes.edn"
         out-path      "rules.md"
 
         all-rules     (parse-linters-md linters-path)
-        implemented   (parse-implemented-rules rules-clj)
-        notes         (edn/read-string (slurp notes-path))
+        metadata      (parse-rule-metadata rules-clj)
+        impl-keys     (parse-implemented-keys rules-clj)
 
-        ;; classify each rule
         enriched      (->> all-rules
                            (map (fn [r]
-                                  (let [kw      (clojure.lang.Keyword/intern (:keyword r))
-                                        note    (get notes kw)
-                                        ;; Use explicit :status from notes only when present;
-                                        ;; otherwise derive from rules.clj.
-                                        st      (cond
-                                                  (and note (contains? note :status))
-                                                  (:status note)
-                                                  (contains? implemented kw) :implemented
-                                                  :else                      :not-implemented)]
-                                    (assoc r :kw kw :status st
-                                             :reason (get-in notes [kw :reason])))))
+                                  (let [kw   (clojure.lang.Keyword/intern (:keyword r))
+                                        meta (get metadata kw)]
+                                    (assoc r :kw kw
+                                           :status (or (:status meta)
+                                                       (when (contains? impl-keys (:keyword r))
+                                                         :implemented))
+                                           :reason (:reason meta)))))
                            (sort-by :keyword))
 
         impl     (filter #(= :implemented (:status %)) enriched)
         skipped  (filter #(= :skipped     (:status %)) enriched)
         todo     (filter #(= :not-implemented (:status %)) enriched)
         na       (filter #(= :not-applicable  (:status %)) enriched)
+        unknown  (filter #(nil? (:status %)) enriched)
+
+        status-icon (fn [s]
+                      (case s
+                        :implemented    " ✅"
+                        :not-applicable " ❌"
+                        :not-implemented " ☹️"
+                        :skipped        " ⚠️"
+                        " 🚨"))
 
         ;; ---- Implemented section ----
         impl-section
         (str "## Implemented Rules\n\n"
              (str/join "\n\n---\n\n"
-                       (map #(render-implemented (:kw %) (:heading %) (:desc %) notes)
+                       (map #(render-implemented (:kw %) (:heading %) (:desc %))
                             impl)))
 
-        ;; ---- Skipped section (inline with not-applicable) ----
         ;; ---- Not-yet-implemented table ----
         todo-table
         (str "## Not Yet Implemented\n\n"
@@ -213,14 +235,9 @@
         (str "## Index\n\n"
              (str/join "\n"
                        (map (fn [r]
-                              (let [tag (case (:status r)
-                                          :implemented    " ✅"
-                                          :skipped        " ⚠️"
-                                          :not-applicable " ❌"
-                                          "")]
-                                (str "- [:" (:keyword r) "](#"
-                                     (str/replace (:keyword r) #"[^a-z0-9-]" "")
-                                     ")" tag)))
+                              (str "- [:" (:keyword r) "](#"
+                                   (str/replace (:keyword r) #"[^a-z0-9-]" "")
+                                   ")" (status-icon (:status r))))
                             enriched)))
 
         output
@@ -237,6 +254,15 @@
 
     (spit out-path output)
     (println (str "Wrote " out-path))
+
+    ;; Update README.md ## Rules section
+    (let [readme-path "README.md"
+          readme     (slurp readme-path)
+          rules-s    (render-readme-rules enriched)
+          new-readme (str/replace readme #"(?sm)^## Rules\n\n.*?(?=\n## |\z)" rules-s)]
+      (spit readme-path new-readme)
+      (println (str "Updated " readme-path)))
+
     (println (str "  " (count impl) " implemented  |  "
-                  (count todo) " not implemented  |  "
+                  (count todo) " not yet implemented  |  "
                   (count na)   " not applicable"))))

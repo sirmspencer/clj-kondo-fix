@@ -36,7 +36,7 @@
 
 (defn expand-findings-by-rule [findings active-rules]
   (reduce-kv (fn [acc rule-key rule-def]
-               (let [matching (rules/findings-matching-rule findings rule-def)]
+               (let [matching (rules/findings-matching-rule findings rule-key rule-def)]
                  (if (seq matching)
                    (assoc acc rule-key {:rule-def rule-def
                                         :findings (group-findings-by-file matching)})
