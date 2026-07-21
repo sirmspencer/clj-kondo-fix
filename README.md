@@ -193,7 +193,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:unknown-require-option](rules.md#unknown-require-option)
 - [:unquote-not-syntax-quoted](rules.md#unquote-not-syntax-quoted)
 - [:unreachable-code](rules.md#unreachable-code)
-- [:unresolved-excluded-var](rules.md#unresolved-excluded-var)
+- [:unresolved-excluded-var](rules.md#unresolved-excluded-var) ✅
 - [:unresolved-namespace](rules.md#unresolved-namespace) ❌
 - [:unresolved-protocol-method](rules.md#unresolved-protocol-method) ❌
 - [:unresolved-symbol](rules.md#unresolved-symbol) ❌

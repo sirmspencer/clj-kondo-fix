@@ -265,7 +265,13 @@
    {:message-re #"^Unused excluded var: "
     :phase       :default
     :fix-fn      fixes/fix-unused-excluded-var-in-file
-    :display     "unused excluded var"}})
+    :display     "unused excluded var"}
+
+   :unresolved-excluded-var
+   {:message-re #"^Unresolved excluded var: "
+    :phase       :default
+    :fix-fn      fixes/fix-unresolved-excluded-var-in-file
+    :display     "unresolved excluded var"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -603,9 +609,9 @@
   {:status :not-implemented
    :display "unreachable code"}
 
-  :unresolved-excluded-var
-  {:status :not-implemented
-   :display "unresolved excluded var"}
+   :unresolved-excluded-var
+   {:status :implemented
+    :display "unresolved excluded var"}
 
    :unused-alias
    {:status :implemented
@@ -1006,11 +1012,6 @@
   :unreachable-code
   {:message-re #"^"
    :display "unreachable code"
-   :fix-fn stub-fix-fn}
-
-  :unresolved-excluded-var
-  {:message-re #"^"
-   :display "unresolved excluded var"
    :fix-fn stub-fix-fn}
 
    :unused-value

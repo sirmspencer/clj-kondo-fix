@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-42 implemented · 44 not yet implemented · 34 not applicable · 0 skipped
+43 implemented · 43 not yet implemented · 34 not applicable · 0 skipped
 
 ## Index
 
@@ -105,7 +105,7 @@
 - [:unknown-require-option](#unknown-require-option) ☹️
 - [:unquote-not-syntax-quoted](#unquote-not-syntax-quoted) ☹️
 - [:unreachable-code](#unreachable-code) ☹️
-- [:unresolved-excluded-var](#unresolved-excluded-var) ☹️
+- [:unresolved-excluded-var](#unresolved-excluded-var) ✅
 - [:unresolved-namespace](#unresolved-namespace) ❌
 - [:unresolved-protocol-method](#unresolved-protocol-method) ❌
 - [:unresolved-symbol](#unresolved-symbol) ❌
@@ -1301,6 +1301,29 @@ warn on var without initial value
 
 ---
 
+### :unresolved-excluded-var
+
+**Unresolved excluded var**
+
+warns when `:refer-clojure :exclude` contains vars that do not exist in clojure.core or cljs.core
+
+```clojure
+(ns foo.removes-unresolved-var
+  (:refer-clojure :exclude [nonexistent]))
+
+(def x 1)
+```
+
+↓
+
+```clojure
+(ns foo.removes-unresolved-var)
+
+(def x 1)
+```
+
+---
+
 ### :unsorted-imports
 
 **Unsorted imports**
@@ -2367,7 +2390,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:unknown-require-option` | warn on unknown `:require` option pairs |
 | `:unquote-not-syntax-quoted` | warns when unquote (`~`) or unquote-splicing (`~@`) is used outside of syntax-quote (`` ` ``) |
 | `:unreachable-code` | warn on unreachable code |
-| `:unresolved-excluded-var` | warns when `:refer-clojure :exclude` contains vars that do not exist in clojure.core or cljs.core |
 | `:unused-value` | warn on unused value: constants, unrealized lazy values, pure functions and transient ops (`assoc!`, `conj!` etc) |
 | `:use` | warns about `:use` or `use` |
 | `:used-underscored-binding` | warn when a underscored (ie marked as unused) binding is used |

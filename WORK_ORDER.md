@@ -43,13 +43,6 @@ These reuse the require-family removal machinery
 (`require_entry.clj`: `remove-token-span`, `cleanup-empty-clauses`;
 `utils.clj`: `remove-referred-var-from-line`). Little new logic.
 
-### 5. `unresolved-excluded-var`
-
-- **Trigger:** a var listed in an `:exclude` vector does not resolve.
-- **Fix:** remove the token from the exclude vector.
-- **Reuse:** shares machinery with unused-excluded-var; do the pair together.
-- **Effort:** S.
-
 ---
 
 ## Tier 2: Easy (single deterministic form rewrite, no cross-file analysis)
