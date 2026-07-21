@@ -259,7 +259,13 @@
    {:message-re #"^Duplicate refer: "
     :phase       :refer
     :fix-fn      fixes/fix-duplicate-refer-in-file
-    :display     "duplicate refer"}})
+    :display     "duplicate refer"}
+
+   :unused-excluded-var
+   {:message-re #"^Unused excluded var: "
+    :phase       :default
+    :fix-fn      fixes/fix-unused-excluded-var-in-file
+    :display     "unused excluded var"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -605,9 +611,9 @@
    {:status :implemented
     :display "unused alias"}
 
-  :unused-excluded-var
-  {:status :not-implemented
-   :display "unused excluded var"}
+   :unused-excluded-var
+   {:status :implemented
+    :display "unused excluded var"}
 
   :unused-value
   {:status :not-implemented
@@ -1007,15 +1013,10 @@
    :display "unresolved excluded var"
    :fix-fn stub-fix-fn}
 
-   :unused-excluded-var
+   :unused-value
    {:message-re #"^"
-    :display "unused excluded var"
+    :display "unused value"
     :fix-fn stub-fix-fn}
-
-  :unused-value
-  {:message-re #"^"
-   :display "unused value"
-   :fix-fn stub-fix-fn}
 
   :use
   {:message-re #"^"

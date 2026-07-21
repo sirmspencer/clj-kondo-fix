@@ -44,7 +44,8 @@
                 [clj-kondo-fix.impl.fixes.unsorted-required-namespaces :as unsorted-required-namespaces]
                 [clj-kondo-fix.impl.fixes.unused-alias :as unused-alias]
                 [clj-kondo-fix.impl.fixes.alias-same-as-ns :as alias-same-as-ns]
-                [clj-kondo-fix.impl.fixes.duplicate-refer :as duplicate-refer]))
+                [clj-kondo-fix.impl.fixes.duplicate-refer :as duplicate-refer]
+                [clj-kondo-fix.impl.fixes.unused-excluded-var :as unused-excluded-var]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -89,3 +90,4 @@
 (def fix-unused-alias-in-file unused-alias/fix-unused-alias-in-file)
 (def fix-alias-same-as-ns-in-file alias-same-as-ns/fix-alias-same-as-ns-in-file)
 (def fix-duplicate-refer-in-file duplicate-refer/fix-duplicate-refer-in-file)
+(def fix-unused-excluded-var-in-file unused-excluded-var/fix-unused-excluded-var-in-file)

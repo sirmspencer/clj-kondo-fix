@@ -43,13 +43,6 @@ These reuse the require-family removal machinery
 (`require_entry.clj`: `remove-token-span`, `cleanup-empty-clauses`;
 `utils.clj`: `remove-referred-var-from-line`). Little new logic.
 
-### 4. `unused-excluded-var`
-
-- **Trigger:** a var listed in `:refer-clojure :exclude [..]` is not used.
-- **Fix:** remove the token from the exclude vector.
-- **Reuse:** token-span removal.
-- **Effort:** S.
-
 ### 5. `unresolved-excluded-var`
 
 - **Trigger:** a var listed in an `:exclude` vector does not resolve.

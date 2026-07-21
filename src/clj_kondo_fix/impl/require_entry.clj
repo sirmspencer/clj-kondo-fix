@@ -232,6 +232,10 @@
           (let [cleaned (str/replace line #"\s*:refer\s*\[\s*\]" "")]
             (recur (inc i) (assoc lines i cleaned)))
 
+          (re-find #":exclude\s*\[\s*\]" line)
+          (let [cleaned (str/replace line #"\s*:exclude\s*\[\s*\]" "")]
+            (recur i (assoc lines i cleaned)))
+
           :else
           (recur (inc i) lines))))))
 

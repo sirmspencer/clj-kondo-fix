@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-41 implemented · 45 not yet implemented · 34 not applicable · 0 skipped
+42 implemented · 44 not yet implemented · 34 not applicable · 0 skipped
 
 ## Index
 
@@ -114,7 +114,7 @@
 - [:unsorted-required-namespaces](#unsorted-required-namespaces) ✅
 - [:unused-alias](#unused-alias) ✅
 - [:unused-binding](#unused-binding) ✅
-- [:unused-excluded-var](#unused-excluded-var) ☹️
+- [:unused-excluded-var](#unused-excluded-var) ✅
 - [:unused-import](#unused-import) ✅
 - [:unused-namespace](#unused-namespace) ✅
 - [:unused-private-var](#unused-private-var) ✅
@@ -1675,6 +1675,29 @@ warn on unused binding
 
 ---
 
+### :unused-excluded-var
+
+**Unused excluded var**
+
+warns when `:refer-clojure :exclude` contains vars that are not redefined in the current namespace. Locals with the same name as an excluded var also count as a redefinition and will suppress this warning
+
+```clojure
+(ns foo.removes-excluded-var
+  (:refer-clojure :exclude [str]))
+
+(def x 1)
+```
+
+↓
+
+```clojure
+(ns foo.removes-excluded-var)
+
+(def x 1)
+```
+
+---
+
 ### :unused-import
 
 **Unused import**
@@ -2345,7 +2368,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:unquote-not-syntax-quoted` | warns when unquote (`~`) or unquote-splicing (`~@`) is used outside of syntax-quote (`` ` ``) |
 | `:unreachable-code` | warn on unreachable code |
 | `:unresolved-excluded-var` | warns when `:refer-clojure :exclude` contains vars that do not exist in clojure.core or cljs.core |
-| `:unused-excluded-var` | warns when `:refer-clojure :exclude` contains vars that are not redefined in the current namespace. Locals with the same name as an excluded var also count as a redefinition and will suppress this warning |
 | `:unused-value` | warn on unused value: constants, unrealized lazy values, pure functions and transient ops (`assoc!`, `conj!` etc) |
 | `:use` | warns about `:use` or `use` |
 | `:used-underscored-binding` | warn when a underscored (ie marked as unused) binding is used |
