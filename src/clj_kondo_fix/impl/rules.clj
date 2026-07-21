@@ -307,7 +307,13 @@
    {:message-re #"^Test assertion message should be a string"
     :phase       :default
     :fix-fn      fixes/fix-is-message-not-string-in-file
-    :display     "is message not string"}})
+    :display     "is message not string"}
+
+   :non-arg-vec-return-type-hint
+   {:message-re #"^Prefer placing return type hint on arg vector"
+    :phase       :default
+    :fix-fn      fixes/fix-non-arg-vec-return-type-hint-in-file
+    :display     "non arg vec return type hint"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -594,8 +600,8 @@
    :display "missing map value"}
 
   :non-arg-vec-return-type-hint
-  {:status :not-implemented
-   :display "non arg vec return type hint"}
+   {:status :implemented
+    :display "non arg vec return type hint"}
 
   :private-call
   {:status :not-implemented
@@ -955,12 +961,7 @@
    :display "missing map value"
    :fix-fn stub-fix-fn}
 
-  :non-arg-vec-return-type-hint
-  {:message-re #"^"
-   :display "non arg vec return type hint"
-   :fix-fn stub-fix-fn}
-
-  :private-call
+   :private-call
   {:message-re #"^"
    :display "private call"
    :fix-fn stub-fix-fn}

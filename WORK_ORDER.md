@@ -68,12 +68,6 @@ form while preserving surrounding structure.
 - **Fix:** normalize to one form consistently.
 - **Effort:** M.
 
-### 13. `non-arg-vec-return-type-hint`
-
-- **Trigger:** a return type hint sits on the fn name instead of the arg vector.
-- **Fix:** move the `^Type` hint onto the arg vector.
-- **Effort:** M (structural move, localized).
-
 ### 14. `misplaced-async-metadata`
 
 - **Trigger:** async metadata is attached in the wrong position.

@@ -156,7 +156,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:missing-protocol-method-arity](rules.md#missing-protocol-method-arity) ❌
 - [:missing-test-assertion](rules.md#missing-test-assertion) ❌
 - [:namespace-name-mismatch](rules.md#namespace-name-mismatch) ❌
-- [:non-arg-vec-return-type-hint](rules.md#non-arg-vec-return-type-hint)
+- [:non-arg-vec-return-type-hint](rules.md#non-arg-vec-return-type-hint) ✅
 - [:plus-one](rules.md#plus-one) ✅
 - [:private-call](rules.md#private-call)
 - [:protocol-method-arity-mismatch](rules.md#protocol-method-arity-mismatch) ❌

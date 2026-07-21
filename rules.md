@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-49 implemented · 37 not yet implemented · 34 not applicable · 0 skipped
+50 implemented · 36 not yet implemented · 34 not applicable · 0 skipped
 
 ## Index
 
@@ -68,7 +68,7 @@
 - [:missing-protocol-method-arity](#missing-protocol-method-arity) ❌
 - [:missing-test-assertion](#missing-test-assertion) ❌
 - [:namespace-name-mismatch](#namespace-name-mismatch) ❌
-- [:non-arg-vec-return-type-hint](#non-arg-vec-return-type-hint) ☹️
+- [:non-arg-vec-return-type-hint](#non-arg-vec-return-type-hint) ✅
 - [:plus-one](#plus-one) ✅
 - [:private-call](#private-call) ☹️
 - [:protocol-method-arity-mismatch](#protocol-method-arity-mismatch) ❌
@@ -713,6 +713,7 @@ warn when `clojure.test/is` receives a non-string message argument. This linter 
 ```clojure
 (ns foo
   (:require [clojure.test :refer [is]]))
+
 (is (= 1 1) :not-a-string)
 ```
 
@@ -721,6 +722,7 @@ warn when `clojure.test/is` receives a non-string message argument. This linter 
 ```clojure
 (ns foo
   (:require [clojure.test :refer [is]]))
+
 (is (= 1 1) "not-a-string")
 ```
 
@@ -863,6 +865,26 @@ warns about missing else branch in `if` expression
 
 ```clojure
 (when-not true 1)
+```
+
+---
+
+### :non-arg-vec-return-type-hint
+
+**Non-arg vec return type hint**
+
+warn when a return type in `defn` is not placed on the argument vector (CLJ only)
+
+```clojure
+(ns foo)
+(defn ^String foo [x] x)
+```
+
+↓
+
+```clojure
+(ns foo)
+(defn foo ^String [x] x)
 ```
 
 ---
@@ -2504,7 +2526,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:missing-body-in-when` | warn when `when` is called only with a condition |
 | `:missing-clause-in-try` | warn when `try` expression misses `catch` or `finally` clause |
 | `:missing-map-value` | warn on key with uneven amount of elements, i.e. one of the keys |
-| `:non-arg-vec-return-type-hint` | warn when a return type in `defn` is not placed on the argument vector (CLJ only) |
 | `:private-call` | warn when private var is used. The name of this linter should be |
 | `:refer` | warns when `:refer` is used. This can be used when one wants to |
 | `:shadowed-fn-param` | warn on fn param that has same name as previously defined one (in the same fn expression) |
