@@ -49,14 +49,6 @@ These reuse the require-family removal machinery
 
 Localized rewrites of one form. No scope or usage analysis needed.
 
-### 6. `single-operand-comparison`
-
-- **Trigger:** a comparison called with one operand always returns true,
-  for example `(< x)` or `(= x)`.
-- **Fix:** replace the whole form with `true`.
-- **Reuse:** mirror `single-logical-operand` almost directly.
-- **Effort:** S.
-
 ### 7. `java-static-field-call`
 
 - **Trigger:** a static field is called as if it were a function,

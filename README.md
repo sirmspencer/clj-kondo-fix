@@ -182,7 +182,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:shadowed-var](rules.md#shadowed-var)
 - [:single-key-in](rules.md#single-key-in) ✅
 - [:single-logical-operand](rules.md#single-logical-operand) ✅
-- [:single-operand-comparison](rules.md#single-operand-comparison)
+- [:single-operand-comparison](rules.md#single-operand-comparison) ✅
 - [:syntax](rules.md#syntax) ❌
 - [:type-mismatch](rules.md#type-mismatch) ❌
 - [:unbound-destructuring-default](rules.md#unbound-destructuring-default)

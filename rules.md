@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-43 implemented · 43 not yet implemented · 34 not applicable · 0 skipped
+44 implemented · 42 not yet implemented · 34 not applicable · 0 skipped
 
 ## Index
 
@@ -94,7 +94,7 @@
 - [:shadowed-var](#shadowed-var) ☹️
 - [:single-key-in](#single-key-in) ✅
 - [:single-logical-operand](#single-logical-operand) ✅
-- [:single-operand-comparison](#single-operand-comparison) ☹️
+- [:single-operand-comparison](#single-operand-comparison) ✅
 - [:syntax](#syntax) ❌
 - [:type-mismatch](#type-mismatch) ❌
 - [:unbound-destructuring-default](#unbound-destructuring-default) ☹️
@@ -1283,6 +1283,32 @@ warn on single operand logical operators with always the same value
 
 ---
 
+### :single-operand-comparison
+
+**Single operand comparison**
+
+warn on comparison with only one argument
+
+```clojure
+(ns foo.removes-comparison
+  (:require [clojure.string :as str]))
+
+(def x (< 1))
+(def y (= 2))
+```
+
+↓
+
+```clojure
+(ns foo.removes-comparison
+  (:require [clojure.string :as str]))
+
+(def x true)
+(def y true)
+```
+
+---
+
 ### :uninitialized-var
 
 **Uninitialized var**
@@ -2382,7 +2408,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:refer` | warns when `:refer` is used. This can be used when one wants to |
 | `:shadowed-fn-param` | warn on fn param that has same name as previously defined one (in the same fn expression) |
 | `:shadowed-var` | warn on var that is shadowed by local |
-| `:single-operand-comparison` | warn on comparison with only one argument |
 | `:unbound-destructuring-default` | warn on binding in `:or` which does not occur in destructuring |
 | `:underscore-in-namespace` | warns about the usage of the `_` character in the declaration of namespaces (as opposed to `-`) |
 | `:unexpected-recur` | `(recur ...)` is called where it's not expected |

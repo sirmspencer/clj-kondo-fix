@@ -271,7 +271,13 @@
    {:message-re #"^Unresolved excluded var: "
     :phase       :default
     :fix-fn      fixes/fix-unresolved-excluded-var-in-file
-    :display     "unresolved excluded var"}})
+    :display     "unresolved excluded var"}
+
+   :single-operand-comparison
+   {:message-re #"^Single operand use of clojure\.core/"
+    :phase       :default
+    :fix-fn      fixes/fix-single-operand-comparison-in-file
+    :display     "single operand comparison"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -577,9 +583,9 @@
   {:status :not-implemented
    :display "shadowed var"}
 
-  :single-operand-comparison
-  {:status :not-implemented
-   :display "single operand comparison"}
+   :single-operand-comparison
+   {:status :implemented
+    :display "single operand comparison"}
 
   :unbound-destructuring-default
   {:status :not-implemented
@@ -974,12 +980,7 @@
    :display "shadowed var"
    :fix-fn stub-fix-fn}
 
-  :single-operand-comparison
-  {:message-re #"^"
-   :display "single operand comparison"
-   :fix-fn stub-fix-fn}
-
-  :unbound-destructuring-default
+   :unbound-destructuring-default
   {:message-re #"^"
    :display "unbound destructuring default"
    :fix-fn stub-fix-fn}
