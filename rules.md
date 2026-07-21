@@ -1,13 +1,13 @@
 # clj-kondo-fix Rule Index
 
-50 implemented · 35 not yet implemented · 35 not applicable · 0 skipped
+51 implemented · 34 not yet implemented · 35 not applicable · 0 skipped
 
 ## Index
 
 - [:alias-same-as-ns](#alias-same-as-ns) ✅
 - [:aliased-namespace-symbol](#aliased-namespace-symbol) ✅
 - [:aliased-namespace-var-usage](#aliased-namespace-var-usage) ❌
-- [:aliased-referred-var](#aliased-referred-var) ☹️
+- [:aliased-referred-var](#aliased-referred-var) ✅
 - [:await-without-async-fn](#await-without-async-fn) ❌
 - [:case-duplicate-test](#case-duplicate-test) ☹️
 - [:case-quoted-test](#case-quoted-test) ❌
@@ -171,6 +171,32 @@ warn when the namespace of a qualified symbol has a defined alias
   (:require [clojure.string :as str]))
 
 (str/join ", " [1 2 3])
+```
+
+---
+
+### :aliased-referred-var
+
+**Aliased referred var**
+
+warn when a var is both referred and accessed via an alias in the same namespace
+
+```clojure
+(ns test-foo
+  (:require [clojure.set :as set :refer [union]]))
+
+(set/union #{1} #{2})
+(union #{3} #{4})
+```
+
+↓
+
+```clojure
+(ns test-foo
+  (:require [clojure.set :as set :refer [union]]))
+
+(union #{1} #{2})
+(union #{3} #{4})
 ```
 
 ---
@@ -2505,7 +2531,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:aliased-referred-var` | warn when a var is both referred and accessed via an alias in the same namespace |
 | `:case-duplicate-test` | identify duplicate case test constants |
 | `:case-symbol-test` | Warn on symbol test constants in `case`. Sometimes this is |
 | `:conditional-build-up` | warn when a `let` repeatedly rebinds the same local map using forms like `(if pred (assoc m ...) m)`, which can often be written more clearly with `cond->` |

@@ -56,12 +56,6 @@ Localized rewrites of one form. No scope or usage analysis needed.
 These require finding and rewriting several positions in the file, or moving a
 form while preserving surrounding structure.
 
-### 12. `aliased-referred-var`
-
-- **Trigger:** a var is used alias-qualified while also referred (or the reverse).
-- **Fix:** normalize to one form consistently.
-- **Effort:** M.
-
 ### 14. `misplaced-async-metadata`
 
 - **Trigger:** async metadata is attached in the wrong position.

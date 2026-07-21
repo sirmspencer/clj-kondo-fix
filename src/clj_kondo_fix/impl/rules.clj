@@ -313,7 +313,13 @@
    {:message-re #"^Prefer placing return type hint on arg vector"
     :phase       :default
     :fix-fn      fixes/fix-non-arg-vec-return-type-hint-in-file
-    :display     "non arg vec return type hint"}})
+    :display     "non arg vec return type hint"}
+
+   :aliased-referred-var
+   {:message-re #"^Var .+ is referred but used via alias:"
+    :phase       :default
+    :fix-fn      fixes/fix-aliased-referred-var-in-file
+    :display     "aliased referred var"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -501,7 +507,7 @@
    :display "aliased namespace var usage"}
 
   :aliased-referred-var
-  {:status :not-implemented
+  {:status :implemented
    :display "aliased referred var"}
 
   :case-duplicate-test
@@ -857,11 +863,6 @@
    :fix-fn stub-fix-fn}
 
   ;; ---- stubs (not-implemented) ----
-  :aliased-referred-var
-  {:message-re #"^"
-   :display "aliased referred var"
-   :fix-fn stub-fix-fn}
-
   :case-duplicate-test
   {:message-re #"^"
    :display "case duplicate test"
