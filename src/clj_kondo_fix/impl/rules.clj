@@ -247,7 +247,13 @@
    {:message-re #"^Unused alias: "
     :phase       :require
     :fix-fn      fixes/fix-unused-alias-in-file
-    :display     "unused alias"}})
+    :display     "unused alias"}
+
+   :alias-same-as-ns
+   {:message-re #"^Alias same as namespace name: "
+    :phase       :require
+    :fix-fn      fixes/fix-alias-same-as-ns-in-file
+    :display     "alias same as ns"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -421,9 +427,9 @@
    :display "warn on reflection"}
 
   ;; ---- not-implemented ----
-  :alias-same-as-ns
-  {:status :not-implemented
-   :display "alias same as ns"}
+   :alias-same-as-ns
+   {:status :implemented
+    :display "alias same as ns"}
 
   :aliased-namespace-symbol
   {:status :not-implemented
@@ -790,15 +796,10 @@
    :fix-fn stub-fix-fn}
 
   ;; ---- stubs (not-implemented) ----
-  :alias-same-as-ns
-  {:message-re #"^"
-   :display "alias same as ns"
-   :fix-fn stub-fix-fn}
-
-  :aliased-namespace-symbol
-  {:message-re #"^"
-   :display "aliased namespace symbol"
-   :fix-fn stub-fix-fn}
+   :aliased-namespace-symbol
+   {:message-re #"^"
+    :display "aliased namespace symbol"
+    :fix-fn stub-fix-fn}
 
   :aliased-namespace-var-usage
   {:message-re #"^"

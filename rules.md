@@ -1,10 +1,10 @@
 # clj-kondo-fix Rule Index
 
-39 implemented · 47 not yet implemented · 34 not applicable · 0 skipped
+40 implemented · 46 not yet implemented · 34 not applicable · 0 skipped
 
 ## Index
 
-- [:alias-same-as-ns](#alias-same-as-ns) ☹️
+- [:alias-same-as-ns](#alias-same-as-ns) ✅
 - [:aliased-namespace-symbol](#aliased-namespace-symbol) ☹️
 - [:aliased-namespace-var-usage](#aliased-namespace-var-usage) ☹️
 - [:aliased-referred-var](#aliased-referred-var) ☹️
@@ -126,6 +126,30 @@
 - [:warn-on-reflection](#warn-on-reflection) ❌
 
 ## Implemented Rules
+
+### :alias-same-as-ns
+
+**Alias same as ns name**
+
+warn when alias is the same as the namespace it is aliasing
+
+```clojure
+(ns foo.removes-redundant-as
+  (:require [clojure.string :as clojure.string :refer [join]]))
+
+(def x (join ", " ["a" "b"]))
+```
+
+↓
+
+```clojure
+(ns foo.removes-redundant-as
+  (:require [clojure.string :refer [join]]))
+
+(def x (join ", " ["a" "b"]))
+```
+
+---
 
 ### :cond-else
 
@@ -1367,23 +1391,6 @@ warn on unused alias introduced in ns form
 
 ---
 
-```clojure
-(ns foo.removes-alias-only
-  (:require [clojure.string :as str]))
-
-(def x 1)
-```
-
-↓
-
-```clojure
-(ns foo.removes-alias-only)
-
-(def x 1)
-```
-
----
-
 ### :unused-binding
 
 **Unused binding**
@@ -2274,7 +2281,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:alias-same-as-ns` | warn when alias is the same as the namespace it is aliasing |
 | `:aliased-namespace-symbol` | warn when the namespace of a qualified symbol has a defined alias |
 | `:aliased-namespace-var-usage` | warn when a var from a namespace that was used with `:as-alias` is used |
 | `:aliased-referred-var` | warn when a var is both referred and accessed via an alias in the same namespace |

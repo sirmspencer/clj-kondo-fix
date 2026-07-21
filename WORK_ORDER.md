@@ -14,8 +14,9 @@
 5. **Remove the rule in the same commit.** The commit that ships the fix must also
    delete the rule's entry from this file. Do not batch removals. Do not
    renumber any items.
-6. **Next item.** After review approval, the next item on the list becomes the
-   active work. Repeat from step 1.
+6. **Generate the next plan.** After committing, present the plan for the next
+   item on the list and wait for approval before implementing.
+7. **Next item.** After plan approval, implement. Repeat from step 1.
 
 ---
 
@@ -41,13 +42,6 @@ fixtures and a test, then regenerate `rules.md` and `README.md`.
 These reuse the require-family removal machinery
 (`require_entry.clj`: `remove-token-span`, `cleanup-empty-clauses`;
 `utils.clj`: `remove-referred-var-from-line`). Little new logic.
-
-### 2. `alias-same-as-ns`
-
-- **Trigger:** the alias equals the namespace name, making `:as` redundant.
-- **Fix:** remove the redundant `:as x` pair.
-- **Reuse:** same as unused-alias; implement alongside it.
-- **Effort:** XS.
 
 ### 3. `duplicate-refer`
 
