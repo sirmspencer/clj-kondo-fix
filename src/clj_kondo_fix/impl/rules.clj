@@ -591,7 +591,8 @@
    :display "line length"}
 
   :misplaced-async-metadata
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "ClojureScript-only linter — cannot trigger or test with .clj fixtures"
    :display "misplaced async metadata"}
 
   :missing-body-in-when
@@ -936,11 +937,6 @@
    :line-length
   {:message-re #"^"
    :display "line length"
-   :fix-fn stub-fix-fn}
-
-  :misplaced-async-metadata
-  {:message-re #"^"
-   :display "misplaced async metadata"
    :fix-fn stub-fix-fn}
 
   :missing-body-in-when

@@ -56,12 +56,6 @@ Localized rewrites of one form. No scope or usage analysis needed.
 These require finding and rewriting several positions in the file, or moving a
 form while preserving surrounding structure.
 
-### 14. `misplaced-async-metadata`
-
-- **Trigger:** async metadata is attached in the wrong position.
-- **Fix:** move the metadata to the correct position.
-- **Effort:** M.
-
 ### 15. `used-underscored-binding`
 
 - **Trigger:** a binding named `_foo` is actually used in its scope.

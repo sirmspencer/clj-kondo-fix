@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-51 implemented · 34 not yet implemented · 35 not applicable · 0 skipped
+51 implemented · 33 not yet implemented · 36 not applicable · 0 skipped
 
 ## Index
 
@@ -57,7 +57,7 @@
 - [:loop-without-recur](#loop-without-recur) ❌
 - [:main-without-gen-class](#main-without-gen-class) ❌
 - [:minus-one](#minus-one) ✅
-- [:misplaced-async-metadata](#misplaced-async-metadata) ☹️
+- [:misplaced-async-metadata](#misplaced-async-metadata) ❌
 - [:misplaced-docstring](#misplaced-docstring) ✅
 - [:missing-body-in-when](#missing-body-in-when) ☹️
 - [:missing-clause-in-try](#missing-clause-in-try) ☹️
@@ -2546,7 +2546,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:format` | warn on unexpected amount of arguments in `format` |
 | `:inline-def` | warn on non-toplevel usage of `def` (and `defn`, etc.) |
 | `:line-length` | warn when lines are longer than a configured length |
-| `:misplaced-async-metadata` | warns when `^:async` metadata is placed where ClojureScript ignores it: on a function's argument vector or on the whole `(fn ...)` form. It must go on the function name. ClojureScript only |
 | `:missing-body-in-when` | warn when `when` is called only with a condition |
 | `:missing-clause-in-try` | warn when `try` expression misses `catch` or `finally` clause |
 | `:missing-map-value` | warn on key with uneven amount of elements, i.e. one of the keys |
@@ -2587,6 +2586,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:hook` | Hook-related lint; not a code correctness issue |
 | `:loop-without-recur` | Structural fix (adding recur) requires understanding loop semantics and intent |
 | `:main-without-gen-class` | Requires adding :gen-class to ns form, which may change compilation behavior |
+| `:misplaced-async-metadata` | ClojureScript-only linter — cannot trigger or test with .clj fixtures |
 | `:missing-docstring` | Writing a meaningful docstring requires human authorship |
 | `:missing-protocol-method` | Generating a protocol method implementation requires knowing the intended behavior |
 | `:missing-protocol-method-arity` | Same as missing-protocol-method |
