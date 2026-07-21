@@ -92,12 +92,6 @@ form while preserving surrounding structure.
 - **Fix:** remove the unreachable forms, delimiting the span carefully.
 - **Effort:** M.
 
-### 17. `is-message-not-string`
-
-- **Trigger:** the message argument to `clojure.test/is` is not a string.
-- **Fix:** reposition or adjust the message argument.
-- **Effort:** M (verify the safe cases before implementing; some may be skip).
-
 ### 18. `use`
 
 - **Trigger:** a `:use` clause in the ns form is discouraged.

@@ -301,7 +301,13 @@
    {:message-re #"^An alias is defined for"
     :phase       :default
     :fix-fn      fixes/fix-aliased-namespace-symbol-in-file
-    :display     "aliased namespace symbol"}})
+    :display     "aliased namespace symbol"}
+
+   :is-message-not-string
+   {:message-re #"^Test assertion message should be a string"
+    :phase       :default
+    :fix-fn      fixes/fix-is-message-not-string-in-file
+    :display     "is message not string"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -560,8 +566,8 @@
    :display "inline def"}
 
   :is-message-not-string
-  {:status :not-implemented
-   :display "is message not string"}
+   {:status :implemented
+    :display "is message not string"}
 
    :java-static-field-call
    {:status :implemented
@@ -922,11 +928,6 @@
   :inline-def
   {:message-re #"^"
    :display "inline def"
-   :fix-fn stub-fix-fn}
-
-  :is-message-not-string
-  {:message-re #"^"
-   :display "is message not string"
    :fix-fn stub-fix-fn}
 
    :line-length

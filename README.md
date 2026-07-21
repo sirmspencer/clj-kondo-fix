@@ -139,7 +139,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:if-nil-return](rules.md#if-nil-return) ✅
 - [:if-x-x-y](rules.md#if-x-x-y) ✅
 - [:inline-def](rules.md#inline-def)
-- [:is-message-not-string](rules.md#is-message-not-string)
+- [:is-message-not-string](rules.md#is-message-not-string) ✅
 - [:java-static-field-call](rules.md#java-static-field-call) ✅
 - [:line-length](rules.md#line-length)
 - [:loop-without-recur](rules.md#loop-without-recur) ❌

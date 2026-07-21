@@ -51,7 +51,8 @@
                 [clj-kondo-fix.impl.fixes.java-static-field-call :as java-static-field-call]
                 [clj-kondo-fix.impl.fixes.duplicate-set-key :as duplicate-set-key]
                 [clj-kondo-fix.impl.fixes.def-fn :as def-fn]
-                [clj-kondo-fix.impl.fixes.aliased-namespace-symbol :as aliased-ns-sym]))
+                [clj-kondo-fix.impl.fixes.aliased-namespace-symbol :as aliased-ns-sym]
+                [clj-kondo-fix.impl.fixes.is-message-not-string :as is-msg-not-str]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -103,3 +104,4 @@
 (def fix-duplicate-set-key-in-file duplicate-set-key/fix-duplicate-set-key-in-file)
 (def fix-def-fn-in-file def-fn/fix-def-fn-in-file)
 (def fix-aliased-namespace-symbol-in-file aliased-ns-sym/fix-aliased-namespace-symbol-in-file)
+(def fix-is-message-not-string-in-file is-msg-not-str/fix-is-message-not-string-in-file)

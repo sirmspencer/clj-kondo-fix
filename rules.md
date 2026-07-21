@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-48 implemented · 38 not yet implemented · 34 not applicable · 0 skipped
+49 implemented · 37 not yet implemented · 34 not applicable · 0 skipped
 
 ## Index
 
@@ -51,7 +51,7 @@
 - [:if-nil-return](#if-nil-return) ✅
 - [:if-x-x-y](#if-x-x-y) ✅
 - [:inline-def](#inline-def) ☹️
-- [:is-message-not-string](#is-message-not-string) ☹️
+- [:is-message-not-string](#is-message-not-string) ✅
 - [:java-static-field-call](#java-static-field-call) ✅
 - [:line-length](#line-length) ☹️
 - [:loop-without-recur](#loop-without-recur) ❌
@@ -700,6 +700,28 @@ warn on `(if x x y)` and suggest `(or x y)` instead when `x` is a
 
 ```clojure
 (defn f [x y] (or x y))
+```
+
+---
+
+### :is-message-not-string
+
+**Is message not string**
+
+warn when `clojure.test/is` receives a non-string message argument. This linter relies on the `:type-mismatch` linter being enabled to perform type checking
+
+```clojure
+(ns foo
+  (:require [clojure.test :refer [is]]))
+(is (= 1 1) :not-a-string)
+```
+
+↓
+
+```clojure
+(ns foo
+  (:require [clojure.test :refer [is]]))
+(is (= 1 1) "not-a-string")
 ```
 
 ---
@@ -2477,7 +2499,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:duplicate-map-key` | warn on duplicate key in map |
 | `:format` | warn on unexpected amount of arguments in `format` |
 | `:inline-def` | warn on non-toplevel usage of `def` (and `defn`, etc.) |
-| `:is-message-not-string` | warn when `clojure.test/is` receives a non-string message argument. This linter relies on the `:type-mismatch` linter being enabled to perform type checking |
 | `:line-length` | warn when lines are longer than a configured length |
 | `:misplaced-async-metadata` | warns when `^:async` metadata is placed where ClojureScript ignores it: on a function's argument vector or on the whole `(fn ...)` form. It must go on the function name. ClojureScript only |
 | `:missing-body-in-when` | warn when `when` is called only with a condition |
