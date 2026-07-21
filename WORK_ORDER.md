@@ -49,15 +49,6 @@ These reuse the require-family removal machinery
 
 Localized rewrites of one form. No scope or usage analysis needed.
 
-### 7. `java-static-field-call`
-
-- **Trigger:** a static field is called as if it were a function,
-  for example `(Math/PI)`.
-- **Fix:** strip the wrapping parens so the field is referenced directly,
-  for example `Math/PI`.
-- **Reuse:** bracket handling similar to `redundant-call`.
-- **Effort:** S to M.
-
 ### 8. `duplicate-set-key`
 
 - **Trigger:** a set literal contains an identical duplicate element,

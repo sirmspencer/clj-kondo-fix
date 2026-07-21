@@ -277,7 +277,13 @@
    {:message-re #"^Single operand use of clojure\.core/"
     :phase       :default
     :fix-fn      fixes/fix-single-operand-comparison-in-file
-    :display     "single operand comparison"}})
+    :display     "single operand comparison"}
+
+   :java-static-field-call
+   {:message-re #"^Static fields should be referenced without parens"
+    :phase       :default
+    :fix-fn      fixes/fix-java-static-field-call-in-file
+    :display     "java static field call"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -539,9 +545,9 @@
   {:status :not-implemented
    :display "is message not string"}
 
-  :java-static-field-call
-  {:status :not-implemented
-   :display "java static field call"}
+   :java-static-field-call
+   {:status :implemented
+    :display "java static field call"}
 
   :line-length
   {:status :not-implemented
@@ -920,12 +926,7 @@
    :display "is message not string"
    :fix-fn stub-fix-fn}
 
-  :java-static-field-call
-  {:message-re #"^"
-   :display "java static field call"
-   :fix-fn stub-fix-fn}
-
-  :line-length
+   :line-length
   {:message-re #"^"
    :display "line length"
    :fix-fn stub-fix-fn}

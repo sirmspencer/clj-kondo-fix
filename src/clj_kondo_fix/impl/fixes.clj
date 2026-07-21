@@ -47,7 +47,8 @@
                 [clj-kondo-fix.impl.fixes.duplicate-refer :as duplicate-refer]
                 [clj-kondo-fix.impl.fixes.unused-excluded-var :as unused-excluded-var]
                 [clj-kondo-fix.impl.fixes.unresolved-excluded-var :as unresolved-excluded-var]
-                [clj-kondo-fix.impl.fixes.single-operand-comparison :as single-operand-comparison]))
+                [clj-kondo-fix.impl.fixes.single-operand-comparison :as single-operand-comparison]
+                [clj-kondo-fix.impl.fixes.java-static-field-call :as java-static-field-call]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -95,3 +96,4 @@
 (def fix-unused-excluded-var-in-file unused-excluded-var/fix-unused-excluded-var-in-file)
 (def fix-unresolved-excluded-var-in-file unresolved-excluded-var/fix-unresolved-excluded-var-in-file)
 (def fix-single-operand-comparison-in-file single-operand-comparison/fix-single-operand-comparison-in-file)
+(def fix-java-static-field-call-in-file java-static-field-call/fix-java-static-field-call-in-file)
