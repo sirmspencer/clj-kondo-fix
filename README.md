@@ -93,7 +93,7 @@ clojure -M:run --lint src/ --fix
 See [rules.md](rules.md) for implementation notes and before/after examples.
 
 - [:alias-same-as-ns](rules.md#alias-same-as-ns) ✅
-- [:aliased-namespace-symbol](rules.md#aliased-namespace-symbol)
+- [:aliased-namespace-symbol](rules.md#aliased-namespace-symbol) ✅
 - [:aliased-namespace-var-usage](rules.md#aliased-namespace-var-usage)
 - [:aliased-referred-var](rules.md#aliased-referred-var)
 - [:await-without-async-fn](rules.md#await-without-async-fn) ❌

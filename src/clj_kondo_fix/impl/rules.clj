@@ -295,7 +295,13 @@
    {:message-re #"^Use defn instead"
     :phase       :default
     :fix-fn      fixes/fix-def-fn-in-file
-    :display     "def + fn"}})
+    :display     "def + fn"}
+
+   :aliased-namespace-symbol
+   {:message-re #"^An alias is defined for"
+    :phase       :default
+    :fix-fn      fixes/fix-aliased-namespace-symbol-in-file
+    :display     "aliased namespace symbol"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -474,8 +480,8 @@
     :display "alias same as ns"}
 
   :aliased-namespace-symbol
-  {:status :not-implemented
-   :display "aliased namespace symbol"}
+   {:status :implemented
+    :display "aliased namespace symbol"}
 
   :aliased-namespace-var-usage
   {:status :not-implemented
@@ -838,11 +844,6 @@
    :fix-fn stub-fix-fn}
 
   ;; ---- stubs (not-implemented) ----
-   :aliased-namespace-symbol
-   {:message-re #"^"
-    :display "aliased namespace symbol"
-    :fix-fn stub-fix-fn}
-
   :aliased-namespace-var-usage
   {:message-re #"^"
    :display "aliased namespace var usage"

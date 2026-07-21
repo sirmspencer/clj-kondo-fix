@@ -1,11 +1,11 @@
 # clj-kondo-fix Rule Index
 
-47 implemented · 39 not yet implemented · 34 not applicable · 0 skipped
+48 implemented · 38 not yet implemented · 34 not applicable · 0 skipped
 
 ## Index
 
 - [:alias-same-as-ns](#alias-same-as-ns) ✅
-- [:aliased-namespace-symbol](#aliased-namespace-symbol) ☹️
+- [:aliased-namespace-symbol](#aliased-namespace-symbol) ✅
 - [:aliased-namespace-var-usage](#aliased-namespace-var-usage) ☹️
 - [:aliased-referred-var](#aliased-referred-var) ☹️
 - [:await-without-async-fn](#await-without-async-fn) ❌
@@ -147,6 +147,30 @@ warn when alias is the same as the namespace it is aliasing
   (:require [clojure.string :refer [join]]))
 
 (def x (join ", " ["a" "b"]))
+```
+
+---
+
+### :aliased-namespace-symbol
+
+**Aliased namespace symbol**
+
+warn when the namespace of a qualified symbol has a defined alias
+
+```clojure
+(ns foo
+  (:require [clojure.string :as str]))
+
+(clojure.string/join ", " [1 2 3])
+```
+
+↓
+
+```clojure
+(ns foo
+  (:require [clojure.string :as str]))
+
+(str/join ", " [1 2 3])
 ```
 
 ---
@@ -2437,7 +2461,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:aliased-namespace-symbol` | warn when the namespace of a qualified symbol has a defined alias |
 | `:aliased-namespace-var-usage` | warn when a var from a namespace that was used with `:as-alias` is used |
 | `:aliased-referred-var` | warn when a var is both referred and accessed via an alias in the same namespace |
 | `:case-duplicate-test` | identify duplicate case test constants |

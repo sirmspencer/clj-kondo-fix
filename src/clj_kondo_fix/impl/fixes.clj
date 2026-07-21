@@ -50,7 +50,8 @@
                 [clj-kondo-fix.impl.fixes.single-operand-comparison :as single-operand-comparison]
                 [clj-kondo-fix.impl.fixes.java-static-field-call :as java-static-field-call]
                 [clj-kondo-fix.impl.fixes.duplicate-set-key :as duplicate-set-key]
-                [clj-kondo-fix.impl.fixes.def-fn :as def-fn]))
+                [clj-kondo-fix.impl.fixes.def-fn :as def-fn]
+                [clj-kondo-fix.impl.fixes.aliased-namespace-symbol :as aliased-ns-sym]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -101,3 +102,4 @@
 (def fix-java-static-field-call-in-file java-static-field-call/fix-java-static-field-call-in-file)
 (def fix-duplicate-set-key-in-file duplicate-set-key/fix-duplicate-set-key-in-file)
 (def fix-def-fn-in-file def-fn/fix-def-fn-in-file)
+(def fix-aliased-namespace-symbol-in-file aliased-ns-sym/fix-aliased-namespace-symbol-in-file)
