@@ -289,7 +289,13 @@
    {:message-re #"^duplicate set element"
     :phase       :default
     :fix-fn      fixes/fix-duplicate-set-key-in-file
-    :display     "duplicate set key"}})
+    :display     "duplicate set key"}
+
+   :def-fn
+   {:message-re #"^Use defn instead"
+    :phase       :default
+    :fix-fn      fixes/fix-def-fn-in-file
+    :display     "def + fn"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -496,8 +502,8 @@
    :display "conflicting alias"}
 
   :def-fn
-  {:status :not-implemented
-   :display "def fn"}
+   {:status :implemented
+    :display "def fn"}
 
   :destructured-or-always-evaluates
   {:status :not-implemented
@@ -867,12 +873,7 @@
    :display "conflicting alias"
    :fix-fn stub-fix-fn}
 
-  :def-fn
-  {:message-re #"^"
-   :display "def fn"
-   :fix-fn stub-fix-fn}
-
-  :destructured-or-always-evaluates
+   :destructured-or-always-evaluates
   {:message-re #"^"
    :display "destructured or always evaluates"
    :fix-fn stub-fix-fn}

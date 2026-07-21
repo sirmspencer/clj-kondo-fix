@@ -49,14 +49,6 @@ These reuse the require-family removal machinery
 
 Localized rewrites of one form. No scope or usage analysis needed.
 
-### 9. `def-fn`
-
-- **Trigger:** `(def foo (fn [..] ..))` should be `(defn foo [..] ..)`.
-- **Fix:** rewrite the `def` plus `fn` into a `defn`, splicing the arg vector and
-  body. Handle docstring, metadata, and multi-arity forms.
-- **Reuse:** none directly; localized structural edit.
-- **Effort:** M (bounded by the multi-arity and metadata cases).
-
 ---
 
 ## Tier 3: Medium (usage-site rewrites, multiple locations, or structural move)

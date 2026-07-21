@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-46 implemented · 40 not yet implemented · 34 not applicable · 0 skipped
+47 implemented · 39 not yet implemented · 34 not applicable · 0 skipped
 
 ## Index
 
@@ -19,7 +19,7 @@
 - [:conflicting-alias](#conflicting-alias) ☹️
 - [:consistent-alias](#consistent-alias) ❌
 - [:datalog-syntax](#datalog-syntax) ❌
-- [:def-fn](#def-fn) ☹️
+- [:def-fn](#def-fn) ✅
 - [:deprecated-namespace](#deprecated-namespace) ❌
 - [:deprecated-var](#deprecated-var) ❌
 - [:destructured-or-always-evaluates](#destructured-or-always-evaluates) ☹️
@@ -213,6 +213,26 @@ warn on a condition that evaluates to an always truthy constant,
 
 ```clojure
 (defn f [] :then)
+```
+
+---
+
+### :def-fn
+
+**Def + fn instead of defn**
+
+tells about closures defined with the combination of
+
+```clojure
+(ns foo)
+(def foo (fn [x] (* x 2)))
+```
+
+↓
+
+```clojure
+(ns foo)
+(defn foo [x] (* x 2))
 ```
 
 ---
@@ -2424,7 +2444,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:case-symbol-test` | Warn on symbol test constants in `case`. Sometimes this is |
 | `:conditional-build-up` | warn when a `let` repeatedly rebinds the same local map using forms like `(if pred (assoc m ...) m)`, which can often be written more clearly with `cond->` |
 | `:conflicting-alias` | warn on conflicting alias |
-| `:def-fn` | tells about closures defined with the combination of |
 | `:destructured-or-always-evaluates` | Warn when an `:or` default value in a destructuring contains an |
 | `:destructured-or-binding-of-same-map` | an `:or` default value refers to a destructured binding of the |
 | `:discouraged-tag` | warn on the usage of a tagged literal that is discouraged to be used |
