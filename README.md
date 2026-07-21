@@ -200,7 +200,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:unresolved-var](rules.md#unresolved-var) ❌
 - [:unsorted-imports](rules.md#unsorted-imports) ✅
 - [:unsorted-required-namespaces](rules.md#unsorted-required-namespaces) ✅
-- [:unused-alias](rules.md#unused-alias)
+- [:unused-alias](rules.md#unused-alias) ✅
 - [:unused-binding](rules.md#unused-binding) ✅
 - [:unused-excluded-var](rules.md#unused-excluded-var)
 - [:unused-import](rules.md#unused-import) ✅

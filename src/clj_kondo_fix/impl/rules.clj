@@ -241,7 +241,13 @@
    {:message-re #"^Unsorted namespace: "
     :phase       :default
     :fix-fn      fixes/fix-unsorted-required-namespaces-in-file
-    :display     "unsorted required namespaces"}})
+    :display     "unsorted required namespaces"}
+
+   :unused-alias
+   {:message-re #"^Unused alias: "
+    :phase       :require
+    :fix-fn      fixes/fix-unused-alias-in-file
+    :display     "unused alias"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -583,9 +589,9 @@
   {:status :not-implemented
    :display "unresolved excluded var"}
 
-  :unused-alias
-  {:status :not-implemented
-   :display "unused alias"}
+   :unused-alias
+   {:status :implemented
+    :display "unused alias"}
 
   :unused-excluded-var
   {:status :not-implemented
@@ -999,15 +1005,10 @@
    :display "unresolved excluded var"
    :fix-fn stub-fix-fn}
 
-  :unused-alias
-  {:message-re #"^"
-   :display "unused alias"
-   :fix-fn stub-fix-fn}
-
-  :unused-excluded-var
-  {:message-re #"^"
-   :display "unused excluded var"
-   :fix-fn stub-fix-fn}
+   :unused-excluded-var
+   {:message-re #"^"
+    :display "unused excluded var"
+    :fix-fn stub-fix-fn}
 
   :unused-value
   {:message-re #"^"
