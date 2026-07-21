@@ -283,7 +283,13 @@
    {:message-re #"^Static fields should be referenced without parens"
     :phase       :default
     :fix-fn      fixes/fix-java-static-field-call-in-file
-    :display     "java static field call"}})
+    :display     "java static field call"}
+
+   :duplicate-set-key
+   {:message-re #"^duplicate set element"
+    :phase       :default
+    :fix-fn      fixes/fix-duplicate-set-key-in-file
+    :display     "duplicate set key"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -529,9 +535,9 @@
    {:status :implemented
     :display "duplicate refer"}
 
-  :duplicate-set-key
-  {:status :not-implemented
-   :display "duplicate set key"}
+   :duplicate-set-key
+   {:status :implemented
+    :display "duplicate set key"}
 
   :format
   {:status :not-implemented
@@ -906,12 +912,7 @@
    :display "duplicate map key"
    :fix-fn stub-fix-fn}
 
-   :duplicate-set-key
-   {:message-re #"^"
-    :display "duplicate set key"
-    :fix-fn stub-fix-fn}
-
-  :format
+   :format
   {:message-re #"^"
    :display "format"
    :fix-fn stub-fix-fn}

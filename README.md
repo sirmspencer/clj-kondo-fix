@@ -125,7 +125,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:duplicate-map-key](rules.md#duplicate-map-key)
 - [:duplicate-refer](rules.md#duplicate-refer) ✅
 - [:duplicate-require](rules.md#duplicate-require) ✅
-- [:duplicate-set-key](rules.md#duplicate-set-key)
+- [:duplicate-set-key](rules.md#duplicate-set-key) ✅
 - [:dynamic-var-not-earmuffed](rules.md#dynamic-var-not-earmuffed) ✅
 - [:earmuffed-var-not-dynamic](rules.md#earmuffed-var-not-dynamic) ✅
 - [:equals-expected-position](rules.md#equals-expected-position) ✅

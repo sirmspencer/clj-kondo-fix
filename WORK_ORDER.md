@@ -49,14 +49,6 @@ These reuse the require-family removal machinery
 
 Localized rewrites of one form. No scope or usage analysis needed.
 
-### 8. `duplicate-set-key`
-
-- **Trigger:** a set literal contains an identical duplicate element,
-  for example `#{:a :a}`.
-- **Fix:** remove the duplicate element. Safe because the elements are identical.
-- **Reuse:** token-span removal.
-- **Effort:** S.
-
 ### 9. `def-fn`
 
 - **Trigger:** `(def foo (fn [..] ..))` should be `(defn foo [..] ..)`.

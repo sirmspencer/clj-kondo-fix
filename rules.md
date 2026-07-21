@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-45 implemented · 41 not yet implemented · 34 not applicable · 0 skipped
+46 implemented · 40 not yet implemented · 34 not applicable · 0 skipped
 
 ## Index
 
@@ -37,7 +37,7 @@
 - [:duplicate-map-key](#duplicate-map-key) ☹️
 - [:duplicate-refer](#duplicate-refer) ✅
 - [:duplicate-require](#duplicate-require) ✅
-- [:duplicate-set-key](#duplicate-set-key) ☹️
+- [:duplicate-set-key](#duplicate-set-key) ✅
 - [:dynamic-var-not-earmuffed](#dynamic-var-not-earmuffed) ✅
 - [:earmuffed-var-not-dynamic](#earmuffed-var-not-dynamic) ✅
 - [:equals-expected-position](#equals-expected-position) ✅
@@ -380,6 +380,26 @@ warns on namespace that has been required more than once within a namespace
 (ns foo (:require  [clojure.string :as str]))
 
 (str/join [""] "")
+```
+
+---
+
+### :duplicate-set-key
+
+**Duplicate set key**
+
+similar to `:duplicate-map-key` but for sets
+
+```clojure
+(ns foo)
+(def s #{:a :b :a})
+```
+
+↓
+
+```clojure
+(ns foo)
+(def s #{:a :b})
 ```
 
 ---
@@ -2413,7 +2433,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:duplicate-field-name` | identify duplicate fields in deftype/defrecord fields definition |
 | `:duplicate-key-args` | identify duplicate key args in calls to `assoc`, `dissoc`, `hash-map` etc |
 | `:duplicate-map-key` | warn on duplicate key in map |
-| `:duplicate-set-key` | similar to `:duplicate-map-key` but for sets |
 | `:format` | warn on unexpected amount of arguments in `format` |
 | `:inline-def` | warn on non-toplevel usage of `def` (and `defn`, etc.) |
 | `:is-message-not-string` | warn when `clojure.test/is` receives a non-string message argument. This linter relies on the `:type-mismatch` linter being enabled to perform type checking |
