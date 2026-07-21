@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-40 implemented · 46 not yet implemented · 34 not applicable · 0 skipped
+41 implemented · 45 not yet implemented · 34 not applicable · 0 skipped
 
 ## Index
 
@@ -35,7 +35,7 @@
 - [:duplicate-field-name](#duplicate-field-name) ☹️
 - [:duplicate-key-args](#duplicate-key-args) ☹️
 - [:duplicate-map-key](#duplicate-map-key) ☹️
-- [:duplicate-refer](#duplicate-refer) ☹️
+- [:duplicate-refer](#duplicate-refer) ✅
 - [:duplicate-require](#duplicate-require) ✅
 - [:duplicate-set-key](#duplicate-set-key) ☹️
 - [:dynamic-var-not-earmuffed](#dynamic-var-not-earmuffed) ✅
@@ -251,6 +251,30 @@ warn when docstring has leading or trailing whitespace
 
 ```clojure
 (defn foo "text" [a b] 1)
+```
+
+---
+
+### :duplicate-refer
+
+**Duplicate refer**
+
+warns on var that has been referred more than once in a `:refer` or `:refer-macros` vector
+
+```clojure
+(ns foo.removes-duplicate
+  (:require [clojure.string :refer [join join]]))
+
+(def x (join "," ["a" "b"]))
+```
+
+↓
+
+```clojure
+(ns foo.removes-duplicate
+  (:require [clojure.string :refer [join]]))
+
+(def x (join "," ["a" "b"]))
 ```
 
 ---
@@ -2297,7 +2321,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:duplicate-field-name` | identify duplicate fields in deftype/defrecord fields definition |
 | `:duplicate-key-args` | identify duplicate key args in calls to `assoc`, `dissoc`, `hash-map` etc |
 | `:duplicate-map-key` | warn on duplicate key in map |
-| `:duplicate-refer` | warns on var that has been referred more than once in a `:refer` or `:refer-macros` vector |
 | `:duplicate-set-key` | similar to `:duplicate-map-key` but for sets |
 | `:format` | warn on unexpected amount of arguments in `format` |
 | `:inline-def` | warn on non-toplevel usage of `def` (and `defn`, etc.) |

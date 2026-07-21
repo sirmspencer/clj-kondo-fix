@@ -123,7 +123,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:duplicate-field-name](rules.md#duplicate-field-name)
 - [:duplicate-key-args](rules.md#duplicate-key-args)
 - [:duplicate-map-key](rules.md#duplicate-map-key)
-- [:duplicate-refer](rules.md#duplicate-refer)
+- [:duplicate-refer](rules.md#duplicate-refer) ✅
 - [:duplicate-require](rules.md#duplicate-require) ✅
 - [:duplicate-set-key](rules.md#duplicate-set-key)
 - [:dynamic-var-not-earmuffed](rules.md#dynamic-var-not-earmuffed) ✅

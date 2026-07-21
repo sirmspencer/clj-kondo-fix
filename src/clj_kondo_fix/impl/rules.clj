@@ -253,7 +253,13 @@
    {:message-re #"^Alias same as namespace name: "
     :phase       :require
     :fix-fn      fixes/fix-alias-same-as-ns-in-file
-    :display     "alias same as ns"}})
+    :display     "alias same as ns"}
+
+   :duplicate-refer
+   {:message-re #"^Duplicate refer: "
+    :phase       :refer
+    :fix-fn      fixes/fix-duplicate-refer-in-file
+    :display     "duplicate refer"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -495,9 +501,9 @@
   {:status :not-implemented
    :display "duplicate map key"}
 
-  :duplicate-refer
-  {:status :not-implemented
-   :display "duplicate refer"}
+   :duplicate-refer
+   {:status :implemented
+    :display "duplicate refer"}
 
   :duplicate-set-key
   {:status :not-implemented
@@ -876,15 +882,10 @@
    :display "duplicate map key"
    :fix-fn stub-fix-fn}
 
-  :duplicate-refer
-  {:message-re #"^"
-   :display "duplicate refer"
-   :fix-fn stub-fix-fn}
-
-  :duplicate-set-key
-  {:message-re #"^"
-   :display "duplicate set key"
-   :fix-fn stub-fix-fn}
+   :duplicate-set-key
+   {:message-re #"^"
+    :display "duplicate set key"
+    :fix-fn stub-fix-fn}
 
   :format
   {:message-re #"^"

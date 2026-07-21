@@ -43,13 +43,6 @@ These reuse the require-family removal machinery
 (`require_entry.clj`: `remove-token-span`, `cleanup-empty-clauses`;
 `utils.clj`: `remove-referred-var-from-line`). Little new logic.
 
-### 3. `duplicate-refer`
-
-- **Trigger:** the same var appears twice in a `:refer [..]` vector.
-- **Fix:** remove the duplicate token, keep the first occurrence.
-- **Reuse:** `remove-referred-var-from-line` / `remove-token-span`.
-- **Effort:** XS.
-
 ### 4. `unused-excluded-var`
 
 - **Trigger:** a var listed in `:refer-clojure :exclude [..]` is not used.
