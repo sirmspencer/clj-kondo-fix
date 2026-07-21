@@ -56,12 +56,6 @@ Localized rewrites of one form. No scope or usage analysis needed.
 These require finding and rewriting several positions in the file, or moving a
 form while preserving surrounding structure.
 
-### 11. `aliased-namespace-var-usage`
-
-- **Trigger:** a var is used by its fully qualified namespace where an alias exists.
-- **Fix:** rewrite to the alias-qualified form.
-- **Effort:** M.
-
 ### 12. `aliased-referred-var`
 
 - **Trigger:** a var is used alias-qualified while also referred (or the reverse).

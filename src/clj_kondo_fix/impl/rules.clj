@@ -496,7 +496,8 @@
     :display "aliased namespace symbol"}
 
   :aliased-namespace-var-usage
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Fires on :as-alias usage where namespace wasn't loaded; cannot mechanically decide whether to add a real require or remove the usage — requires project knowledge"
    :display "aliased namespace var usage"}
 
   :aliased-referred-var
@@ -856,11 +857,6 @@
    :fix-fn stub-fix-fn}
 
   ;; ---- stubs (not-implemented) ----
-  :aliased-namespace-var-usage
-  {:message-re #"^"
-   :display "aliased namespace var usage"
-   :fix-fn stub-fix-fn}
-
   :aliased-referred-var
   {:message-re #"^"
    :display "aliased referred var"

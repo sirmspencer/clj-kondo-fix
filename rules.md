@@ -1,12 +1,12 @@
 # clj-kondo-fix Rule Index
 
-50 implemented · 36 not yet implemented · 34 not applicable · 0 skipped
+50 implemented · 35 not yet implemented · 35 not applicable · 0 skipped
 
 ## Index
 
 - [:alias-same-as-ns](#alias-same-as-ns) ✅
 - [:aliased-namespace-symbol](#aliased-namespace-symbol) ✅
-- [:aliased-namespace-var-usage](#aliased-namespace-var-usage) ☹️
+- [:aliased-namespace-var-usage](#aliased-namespace-var-usage) ❌
 - [:aliased-referred-var](#aliased-referred-var) ☹️
 - [:await-without-async-fn](#await-without-async-fn) ❌
 - [:case-duplicate-test](#case-duplicate-test) ☹️
@@ -2505,7 +2505,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:aliased-namespace-var-usage` | warn when a var from a namespace that was used with `:as-alias` is used |
 | `:aliased-referred-var` | warn when a var is both referred and accessed via an alias in the same namespace |
 | `:case-duplicate-test` | identify duplicate case test constants |
 | `:case-symbol-test` | Warn on symbol test constants in `case`. Sometimes this is |
@@ -2548,6 +2547,7 @@ These rules cannot be meaningfully auto-fixed.
 
 | Rule | Why |
 | --- | --- |
+| `:aliased-namespace-var-usage` | Fires on :as-alias usage where namespace wasn't loaded; cannot mechanically decide whether to add a real require or remove the usage — requires project knowledge |
 | `:await-without-async-fn` | Structural fix (wrapping fn in async) requires understanding intent |
 | `:case-quoted-test` | Removing the quote is trivial but the user may have intended the quoted symbol as a runtime value; requires human judgment |
 | `:clj-kondo-config` | Config validation errors need human correction |
