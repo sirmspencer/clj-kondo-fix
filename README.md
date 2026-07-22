@@ -110,7 +110,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:def-fn](rules.md#def-fn) ✅
 - [:deprecated-namespace](rules.md#deprecated-namespace) ❌
 - [:deprecated-var](rules.md#deprecated-var) ❌
-- [:destructured-or-always-evaluates](rules.md#destructured-or-always-evaluates)
+- [:destructured-or-always-evaluates](rules.md#destructured-or-always-evaluates) ❌
 - [:destructured-or-binding-of-same-map](rules.md#destructured-or-binding-of-same-map)
 - [:discouraged-java-method](rules.md#discouraged-java-method) ❌
 - [:discouraged-namespace](rules.md#discouraged-namespace) ❌

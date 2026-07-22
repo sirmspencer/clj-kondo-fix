@@ -553,7 +553,8 @@
     :display "def fn"}
 
   :destructured-or-always-evaluates
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Fixing requires restructuring destructuring to defer evaluation (e.g., let + if); no simple text transform exists"
    :display "destructured or always evaluates"}
 
   :destructured-or-binding-of-same-map

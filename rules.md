@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-54 implemented · 26 not yet implemented · 40 not applicable · 0 skipped
+54 implemented · 25 not yet implemented · 41 not applicable · 0 skipped
 
 ## Index
 
@@ -22,7 +22,7 @@
 - [:def-fn](#def-fn) ✅
 - [:deprecated-namespace](#deprecated-namespace) ❌
 - [:deprecated-var](#deprecated-var) ❌
-- [:destructured-or-always-evaluates](#destructured-or-always-evaluates) ☹️
+- [:destructured-or-always-evaluates](#destructured-or-always-evaluates) ❌
 - [:destructured-or-binding-of-same-map](#destructured-or-binding-of-same-map) ☹️
 - [:discouraged-java-method](#discouraged-java-method) ❌
 - [:discouraged-namespace](#discouraged-namespace) ❌
@@ -2609,7 +2609,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:destructured-or-always-evaluates` | Warn when an `:or` default value in a destructuring contains an |
 | `:destructured-or-binding-of-same-map` | an `:or` default value refers to a destructured binding of the |
 | `:discouraged-tag` | warn on the usage of a tagged literal that is discouraged to be used |
 | `:do-template` | warn on incorrect usages of `clojure.template/do-template`: no args, no values, or incorrect number of values |
@@ -2654,6 +2653,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:datalog-syntax` | Invalid datalog syntax requires domain knowledge to correct |
 | `:deprecated-namespace` | Replacing a deprecated namespace requires knowing the recommended replacement |
 | `:deprecated-var` | Replacing a deprecated var requires knowing the recommended replacement |
+| `:destructured-or-always-evaluates` | Fixing requires restructuring destructuring to defer evaluation (e.g., let + if); no simple text transform exists |
 | `:discouraged-java-method` | Replacing a discouraged method requires knowing the configured replacement |
 | `:discouraged-namespace` | Replacing a discouraged namespace requires knowing the configured replacement |
 | `:discouraged-var` | Replacing a discouraged var requires knowing the configured replacement |

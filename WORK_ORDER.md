@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-3. `:destructured-or-always-evaluates`
 4. `:destructured-or-binding-of-same-map`
 5. `:discouraged-tag`
 6. `:do-template`
