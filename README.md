@@ -209,6 +209,6 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:unused-referred-var](rules.md#unused-referred-var) ✅
 - [:unused-value](rules.md#unused-value)
 - [:use](rules.md#use)
-- [:used-underscored-binding](rules.md#used-underscored-binding)
+- [:used-underscored-binding](rules.md#used-underscored-binding) ✅
 - [:var-same-name-except-case](rules.md#var-same-name-except-case)
 - [:warn-on-reflection](rules.md#warn-on-reflection) ❌

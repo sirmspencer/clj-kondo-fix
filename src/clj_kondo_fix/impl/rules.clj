@@ -319,7 +319,13 @@
    {:message-re #"^Var .+ is referred but used via alias:"
     :phase       :default
     :fix-fn      fixes/fix-aliased-referred-var-in-file
-    :display     "aliased referred var"}})
+    :display     "aliased referred var"}
+
+   :used-underscored-binding
+   {:message-re #"^Used binding is marked as unused:"
+    :phase       :default
+    :fix-fn      fixes/fix-used-underscored-binding-in-file
+    :display     "used underscored binding"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -680,7 +686,7 @@
    :display "use"}
 
   :used-underscored-binding
-  {:status :not-implemented
+  {:status :implemented
    :display "used underscored binding"}
 
   :var-same-name-except-case
@@ -1022,11 +1028,6 @@
   :use
   {:message-re #"^"
    :display "use"
-   :fix-fn stub-fix-fn}
-
-  :used-underscored-binding
-  {:message-re #"^"
-   :display "used underscored binding"
    :fix-fn stub-fix-fn}
 
   :var-same-name-except-case

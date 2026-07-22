@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-51 implemented · 33 not yet implemented · 36 not applicable · 0 skipped
+52 implemented · 32 not yet implemented · 36 not applicable · 0 skipped
 
 ## Index
 
@@ -121,7 +121,7 @@
 - [:unused-referred-var](#unused-referred-var) ✅
 - [:unused-value](#unused-value) ☹️
 - [:use](#use) ☹️
-- [:used-underscored-binding](#used-underscored-binding) ☹️
+- [:used-underscored-binding](#used-underscored-binding) ✅
 - [:var-same-name-except-case](#var-same-name-except-case) ☹️
 - [:warn-on-reflection](#warn-on-reflection) ❌
 
@@ -2525,6 +2525,30 @@ warns about unused referred vars
 (join [""] "")
 ```
 
+---
+
+### :used-underscored-binding
+
+**Used underscored bindings**
+
+warn when a underscored (ie marked as unused) binding is used
+
+```clojure
+(ns test-foo)
+
+(defn foo [_x]
+  (inc _x))
+```
+
+↓
+
+```clojure
+(ns test-foo)
+
+(defn foo [x]
+  (inc x))
+```
+
 ## Not Yet Implemented
 
 These rules could potentially be auto-fixed but have not been tackled yet.
@@ -2562,7 +2586,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:unreachable-code` | warn on unreachable code |
 | `:unused-value` | warn on unused value: constants, unrealized lazy values, pure functions and transient ops (`assoc!`, `conj!` etc) |
 | `:use` | warns about `:use` or `use` |
-| `:used-underscored-binding` | warn when a underscored (ie marked as unused) binding is used |
 | `:var-same-name-except-case` | warn on vars that share the same name with different case (only in Clojure mode) as these could cause clashing class file names on case insensitive filesystems |
 
 ## Not Applicable

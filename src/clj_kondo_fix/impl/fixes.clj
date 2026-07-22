@@ -54,7 +54,8 @@
                 [clj-kondo-fix.impl.fixes.aliased-namespace-symbol :as aliased-ns-sym]
                 [clj-kondo-fix.impl.fixes.is-message-not-string :as is-msg-not-str]
                 [clj-kondo-fix.impl.fixes.non-arg-vec-return-type-hint :as non-arg-hint]
-                [clj-kondo-fix.impl.fixes.aliased-referred-var :as aliased-referred-var]))
+                [clj-kondo-fix.impl.fixes.aliased-referred-var :as aliased-referred-var]
+                [clj-kondo-fix.impl.fixes.used-underscored-binding :as used-underscored-binding]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -109,3 +110,4 @@
 (def fix-is-message-not-string-in-file is-msg-not-str/fix-is-message-not-string-in-file)
 (def fix-non-arg-vec-return-type-hint-in-file non-arg-hint/fix-non-arg-vec-return-type-hint-in-file)
 (def fix-aliased-referred-var-in-file aliased-referred-var/fix-aliased-referred-var-in-file)
+(def fix-used-underscored-binding-in-file used-underscored-binding/fix-used-underscored-binding-in-file)
