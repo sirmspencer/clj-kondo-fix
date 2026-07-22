@@ -12,27 +12,27 @@
 6. **Remove the rule in the same commit.** The commit that ships the fix must also delete that rule's entry from this file. Do not batch removals. Do not renumber remaining items.
 7. **Pause after each rule.** Stop and wait for review before starting the next item.
 8. **Commit once approved** make a commit for each rule.
-9. **Repeat** go back to step 1 for the next rule.
+9. **Repeat** go back to step 1 and keep going for the next rule.
 
 ## Remaining Rules
 
-9. `:duplicate-key-args`
-10. `:duplicate-map-key`
-11. `:format`
-12. `:inline-def`
-13. `:line-length`
-14. `:missing-body-in-when`
-15. `:missing-clause-in-try`
-16. `:missing-map-value`
-17. `:private-call`
-18. `:refer`
-19. `:shadowed-fn-param`
-20. `:shadowed-var`
-21. `:unbound-destructuring-default`
-22. `:underscore-in-namespace`
-23. `:unexpected-recur`
-24. `:unknown-ns-option`
-25. `:unknown-require-option`
-26. `:unquote-not-syntax-quoted`
-27. `:unused-value`
-28. `:var-same-name-except-case`
+1. `:duplicate-key-args`
+2. `:duplicate-map-key`
+3. `:format`
+4. `:inline-def`
+5. `:line-length`
+6. `:missing-body-in-when`
+7. `:missing-clause-in-try`
+8. `:missing-map-value`
+9. `:private-call`
+10. `:refer`
+11. `:shadowed-fn-param`
+12. `:shadowed-var`
+13. `:unbound-destructuring-default`
+14. `:underscore-in-namespace`
+15. `:unexpected-recur`
+16. `:unknown-ns-option`
+17. `:unknown-require-option`
+18. `:unquote-not-syntax-quoted`
+19. `:unused-value`
+20. `:var-same-name-except-case`
