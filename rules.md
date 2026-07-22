@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-55 implemented · 21 not yet implemented · 44 not applicable · 0 skipped
+56 implemented · 20 not yet implemented · 44 not applicable · 0 skipped
 
 ## Index
 
@@ -32,7 +32,7 @@
 - [:docstring-blank](#docstring-blank) ✅
 - [:docstring-leading-trailing-whitespace](#docstring-leading-trailing-whitespace) ✅
 - [:docstring-no-summary](#docstring-no-summary) ✅
-- [:duplicate-field-name](#duplicate-field-name) ☹️
+- [:duplicate-field-name](#duplicate-field-name) ✅
 - [:duplicate-key-args](#duplicate-key-args) ☹️
 - [:duplicate-map-key](#duplicate-map-key) ☹️
 - [:duplicate-refer](#duplicate-refer) ✅
@@ -343,6 +343,60 @@ warn when first _line_ of docstring is not a complete
 ```clojure
 (ns foo)
 (defn foo "Not a sentence." [a b] 1)
+```
+
+---
+
+### :duplicate-field-name
+
+**Duplicate field name**
+
+identify duplicate fields in deftype/defrecord fields definition
+
+**multiple duplicate fields**
+
+```clojure
+(ns foo)
+(deftype T [a b a b])
+```
+
+↓
+
+```clojure
+(ns foo)
+(deftype T [a b])
+```
+
+---
+
+**defrecord with duplicate field**
+
+```clojure
+(ns foo)
+(defrecord R [field another-field field])
+```
+
+↓
+
+```clojure
+(ns foo)
+(defrecord R [field another-field])
+```
+
+---
+
+**deftype with duplicate field**
+
+```clojure
+(ns foo)
+(deftype T [field another-field field])
+```
+
+↓
+
+```clojure
+(ns foo)
+(deftype T [field another-field])
 ```
 
 ---
@@ -2631,7 +2685,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:duplicate-field-name` | identify duplicate fields in deftype/defrecord fields definition |
 | `:duplicate-key-args` | identify duplicate key args in calls to `assoc`, `dissoc`, `hash-map` etc |
 | `:duplicate-map-key` | warn on duplicate key in map |
 | `:format` | warn on unexpected amount of arguments in `format` |

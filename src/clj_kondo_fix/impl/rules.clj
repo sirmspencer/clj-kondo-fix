@@ -201,6 +201,13 @@
     :fix-fn      fixes/fix-docstring-no-summary-in-file
     :display     "docstring no summary"}
 
+   :duplicate-field-name
+   {:message-re #"^Duplicate field name: "
+    :phase       :default
+    :fix-fn      fixes/fix-duplicate-field-name-in-file
+    :linter-type :duplicate-field
+    :display     "duplicate field name"}
+
    :redundant-declare
    {:message-re #"^Redundant declare: "
     :phase       :default
@@ -583,7 +590,7 @@
    :display "docstring no summary"}
 
   :duplicate-field-name
-  {:status :not-implemented
+  {:status :implemented
    :display "duplicate field name"}
 
   :duplicate-key-args
@@ -936,11 +943,6 @@
    :display "do template"
    :fix-fn stub-fix-fn}
 
-  :duplicate-field-name
-  {:message-re #"^"
-   :display "duplicate field name"
-   :fix-fn stub-fix-fn}
-
   :duplicate-key-args
   {:message-re #"^"
    :display "duplicate key args"
@@ -1064,8 +1066,9 @@
           expanded)))
 
 (defn findings-matching-rule [findings rule-key rule-def]
-  (->> findings
-       (filter #(= (:type %) rule-key))
-       (filter #(re-find (:message-re rule-def) (:message %)))))
+  (let [linter-type (or (:linter-type rule-def) rule-key)]
+    (->> findings
+         (filter #(= (:type %) linter-type))
+         (filter #(re-find (:message-re rule-def) (:message %))))))
 
 

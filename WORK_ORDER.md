@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-8. `:duplicate-field-name`
 9. `:duplicate-key-args`
 10. `:duplicate-map-key`
 11. `:format`

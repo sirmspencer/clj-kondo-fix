@@ -120,7 +120,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:docstring-blank](rules.md#docstring-blank) ✅
 - [:docstring-leading-trailing-whitespace](rules.md#docstring-leading-trailing-whitespace) ✅
 - [:docstring-no-summary](rules.md#docstring-no-summary) ✅
-- [:duplicate-field-name](rules.md#duplicate-field-name)
+- [:duplicate-field-name](rules.md#duplicate-field-name) ✅
 - [:duplicate-key-args](rules.md#duplicate-key-args)
 - [:duplicate-map-key](rules.md#duplicate-map-key)
 - [:duplicate-refer](rules.md#duplicate-refer) ✅
