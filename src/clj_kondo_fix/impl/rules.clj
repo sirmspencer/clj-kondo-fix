@@ -356,7 +356,13 @@
    {:message-re #"^Missing body in when$"
     :phase       :default
     :fix-fn      fixes/fix-missing-body-in-when-in-file
-    :display     "missing body in when"}})
+    :display     "missing body in when"}
+
+   :shadowed-var
+   {:message-re #"^Shadowed var: "
+    :phase       :default
+    :fix-fn      fixes/fix-shadowed-var-in-file
+    :display     "shadowed var"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -649,36 +655,37 @@
    {:status :implemented
     :display "missing body in when"}
 
-  :missing-clause-in-try
-  {:status :not-applicable
-   :reason "Cannot generate a meaningful catch or finally clause; removing the try wrapper changes semantics"
-   :display "missing clause in try"}
+   :missing-clause-in-try
+   {:status :not-applicable
+    :reason "Cannot generate a meaningful catch or finally clause; removing the try wrapper changes semantics"
+    :display "missing clause in try"}
 
-  :missing-map-value
-  {:status :not-applicable
-   :reason "Cannot determine whether to add a value or remove the key; requires human judgment"
-   :display "missing map value"}
+   :missing-map-value
+   {:status :not-applicable
+    :reason "Cannot determine whether to add a value or remove the key; requires human judgment"
+    :display "missing map value"}
 
    :non-arg-vec-return-type-hint
    {:status :implemented
     :display "non arg vec return type hint"}
 
-  :private-call
-  {:status :not-applicable
-   :reason "Calling a private var across namespaces is a design violation; whether to make the var public or remove the call requires human judgment"
-   :display "private call"}
+   :private-call
+   {:status :not-applicable
+    :reason "Calling a private var across namespaces is a design violation; whether to make the var public or remove the call requires human judgment"
+    :display "private call"}
 
-  :refer
-  {:status :not-applicable
-   :reason "Replacing :refer with :as requires renaming all referred symbols to alias/sym throughout the file; not a safe text transform"
-   :display "refer"}
+   :refer
+   {:status :not-applicable
+    :reason "Replacing :refer with :as requires renaming all referred symbols to alias/sym throughout the file; not a safe text transform"
+    :display "refer"}
 
    :shadowed-fn-param
-   {:status :not-implemented
+   {:status :not-applicable
+    :reason "Duplicate param name in arg vector (e.g. (fn [x x])): renaming requires knowing the intended name and removes changes arity"
     :display "shadowed fn param"}
 
    :shadowed-var
-   {:status :not-implemented
+   {:status :implemented
     :display "shadowed var"}
 
    :single-operand-comparison
@@ -1008,16 +1015,6 @@
     :display "refer"
     :fix-fn stub-fix-fn}
 
-   :shadowed-fn-param
-   {:message-re #"^"
-    :display "shadowed fn param"
-    :fix-fn stub-fix-fn}
-
-   :shadowed-var
-   {:message-re #"^"
-    :display "shadowed var"
-    :fix-fn stub-fix-fn}
-
    :unbound-destructuring-default
    {:message-re #"^"
     :display "unbound destructuring default"
@@ -1080,5 +1077,3 @@
     (->> findings
          (filter #(= (:type %) linter-type))
          (filter #(re-find (:message-re rule-def) (:message %))))))
-
-

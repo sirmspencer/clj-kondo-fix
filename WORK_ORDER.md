@@ -16,8 +16,6 @@
 
 ## Remaining Rules
 
-11. `:shadowed-fn-param`
-12. `:shadowed-var`
 13. `:unbound-destructuring-default`
 14. `:underscore-in-namespace`
 15. `:unexpected-recur`

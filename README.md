@@ -178,8 +178,8 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:refer-all](rules.md#refer-all) ❌
 - [:schema-misplaced-return](rules.md#schema-misplaced-return) ❌
 - [:self-requiring-namespace](rules.md#self-requiring-namespace) ❌
-- [:shadowed-fn-param](rules.md#shadowed-fn-param)
-- [:shadowed-var](rules.md#shadowed-var)
+- [:shadowed-fn-param](rules.md#shadowed-fn-param) ❌
+- [:shadowed-var](rules.md#shadowed-var) ✅
 - [:single-key-in](rules.md#single-key-in) ✅
 - [:single-logical-operand](rules.md#single-logical-operand) ✅
 - [:single-operand-comparison](rules.md#single-operand-comparison) ✅

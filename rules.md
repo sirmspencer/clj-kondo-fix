@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-57 implemented · 10 not yet implemented · 53 not applicable · 0 skipped
+58 implemented · 8 not yet implemented · 54 not applicable · 0 skipped
 
 ## Index
 
@@ -90,8 +90,8 @@
 - [:refer-all](#refer-all) ❌
 - [:schema-misplaced-return](#schema-misplaced-return) ❌
 - [:self-requiring-namespace](#self-requiring-namespace) ❌
-- [:shadowed-fn-param](#shadowed-fn-param) ☹️
-- [:shadowed-var](#shadowed-var) ☹️
+- [:shadowed-fn-param](#shadowed-fn-param) ❌
+- [:shadowed-var](#shadowed-var) ✅
 - [:single-key-in](#single-key-in) ✅
 - [:single-logical-operand](#single-logical-operand) ✅
 - [:single-operand-comparison](#single-operand-comparison) ✅
@@ -1470,6 +1470,40 @@ warn on redundant `str` calls. The warning arises when a single argument
 
 ---
 
+### :shadowed-var
+
+**Shadowed var**
+
+warn on var that is shadowed by local
+
+```clojure
+(ns foo)
+(let [name 2] name)
+```
+
+↓
+
+```clojure
+(ns foo)
+(let [LOCAL-name 2] LOCAL-name)
+```
+
+---
+
+```clojure
+(ns foo)
+(defn bar [name] (str name))
+```
+
+↓
+
+```clojure
+(ns foo)
+(defn bar [LOCAL-name] (str LOCAL-name))
+```
+
+---
+
 ### :single-key-in
 
 **Single key in**
@@ -2710,8 +2744,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:shadowed-fn-param` | warn on fn param that has same name as previously defined one (in the same fn expression) |
-| `:shadowed-var` | warn on var that is shadowed by local |
 | `:unbound-destructuring-default` | warn on binding in `:or` which does not occur in destructuring |
 | `:underscore-in-namespace` | warns about the usage of the `_` character in the declaration of namespaces (as opposed to `-`) |
 | `:unexpected-recur` | `(recur ...)` is called where it's not expected |
@@ -2773,6 +2805,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:refer-all` | Cannot determine which symbols are actually used without analysis data; producing an explicit :refer list or :as alias requires domain knowledge |
 | `:schema-misplaced-return` | Plumatic Schema placement requires understanding the schema structure |
 | `:self-requiring-namespace` | Circular self-require must be resolved by removing the problematic require manually |
+| `:shadowed-fn-param` | Duplicate param name in arg vector (e.g. (fn [x x])): renaming requires knowing the intended name and removes changes arity |
 | `:syntax` | Syntax errors cannot be automatically corrected |
 | `:type-mismatch` | Type errors require type inference context unavailable at text-transformation level |
 | `:unresolved-namespace` | Cannot create or locate a missing namespace automatically |
