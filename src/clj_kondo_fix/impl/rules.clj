@@ -663,9 +663,10 @@
    {:status :implemented
     :display "non arg vec return type hint"}
 
-   :private-call
-   {:status :not-implemented
-    :display "private call"}
+  :private-call
+  {:status :not-applicable
+   :reason "Calling a private var across namespaces is a design violation; whether to make the var public or remove the call requires human judgment"
+   :display "private call"}
 
    :refer
    {:status :not-implemented

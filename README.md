@@ -158,7 +158,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:namespace-name-mismatch](rules.md#namespace-name-mismatch) ❌
 - [:non-arg-vec-return-type-hint](rules.md#non-arg-vec-return-type-hint) ✅
 - [:plus-one](rules.md#plus-one) ✅
-- [:private-call](rules.md#private-call)
+- [:private-call](rules.md#private-call) ❌
 - [:protocol-method-arity-mismatch](rules.md#protocol-method-arity-mismatch) ❌
 - [:protocol-method-varargs](rules.md#protocol-method-varargs) ❌
 - [:quoted-case-test-constant](rules.md#quoted-case-test-constant) ❌

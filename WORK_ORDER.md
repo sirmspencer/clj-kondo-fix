@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-9. `:private-call`
 10. `:refer`
 11. `:shadowed-fn-param`
 12. `:shadowed-var`

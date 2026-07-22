@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-57 implemented · 12 not yet implemented · 51 not applicable · 0 skipped
+57 implemented · 11 not yet implemented · 52 not applicable · 0 skipped
 
 ## Index
 
@@ -70,7 +70,7 @@
 - [:namespace-name-mismatch](#namespace-name-mismatch) ❌
 - [:non-arg-vec-return-type-hint](#non-arg-vec-return-type-hint) ✅
 - [:plus-one](#plus-one) ✅
-- [:private-call](#private-call) ☹️
+- [:private-call](#private-call) ❌
 - [:protocol-method-arity-mismatch](#protocol-method-arity-mismatch) ❌
 - [:protocol-method-varargs](#protocol-method-varargs) ❌
 - [:quoted-case-test-constant](#quoted-case-test-constant) ❌
@@ -2710,7 +2710,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:private-call` | warn when private var is used. The name of this linter should be |
 | `:refer` | warns when `:refer` is used. This can be used when one wants to |
 | `:shadowed-fn-param` | warn on fn param that has same name as previously defined one (in the same fn expression) |
 | `:shadowed-var` | warn on var that is shadowed by local |
@@ -2765,6 +2764,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:missing-protocol-method-arity` | Same as missing-protocol-method |
 | `:missing-test-assertion` | Writing a test assertion requires human authorship |
 | `:namespace-name-mismatch` | Renaming either the file or the ns declaration is a multi-file operation |
+| `:private-call` | Calling a private var across namespaces is a design violation; whether to make the var public or remove the call requires human judgment |
 | `:protocol-method-arity-mismatch` | Resolving an arity mismatch requires understanding the intended protocol contract |
 | `:protocol-method-varargs` | Varargs protocol methods require structural refactoring |
 | `:quoted-case-test-constant` | Fix is trivial (remove single quote) but safety depends on whether the quoted form is intentional behavior in a performance-sensitive code path |
