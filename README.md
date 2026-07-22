@@ -134,7 +134,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:equals-nil](rules.md#equals-nil) ✅
 - [:equals-true](rules.md#equals-true) ✅
 - [:file](rules.md#file) ❌
-- [:format](rules.md#format)
+- [:format](rules.md#format) ❌
 - [:hook](rules.md#hook) ❌
 - [:if-nil-return](rules.md#if-nil-return) ✅
 - [:if-x-x-y](rules.md#if-x-x-y) ✅

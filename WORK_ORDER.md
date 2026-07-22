@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-3. `:format`
 4. `:inline-def`
 5. `:line-length`
 6. `:missing-body-in-when`

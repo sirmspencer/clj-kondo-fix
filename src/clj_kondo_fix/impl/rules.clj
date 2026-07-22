@@ -612,7 +612,8 @@
     :display "duplicate set key"}
 
   :format
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Cannot determine whether the format string needs more specifiers or the argument list needs trimming; requires human judgment"
    :display "format"}
 
   :inline-def
