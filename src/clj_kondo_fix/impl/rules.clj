@@ -772,7 +772,8 @@
     :display "used underscored binding"}
 
    :var-same-name-except-case
-   {:status :not-implemented
+   {:status :not-applicable
+    :reason "Cannot determine which of the two conflicting vars to rename or remove; requires human judgment and cross-file analysis"
     :display "var same name except case"}})
 
 (defn stub-fix-fn [file-path lines findings log]

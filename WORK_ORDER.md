@@ -16,4 +16,4 @@
 
 ## Remaining Rules
 
-20. `:var-same-name-except-case`
+(none — all rules resolved)

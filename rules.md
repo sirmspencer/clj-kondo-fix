@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-62 implemented · 1 not yet implemented · 57 not applicable · 0 skipped
+62 implemented · 0 not yet implemented · 58 not applicable · 0 skipped
 
 ## Index
 
@@ -122,7 +122,7 @@
 - [:unused-value](#unused-value) ✅
 - [:use](#use) ✅
 - [:used-underscored-binding](#used-underscored-binding) ✅
-- [:var-same-name-except-case](#var-same-name-except-case) ☹️
+- [:var-same-name-except-case](#var-same-name-except-case) ❌
 - [:warn-on-reflection](#warn-on-reflection) ❌
 
 ## Implemented Rules
@@ -2874,7 +2874,7 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:var-same-name-except-case` | warn on vars that share the same name with different case (only in Clojure mode) as these could cause clashing class file names on case insensitive filesystems |
+
 
 ## Not Applicable
 
@@ -2938,4 +2938,5 @@ These rules cannot be meaningfully auto-fixed.
 | `:unresolved-protocol-method` | Resolving a missing protocol method requires human implementation |
 | `:unresolved-symbol` | Cannot create or locate a missing symbol automatically |
 | `:unresolved-var` | Cannot create or locate a missing var automatically |
+| `:var-same-name-except-case` | Cannot determine which of the two conflicting vars to rename or remove; requires human judgment and cross-file analysis |
 | `:warn-on-reflection` | Requires adding *warn-on-reflection* binding; intent and placement are contextual |
