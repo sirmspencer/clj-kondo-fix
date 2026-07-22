@@ -599,7 +599,8 @@
    :display "duplicate key args"}
 
   :duplicate-map-key
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Cannot determine which of the duplicate key-value pairs was intended; requires human judgment"
    :display "duplicate map key"}
 
    :duplicate-refer

@@ -122,7 +122,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:docstring-no-summary](rules.md#docstring-no-summary) ✅
 - [:duplicate-field-name](rules.md#duplicate-field-name) ✅
 - [:duplicate-key-args](rules.md#duplicate-key-args) ❌
-- [:duplicate-map-key](rules.md#duplicate-map-key)
+- [:duplicate-map-key](rules.md#duplicate-map-key) ❌
 - [:duplicate-refer](rules.md#duplicate-refer) ✅
 - [:duplicate-require](rules.md#duplicate-require) ✅
 - [:duplicate-set-key](rules.md#duplicate-set-key) ✅

@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-56 implemented · 19 not yet implemented · 45 not applicable · 0 skipped
+56 implemented · 18 not yet implemented · 46 not applicable · 0 skipped
 
 ## Index
 
@@ -34,7 +34,7 @@
 - [:docstring-no-summary](#docstring-no-summary) ✅
 - [:duplicate-field-name](#duplicate-field-name) ✅
 - [:duplicate-key-args](#duplicate-key-args) ❌
-- [:duplicate-map-key](#duplicate-map-key) ☹️
+- [:duplicate-map-key](#duplicate-map-key) ❌
 - [:duplicate-refer](#duplicate-refer) ✅
 - [:duplicate-require](#duplicate-require) ✅
 - [:duplicate-set-key](#duplicate-set-key) ✅
@@ -2691,7 +2691,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:duplicate-map-key` | warn on duplicate key in map |
 | `:format` | warn on unexpected amount of arguments in `format` |
 | `:inline-def` | warn on non-toplevel usage of `def` (and `defn`, etc.) |
 | `:line-length` | warn when lines are longer than a configured length |
@@ -2737,6 +2736,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:discouraged-var` | Replacing a discouraged var requires knowing the configured replacement |
 | `:do-template` | Fixing incorrect arg/value count requires knowing which values to add or remove; requires developer intent |
 | `:duplicate-key-args` | Cannot determine which of the duplicate key-value pairs was intended; requires human judgment |
+| `:duplicate-map-key` | Cannot determine which of the duplicate key-value pairs was intended; requires human judgment |
 | `:file` | File I/O errors cannot be auto-fixed |
 | `:hook` | Hook-related lint; not a code correctness issue |
 | `:loop-without-recur` | Structural fix (adding recur) requires understanding loop semantics and intent |

@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-2. `:duplicate-map-key`
 3. `:format`
 4. `:inline-def`
 5. `:line-length`
