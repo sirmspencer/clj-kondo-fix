@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-1. `:conditional-build-up`
 2. `:conflicting-alias`
 3. `:destructured-or-always-evaluates`
 4. `:destructured-or-binding-of-same-map`

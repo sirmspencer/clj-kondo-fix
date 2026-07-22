@@ -539,7 +539,8 @@
    :display "case symbol test"}
 
   :conditional-build-up
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Rewriting a let with conditional assoc/update into cond-> requires understanding the full let form structure and developer intent; cannot safely automate"
    :display "conditional build up"}
 
   :conflicting-alias

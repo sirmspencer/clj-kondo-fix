@@ -103,7 +103,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:clj-kondo-config](rules.md#clj-kondo-config) ❌
 - [:cond-else](rules.md#cond-else) ✅
 - [:condition-always-true](rules.md#condition-always-true) ✅
-- [:conditional-build-up](rules.md#conditional-build-up)
+- [:conditional-build-up](rules.md#conditional-build-up) ❌
 - [:conflicting-alias](rules.md#conflicting-alias)
 - [:consistent-alias](rules.md#consistent-alias) ❌
 - [:datalog-syntax](rules.md#datalog-syntax) ❌
