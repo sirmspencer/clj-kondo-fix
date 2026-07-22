@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-5. `:discouraged-tag`
 6. `:do-template`
 7. `:docstring-no-summary`
 8. `:duplicate-field-name`

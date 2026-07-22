@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-54 implemented · 24 not yet implemented · 42 not applicable · 0 skipped
+54 implemented · 23 not yet implemented · 43 not applicable · 0 skipped
 
 ## Index
 
@@ -26,7 +26,7 @@
 - [:destructured-or-binding-of-same-map](#destructured-or-binding-of-same-map) ❌
 - [:discouraged-java-method](#discouraged-java-method) ❌
 - [:discouraged-namespace](#discouraged-namespace) ❌
-- [:discouraged-tag](#discouraged-tag) ☹️
+- [:discouraged-tag](#discouraged-tag) ❌
 - [:discouraged-var](#discouraged-var) ❌
 - [:do-template](#do-template) ☹️
 - [:docstring-blank](#docstring-blank) ✅
@@ -2609,7 +2609,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:discouraged-tag` | warn on the usage of a tagged literal that is discouraged to be used |
 | `:do-template` | warn on incorrect usages of `clojure.template/do-template`: no args, no values, or incorrect number of values |
 | `:docstring-no-summary` | warn when first _line_ of docstring is not a complete |
 | `:duplicate-field-name` | identify duplicate fields in deftype/defrecord fields definition |
@@ -2656,6 +2655,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:destructured-or-binding-of-same-map` | Fixing requires understanding the intended default value and restructuring the destructuring or adding a let; no simple text transform |
 | `:discouraged-java-method` | Replacing a discouraged method requires knowing the configured replacement |
 | `:discouraged-namespace` | Replacing a discouraged namespace requires knowing the configured replacement |
+| `:discouraged-tag` | Which tagged literal to replace with what is user-configured; cannot determine without reading config |
 | `:discouraged-var` | Replacing a discouraged var requires knowing the configured replacement |
 | `:file` | File I/O errors cannot be auto-fixed |
 | `:hook` | Hook-related lint; not a code correctness issue |

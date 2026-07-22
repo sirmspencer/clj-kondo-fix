@@ -114,7 +114,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:destructured-or-binding-of-same-map](rules.md#destructured-or-binding-of-same-map) ❌
 - [:discouraged-java-method](rules.md#discouraged-java-method) ❌
 - [:discouraged-namespace](rules.md#discouraged-namespace) ❌
-- [:discouraged-tag](rules.md#discouraged-tag)
+- [:discouraged-tag](rules.md#discouraged-tag) ❌
 - [:discouraged-var](rules.md#discouraged-var) ❌
 - [:do-template](rules.md#do-template)
 - [:docstring-blank](rules.md#docstring-blank) ✅

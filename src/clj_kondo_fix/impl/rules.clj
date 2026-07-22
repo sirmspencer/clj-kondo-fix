@@ -563,7 +563,8 @@
    :display "destructured or binding of same map"}
 
   :discouraged-tag
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Which tagged literal to replace with what is user-configured; cannot determine without reading config"
    :display "discouraged tag"}
 
   :do-template
