@@ -331,7 +331,13 @@
    {:message-re #"^unreachable code"
     :phase       :default
     :fix-fn      fixes/fix-unreachable-code-in-file
-    :display     "unreachable code"}})
+    :display     "unreachable code"}
+
+   :use
+   {:message-re #"^use :require"
+    :phase       :default
+    :fix-fn      fixes/fix-use-in-file
+    :display     "use"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -688,7 +694,7 @@
    :display "unused value"}
 
   :use
-  {:status :not-implemented
+  {:status :implemented
    :display "use"}
 
   :used-underscored-binding
@@ -1025,11 +1031,6 @@
    {:message-re #"^"
     :display "unused value"
     :fix-fn stub-fix-fn}
-
-  :use
-  {:message-re #"^"
-   :display "use"
-   :fix-fn stub-fix-fn}
 
   :var-same-name-except-case
   {:message-re #"^"

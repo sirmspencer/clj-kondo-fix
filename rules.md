@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-53 implemented · 31 not yet implemented · 36 not applicable · 0 skipped
+54 implemented · 30 not yet implemented · 36 not applicable · 0 skipped
 
 ## Index
 
@@ -120,7 +120,7 @@
 - [:unused-private-var](#unused-private-var) ✅
 - [:unused-referred-var](#unused-referred-var) ✅
 - [:unused-value](#unused-value) ☹️
-- [:use](#use) ☹️
+- [:use](#use) ✅
 - [:used-underscored-binding](#used-underscored-binding) ✅
 - [:var-same-name-except-case](#var-same-name-except-case) ☹️
 - [:warn-on-reflection](#warn-on-reflection) ❌
@@ -2557,6 +2557,30 @@ warns about unused referred vars
 
 ---
 
+### :use
+
+**Use**
+
+warns about `:use` or `use`
+
+```clojure
+(ns test-use
+  (:use [clojure.string :only [join split]]))
+
+(join "," ["a"])
+```
+
+↓
+
+```clojure
+(ns test-use
+  (:require [clojure.string :refer [join split]]))
+
+(join "," ["a"])
+```
+
+---
+
 ### :used-underscored-binding
 
 **Used underscored bindings**
@@ -2614,7 +2638,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:unknown-require-option` | warn on unknown `:require` option pairs |
 | `:unquote-not-syntax-quoted` | warns when unquote (`~`) or unquote-splicing (`~@`) is used outside of syntax-quote (`` ` ``) |
 | `:unused-value` | warn on unused value: constants, unrealized lazy values, pure functions and transient ops (`assoc!`, `conj!` etc) |
-| `:use` | warns about `:use` or `use` |
 | `:var-same-name-except-case` | warn on vars that share the same name with different case (only in Clojure mode) as these could cause clashing class file names on case insensitive filesystems |
 
 ## Not Applicable
