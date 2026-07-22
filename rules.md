@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-60 implemented · 3 not yet implemented · 57 not applicable · 0 skipped
+61 implemented · 2 not yet implemented · 57 not applicable · 0 skipped
 
 ## Index
 
@@ -103,7 +103,7 @@
 - [:uninitialized-var](#uninitialized-var) ✅
 - [:unknown-ns-option](#unknown-ns-option) ❌
 - [:unknown-require-option](#unknown-require-option) ❌
-- [:unquote-not-syntax-quoted](#unquote-not-syntax-quoted) ☹️
+- [:unquote-not-syntax-quoted](#unquote-not-syntax-quoted) ✅
 - [:unreachable-code](#unreachable-code) ✅
 - [:unresolved-excluded-var](#unresolved-excluded-var) ✅
 - [:unresolved-namespace](#unresolved-namespace) ❌
@@ -1680,6 +1680,42 @@ warn on var without initial value
 
 ---
 
+### :unquote-not-syntax-quoted
+
+**Unquote outside syntax-quote**
+
+warns when unquote (`~`) or unquote-splicing (`~@`) is used outside of syntax-quote (`` ` ``)
+
+```clojure
+(ns foo)
+(def y ~@coll)
+```
+
+↓
+
+```clojure
+(ns foo)
+(def y coll)
+```
+
+---
+
+```clojure
+(ns foo)
+
+(def x ~foo)
+```
+
+↓
+
+```clojure
+(ns foo)
+
+(def x foo)
+```
+
+---
+
 ### :unreachable-code
 
 **Unreachable code**
@@ -2808,7 +2844,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:unquote-not-syntax-quoted` | warns when unquote (`~`) or unquote-splicing (`~@`) is used outside of syntax-quote (`` ` ``) |
 | `:unused-value` | warn on unused value: constants, unrealized lazy values, pure functions and transient ops (`assoc!`, `conj!` etc) |
 | `:var-same-name-except-case` | warn on vars that share the same name with different case (only in Clojure mode) as these could cause clashing class file names on case insensitive filesystems |
 

@@ -63,7 +63,8 @@
             [clj-kondo-fix.impl.fixes.missing-body-in-when :as missing-body-in-when]
             [clj-kondo-fix.impl.fixes.shadowed-var :as shadowed-var]
             [clj-kondo-fix.impl.fixes.unbound-destructuring-default :as unbound-destr-default]
-            [clj-kondo-fix.impl.fixes.underscore-in-namespace :as underscore-in-ns]))
+            [clj-kondo-fix.impl.fixes.underscore-in-namespace :as underscore-in-ns]
+            [clj-kondo-fix.impl.fixes.unquote-not-syntax-quoted :as unquote-not-sq]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -127,3 +128,4 @@
 (def fix-shadowed-var-in-file shadowed-var/fix-shadowed-var-in-file)
 (def fix-unbound-destructuring-default-in-file unbound-destr-default/fix-unbound-destructuring-default-in-file)
 (def fix-underscore-in-namespace-in-file underscore-in-ns/fix-underscore-in-namespace-in-file)
+(def fix-unquote-not-syntax-quoted-in-file unquote-not-sq/fix-unquote-not-syntax-quoted-in-file)

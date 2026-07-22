@@ -374,7 +374,13 @@
    {:message-re #"^Avoid underscore in namespace name: "
     :phase       :default
     :fix-fn      fixes/fix-underscore-in-namespace-in-file
-    :display     "underscore in namespace"}})
+    :display     "underscore in namespace"}
+
+   :unquote-not-syntax-quoted
+   {:message-re #"^Unquote(?:-splicing)? \(~@?\) not syntax-quoted$"
+    :phase       :default
+    :fix-fn      fixes/fix-unquote-not-syntax-quoted-in-file
+    :display     "unquote not syntax quoted"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -712,23 +718,23 @@
    {:status :implemented
     :display "underscore in namespace"}
 
-  :unexpected-recur
-  {:status :not-applicable
-   :reason "Fixing requires knowing whether to add a loop, replace with a regular call, or restructure; requires human judgment"
-   :display "unexpected recur"}
+   :unexpected-recur
+   {:status :not-applicable
+    :reason "Fixing requires knowing whether to add a loop, replace with a regular call, or restructure; requires human judgment"
+    :display "unexpected recur"}
 
-  :unknown-ns-option
-  {:status :not-applicable
-   :reason "Cannot determine whether the clause is a mistyped :require (removing it would silently drop dependencies) or an unrecognized tool config"
-   :display "unknown ns option"}
+   :unknown-ns-option
+   {:status :not-applicable
+    :reason "Cannot determine whether the clause is a mistyped :require (removing it would silently drop dependencies) or an unrecognized tool config"
+    :display "unknown ns option"}
 
-  :unknown-require-option
-  {:status :not-applicable
-   :reason "Cannot determine whether the option is a mistyped :as or :refer; removing it could silently drop an alias or referred vars"
-   :display "unknown require option"}
+   :unknown-require-option
+   {:status :not-applicable
+    :reason "Cannot determine whether the option is a mistyped :as or :refer; removing it could silently drop an alias or referred vars"
+    :display "unknown require option"}
 
    :unquote-not-syntax-quoted
-   {:status :not-implemented
+   {:status :implemented
     :display "unquote not syntax quoted"}
 
    :unreachable-code
@@ -1043,11 +1049,6 @@
    :unknown-require-option
    {:message-re #"^"
     :display "unknown require option"
-    :fix-fn stub-fix-fn}
-
-   :unquote-not-syntax-quoted
-   {:message-re #"^"
-    :display "unquote not syntax quoted"
     :fix-fn stub-fix-fn}
 
    :unused-value

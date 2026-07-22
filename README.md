@@ -191,7 +191,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:uninitialized-var](rules.md#uninitialized-var) ✅
 - [:unknown-ns-option](rules.md#unknown-ns-option) ❌
 - [:unknown-require-option](rules.md#unknown-require-option) ❌
-- [:unquote-not-syntax-quoted](rules.md#unquote-not-syntax-quoted)
+- [:unquote-not-syntax-quoted](rules.md#unquote-not-syntax-quoted) ✅
 - [:unreachable-code](rules.md#unreachable-code) ✅
 - [:unresolved-excluded-var](rules.md#unresolved-excluded-var) ✅
 - [:unresolved-namespace](rules.md#unresolved-namespace) ❌
