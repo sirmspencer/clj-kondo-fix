@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-59 implemented · 7 not yet implemented · 54 not applicable · 0 skipped
+60 implemented · 6 not yet implemented · 54 not applicable · 0 skipped
 
 ## Index
 
@@ -98,7 +98,7 @@
 - [:syntax](#syntax) ❌
 - [:type-mismatch](#type-mismatch) ❌
 - [:unbound-destructuring-default](#unbound-destructuring-default) ✅
-- [:underscore-in-namespace](#underscore-in-namespace) ☹️
+- [:underscore-in-namespace](#underscore-in-namespace) ✅
 - [:unexpected-recur](#unexpected-recur) ☹️
 - [:uninitialized-var](#uninitialized-var) ✅
 - [:unknown-ns-option](#unknown-ns-option) ☹️
@@ -1624,6 +1624,44 @@ warn on binding in `:or` which does not occur in destructuring
 
 ---
 
+```clojure
+(ns foo)
+(let [{:keys [a b] :or {b 1 c 2}} {:a 2}]
+  [a b])
+```
+
+↓
+
+```clojure
+(ns foo)
+(let [{:keys [a b] :or {b 1}} {:a 2}]
+  [a b])
+```
+
+---
+
+### :underscore-in-namespace
+
+**Underscore in namespace**
+
+warns about the usage of the `_` character in the declaration of namespaces (as opposed to `-`)
+
+```clojure
+(ns foo_bar.baz_qux)
+
+(defn greet [] "hello")
+```
+
+↓
+
+```clojure
+(ns foo-bar.baz-qux)
+
+(defn greet [] "hello")
+```
+
+---
+
 ### :uninitialized-var
 
 **Uninitialized var**
@@ -2770,7 +2808,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:underscore-in-namespace` | warns about the usage of the `_` character in the declaration of namespaces (as opposed to `-`) |
 | `:unexpected-recur` | `(recur ...)` is called where it's not expected |
 | `:unknown-ns-option` | warn on unknown top-level `ns` options |
 | `:unknown-require-option` | warn on unknown `:require` option pairs |

@@ -186,7 +186,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:syntax](rules.md#syntax) ❌
 - [:type-mismatch](rules.md#type-mismatch) ❌
 - [:unbound-destructuring-default](rules.md#unbound-destructuring-default) ✅
-- [:underscore-in-namespace](rules.md#underscore-in-namespace)
+- [:underscore-in-namespace](rules.md#underscore-in-namespace) ✅
 - [:unexpected-recur](rules.md#unexpected-recur)
 - [:uninitialized-var](rules.md#uninitialized-var) ✅
 - [:unknown-ns-option](rules.md#unknown-ns-option)
