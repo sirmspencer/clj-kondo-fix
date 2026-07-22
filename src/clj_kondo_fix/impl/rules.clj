@@ -362,7 +362,13 @@
    {:message-re #"^Shadowed var: "
     :phase       :default
     :fix-fn      fixes/fix-shadowed-var-in-file
-    :display     "shadowed var"}})
+    :display     "shadowed var"}
+
+   :unbound-destructuring-default
+   {:message-re #"^.+ is not bound in this destructuring form$"
+    :phase       :default
+    :fix-fn      fixes/fix-unbound-destructuring-default-in-file
+    :display     "unbound destructuring default"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -693,7 +699,7 @@
     :display "single operand comparison"}
 
    :unbound-destructuring-default
-   {:status :not-implemented
+   {:status :implemented
     :display "unbound destructuring default"}
 
    :underscore-in-namespace
@@ -1013,11 +1019,6 @@
    :refer
    {:message-re #"^"
     :display "refer"
-    :fix-fn stub-fix-fn}
-
-   :unbound-destructuring-default
-   {:message-re #"^"
-    :display "unbound destructuring default"
     :fix-fn stub-fix-fn}
 
    :underscore-in-namespace

@@ -25,57 +25,65 @@
     (spit fpath content)
     (try (f fpath) (finally (io/delete-file fpath true)))))
 
+(def ^:private linter-deps
+  "Linters that must remain enabled for a given linter to fire.
+   kondo uses shared infrastructure that can be disabled by parent linters."
+  {:unbound-destructuring-default #{:unused-binding}})
+
 (defn lint-file
   "Run clj-kondo on file-path with the given linters enabled (all others off).
    Returns findings normalized to {:line :col :message}."
   [file-path & {:keys [linters]}]
-  (let [all-off {:linters {:namespace-name-mismatch    {:level :off}
-                            :syntax                     {:level :off}
-                            :datalog-syntax             {:level :off}
-                             :unresolved-symbol          {:level :off}
-                            :unresolved-var             {:level :off}
-                            :unresolved-namespace       {:level :off}
-                            :unresolved-excluded-var    {:level :off}
-                            :unresolved-protocol-method {:level :off}
-                            :unused-binding             {:level :off}
-                            :unused-referred-var        {:level :off}
-                            :unused-namespace           {:level :off}
-                            :unused-private-var         {:level :off}
-                            :unused-import              {:level :off}
-                            :duplicate-require          {:level :off}
-                            :redundant-do               {:level :off}
-                            :redundant-let              {:level :off}
-                            :redundant-let-binding      {:level :off}
-                            :redundant-expression       {:level :off}
-                            :redundant-call             {:level :off}
-                            :redundant-declare          {:level :off}
-                            :redundant-fn-wrapper       {:level :off}
-                            :redundant-nested-call      {:level :off}
-                            :refer-all                  {:level :off}
-                            :misplaced-docstring        {:level :off}
-                            :missing-docstring          {:level :off}
-                            :missing-else-branch        {:level :off}
-                             :missing-body-in-when       {:level :off}
-                             :missing-test-assertion     {:level :off}
-                             :redundant-str-call         {:level :off}
-                             :redundant-format           {:level :off}
-                             :unused-value               {:level :off}
-                            :not-a-function             {:level :off}
-                             :shadowed-var               {:level :off}
-                            :shadowed-fn-param          {:level :off}
-                            :loop-without-recur         {:level :off}
-                            :uninitialized-var          {:level :off}
-                            :inline-def                 {:level :off}
-                            :cond-else                  {:level :off}
-                             :condition-always-true      {:level :off}
-                             :docstring-leading-trailing-whitespace {:level :off}
-                             :earmuffed-var-not-dynamic  {:level :off}
-                             :equals-float               {:level :off}
-                             :keyword-binding            {:level :off}
-                             :not-nil?                   {:level :off}
-                             :redundant-primitive-coercion {:level :off}
-                            :unknown-require-option     {:level :off}
-                            :invalid-ref                {:level :off}}}
+  (let [deps-to-keep (into #{} (mapcat #(get linter-deps % #{}) linters))
+        all-off {:linters (reduce dissoc
+                                  {:namespace-name-mismatch    {:level :off}
+                                   :syntax                     {:level :off}
+                                   :datalog-syntax             {:level :off}
+                                   :unresolved-symbol          {:level :off}
+                                   :unresolved-var             {:level :off}
+                                   :unresolved-namespace       {:level :off}
+                                   :unresolved-excluded-var    {:level :off}
+                                   :unresolved-protocol-method {:level :off}
+                                   :unused-binding             {:level :off}
+                                   :unused-referred-var        {:level :off}
+                                   :unused-namespace           {:level :off}
+                                   :unused-private-var         {:level :off}
+                                   :unused-import              {:level :off}
+                                   :duplicate-require          {:level :off}
+                                   :redundant-do               {:level :off}
+                                   :redundant-let              {:level :off}
+                                   :redundant-let-binding      {:level :off}
+                                   :redundant-expression       {:level :off}
+                                   :redundant-call             {:level :off}
+                                   :redundant-declare          {:level :off}
+                                   :redundant-fn-wrapper       {:level :off}
+                                   :redundant-nested-call      {:level :off}
+                                   :refer-all                  {:level :off}
+                                   :misplaced-docstring        {:level :off}
+                                   :missing-docstring          {:level :off}
+                                   :missing-else-branch        {:level :off}
+                                   :missing-body-in-when       {:level :off}
+                                   :missing-test-assertion     {:level :off}
+                                   :redundant-str-call         {:level :off}
+                                   :redundant-format           {:level :off}
+                                   :unused-value               {:level :off}
+                                   :not-a-function             {:level :off}
+                                   :shadowed-var               {:level :off}
+                                   :shadowed-fn-param          {:level :off}
+                                   :loop-without-recur         {:level :off}
+                                   :uninitialized-var          {:level :off}
+                                   :inline-def                 {:level :off}
+                                   :cond-else                  {:level :off}
+                                   :condition-always-true      {:level :off}
+                                   :docstring-leading-trailing-whitespace {:level :off}
+                                   :earmuffed-var-not-dynamic  {:level :off}
+                                   :equals-float               {:level :off}
+                                   :keyword-binding            {:level :off}
+                                   :not-nil?                   {:level :off}
+                                   :redundant-primitive-coercion {:level :off}
+                                   :unknown-require-option     {:level :off}
+                                   :invalid-ref                {:level :off}}
+                                  deps-to-keep)}
         enabled {:linters (into {:namespace-name-mismatch {:level :off}}
                                 (map (fn [k] [k {:level :warning}]) linters))}
         config  {:linters (merge (:linters all-off) (:linters enabled))}

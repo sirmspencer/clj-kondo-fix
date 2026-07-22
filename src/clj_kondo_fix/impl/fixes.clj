@@ -61,7 +61,8 @@
             [clj-kondo-fix.impl.fixes.docstring-no-summary :as docstring-no-summary]
             [clj-kondo-fix.impl.fixes.duplicate-field-name :as duplicate-field-name]
             [clj-kondo-fix.impl.fixes.missing-body-in-when :as missing-body-in-when]
-            [clj-kondo-fix.impl.fixes.shadowed-var :as shadowed-var]))
+            [clj-kondo-fix.impl.fixes.shadowed-var :as shadowed-var]
+            [clj-kondo-fix.impl.fixes.unbound-destructuring-default :as unbound-destr-default]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -123,3 +124,4 @@
 (def fix-use-in-file use/fix-use-in-file)
 (def fix-missing-body-in-when-in-file missing-body-in-when/fix-missing-body-in-when-in-file)
 (def fix-shadowed-var-in-file shadowed-var/fix-shadowed-var-in-file)
+(def fix-unbound-destructuring-default-in-file unbound-destr-default/fix-unbound-destructuring-default-in-file)

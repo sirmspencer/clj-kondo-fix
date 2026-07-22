@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-58 implemented · 8 not yet implemented · 54 not applicable · 0 skipped
+59 implemented · 7 not yet implemented · 54 not applicable · 0 skipped
 
 ## Index
 
@@ -97,7 +97,7 @@
 - [:single-operand-comparison](#single-operand-comparison) ✅
 - [:syntax](#syntax) ❌
 - [:type-mismatch](#type-mismatch) ❌
-- [:unbound-destructuring-default](#unbound-destructuring-default) ☹️
+- [:unbound-destructuring-default](#unbound-destructuring-default) ✅
 - [:underscore-in-namespace](#underscore-in-namespace) ☹️
 - [:unexpected-recur](#unexpected-recur) ☹️
 - [:uninitialized-var](#uninitialized-var) ✅
@@ -1478,6 +1478,7 @@ warn on var that is shadowed by local
 
 ```clojure
 (ns foo)
+
 (let [name 2] name)
 ```
 
@@ -1485,6 +1486,7 @@ warn on var that is shadowed by local
 
 ```clojure
 (ns foo)
+
 (let [LOCAL-name 2] LOCAL-name)
 ```
 
@@ -1492,6 +1494,7 @@ warn on var that is shadowed by local
 
 ```clojure
 (ns foo)
+
 (defn bar [name] (str name))
 ```
 
@@ -1499,6 +1502,7 @@ warn on var that is shadowed by local
 
 ```clojure
 (ns foo)
+
 (defn bar [LOCAL-name] (str LOCAL-name))
 ```
 
@@ -1594,6 +1598,28 @@ warn on comparison with only one argument
 
 (def x true)
 (def y true)
+```
+
+---
+
+### :unbound-destructuring-default
+
+**Unbound destructuring default**
+
+warn on binding in `:or` which does not occur in destructuring
+
+```clojure
+(ns foo)
+(let [{:keys [a] :or {b 1}} {:a 2}]
+  a)
+```
+
+↓
+
+```clojure
+(ns foo)
+(let [{:keys [a]} {:a 2}]
+  a)
 ```
 
 ---
@@ -2744,7 +2770,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:unbound-destructuring-default` | warn on binding in `:or` which does not occur in destructuring |
 | `:underscore-in-namespace` | warns about the usage of the `_` character in the declaration of namespaces (as opposed to `-`) |
 | `:unexpected-recur` | `(recur ...)` is called where it's not expected |
 | `:unknown-ns-option` | warn on unknown top-level `ns` options |

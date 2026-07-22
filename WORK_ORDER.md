@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-13. `:unbound-destructuring-default`
 14. `:underscore-in-namespace`
 15. `:unexpected-recur`
 16. `:unknown-ns-option`

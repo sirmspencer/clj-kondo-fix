@@ -185,7 +185,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:single-operand-comparison](rules.md#single-operand-comparison) ✅
 - [:syntax](rules.md#syntax) ❌
 - [:type-mismatch](rules.md#type-mismatch) ❌
-- [:unbound-destructuring-default](rules.md#unbound-destructuring-default)
+- [:unbound-destructuring-default](rules.md#unbound-destructuring-default) ✅
 - [:underscore-in-namespace](rules.md#underscore-in-namespace)
 - [:unexpected-recur](rules.md#unexpected-recur)
 - [:uninitialized-var](rules.md#uninitialized-var) ✅
