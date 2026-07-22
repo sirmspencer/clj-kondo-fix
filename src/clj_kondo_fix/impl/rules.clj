@@ -544,7 +544,8 @@
    :display "conditional build up"}
 
   :conflicting-alias
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Renaming the alias requires knowing which call sites refer to which namespace; cannot determine from a single-file finding"
    :display "conflicting alias"}
 
   :def-fn

@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-54 implemented · 27 not yet implemented · 39 not applicable · 0 skipped
+54 implemented · 26 not yet implemented · 40 not applicable · 0 skipped
 
 ## Index
 
@@ -16,7 +16,7 @@
 - [:cond-else](#cond-else) ✅
 - [:condition-always-true](#condition-always-true) ✅
 - [:conditional-build-up](#conditional-build-up) ❌
-- [:conflicting-alias](#conflicting-alias) ☹️
+- [:conflicting-alias](#conflicting-alias) ❌
 - [:consistent-alias](#consistent-alias) ❌
 - [:datalog-syntax](#datalog-syntax) ❌
 - [:def-fn](#def-fn) ✅
@@ -2609,7 +2609,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:conflicting-alias` | warn on conflicting alias |
 | `:destructured-or-always-evaluates` | Warn when an `:or` default value in a destructuring contains an |
 | `:destructured-or-binding-of-same-map` | an `:or` default value refers to a destructured binding of the |
 | `:discouraged-tag` | warn on the usage of a tagged literal that is discouraged to be used |
@@ -2650,6 +2649,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:case-symbol-test` | Prepending : is trivial but the bare symbol may be an intentional compile-time constant; requires human judgment |
 | `:clj-kondo-config` | Config validation errors need human correction |
 | `:conditional-build-up` | Rewriting a let with conditional assoc/update into cond-> requires understanding the full let form structure and developer intent; cannot safely automate |
+| `:conflicting-alias` | Renaming the alias requires knowing which call sites refer to which namespace; cannot determine from a single-file finding |
 | `:consistent-alias` | Requires a globally configured alias table; not deterministic from a single file |
 | `:datalog-syntax` | Invalid datalog syntax requires domain knowledge to correct |
 | `:deprecated-namespace` | Replacing a deprecated namespace requires knowing the recommended replacement |

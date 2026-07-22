@@ -104,7 +104,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:cond-else](rules.md#cond-else) ✅
 - [:condition-always-true](rules.md#condition-always-true) ✅
 - [:conditional-build-up](rules.md#conditional-build-up) ❌
-- [:conflicting-alias](rules.md#conflicting-alias)
+- [:conflicting-alias](rules.md#conflicting-alias) ❌
 - [:consistent-alias](rules.md#consistent-alias) ❌
 - [:datalog-syntax](rules.md#datalog-syntax) ❌
 - [:def-fn](rules.md#def-fn) ✅
