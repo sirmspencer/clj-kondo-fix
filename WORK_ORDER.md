@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-16. `:unknown-ns-option`
 17. `:unknown-require-option`
 18. `:unquote-not-syntax-quoted`
 19. `:unused-value`

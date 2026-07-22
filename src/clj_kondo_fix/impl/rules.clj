@@ -717,9 +717,10 @@
    :reason "Fixing requires knowing whether to add a loop, replace with a regular call, or restructure; requires human judgment"
    :display "unexpected recur"}
 
-   :unknown-ns-option
-   {:status :not-implemented
-    :display "unknown ns option"}
+  :unknown-ns-option
+  {:status :not-applicable
+   :reason "Cannot determine whether the clause is a mistyped :require (removing it would silently drop dependencies) or an unrecognized tool config"
+   :display "unknown ns option"}
 
    :unknown-require-option
    {:status :not-implemented

@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-60 implemented · 5 not yet implemented · 55 not applicable · 0 skipped
+60 implemented · 4 not yet implemented · 56 not applicable · 0 skipped
 
 ## Index
 
@@ -101,7 +101,7 @@
 - [:underscore-in-namespace](#underscore-in-namespace) ✅
 - [:unexpected-recur](#unexpected-recur) ❌
 - [:uninitialized-var](#uninitialized-var) ✅
-- [:unknown-ns-option](#unknown-ns-option) ☹️
+- [:unknown-ns-option](#unknown-ns-option) ❌
 - [:unknown-require-option](#unknown-require-option) ☹️
 - [:unquote-not-syntax-quoted](#unquote-not-syntax-quoted) ☹️
 - [:unreachable-code](#unreachable-code) ✅
@@ -2808,7 +2808,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:unknown-ns-option` | warn on unknown top-level `ns` options |
 | `:unknown-require-option` | warn on unknown `:require` option pairs |
 | `:unquote-not-syntax-quoted` | warns when unquote (`~`) or unquote-splicing (`~@`) is used outside of syntax-quote (`` ` ``) |
 | `:unused-value` | warn on unused value: constants, unrealized lazy values, pure functions and transient ops (`assoc!`, `conj!` etc) |
@@ -2870,6 +2869,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:syntax` | Syntax errors cannot be automatically corrected |
 | `:type-mismatch` | Type errors require type inference context unavailable at text-transformation level |
 | `:unexpected-recur` | Fixing requires knowing whether to add a loop, replace with a regular call, or restructure; requires human judgment |
+| `:unknown-ns-option` | Cannot determine whether the clause is a mistyped :require (removing it would silently drop dependencies) or an unrecognized tool config |
 | `:unresolved-namespace` | Cannot create or locate a missing namespace automatically |
 | `:unresolved-protocol-method` | Resolving a missing protocol method requires human implementation |
 | `:unresolved-symbol` | Cannot create or locate a missing symbol automatically |
