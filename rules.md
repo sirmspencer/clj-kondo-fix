@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-54 implemented · 23 not yet implemented · 43 not applicable · 0 skipped
+54 implemented · 22 not yet implemented · 44 not applicable · 0 skipped
 
 ## Index
 
@@ -28,7 +28,7 @@
 - [:discouraged-namespace](#discouraged-namespace) ❌
 - [:discouraged-tag](#discouraged-tag) ❌
 - [:discouraged-var](#discouraged-var) ❌
-- [:do-template](#do-template) ☹️
+- [:do-template](#do-template) ❌
 - [:docstring-blank](#docstring-blank) ✅
 - [:docstring-leading-trailing-whitespace](#docstring-leading-trailing-whitespace) ✅
 - [:docstring-no-summary](#docstring-no-summary) ☹️
@@ -2609,7 +2609,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:do-template` | warn on incorrect usages of `clojure.template/do-template`: no args, no values, or incorrect number of values |
 | `:docstring-no-summary` | warn when first _line_ of docstring is not a complete |
 | `:duplicate-field-name` | identify duplicate fields in deftype/defrecord fields definition |
 | `:duplicate-key-args` | identify duplicate key args in calls to `assoc`, `dissoc`, `hash-map` etc |
@@ -2657,6 +2656,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:discouraged-namespace` | Replacing a discouraged namespace requires knowing the configured replacement |
 | `:discouraged-tag` | Which tagged literal to replace with what is user-configured; cannot determine without reading config |
 | `:discouraged-var` | Replacing a discouraged var requires knowing the configured replacement |
+| `:do-template` | Fixing incorrect arg/value count requires knowing which values to add or remove; requires developer intent |
 | `:file` | File I/O errors cannot be auto-fixed |
 | `:hook` | Hook-related lint; not a code correctness issue |
 | `:loop-without-recur` | Structural fix (adding recur) requires understanding loop semantics and intent |

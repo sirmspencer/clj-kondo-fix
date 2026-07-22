@@ -116,7 +116,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:discouraged-namespace](rules.md#discouraged-namespace) ❌
 - [:discouraged-tag](rules.md#discouraged-tag) ❌
 - [:discouraged-var](rules.md#discouraged-var) ❌
-- [:do-template](rules.md#do-template)
+- [:do-template](rules.md#do-template) ❌
 - [:docstring-blank](rules.md#docstring-blank) ✅
 - [:docstring-leading-trailing-whitespace](rules.md#docstring-leading-trailing-whitespace) ✅
 - [:docstring-no-summary](rules.md#docstring-no-summary)

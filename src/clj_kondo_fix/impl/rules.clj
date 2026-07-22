@@ -568,7 +568,8 @@
    :display "discouraged tag"}
 
   :do-template
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Fixing incorrect arg/value count requires knowing which values to add or remove; requires developer intent"
    :display "do template"}
 
   :docstring-no-summary
