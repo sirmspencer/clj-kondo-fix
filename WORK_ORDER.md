@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-4. `:destructured-or-binding-of-same-map`
 5. `:discouraged-tag`
 6. `:do-template`
 7. `:docstring-no-summary`

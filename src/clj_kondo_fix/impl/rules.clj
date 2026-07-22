@@ -558,7 +558,8 @@
    :display "destructured or always evaluates"}
 
   :destructured-or-binding-of-same-map
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Fixing requires understanding the intended default value and restructuring the destructuring or adding a let; no simple text transform"
    :display "destructured or binding of same map"}
 
   :discouraged-tag
