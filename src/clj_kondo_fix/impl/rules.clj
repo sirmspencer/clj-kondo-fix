@@ -654,9 +654,10 @@
    :reason "Cannot generate a meaningful catch or finally clause; removing the try wrapper changes semantics"
    :display "missing clause in try"}
 
-   :missing-map-value
-   {:status :not-implemented
-    :display "missing map value"}
+  :missing-map-value
+  {:status :not-applicable
+   :reason "Cannot determine whether to add a value or remove the key; requires human judgment"
+   :display "missing map value"}
 
    :non-arg-vec-return-type-hint
    {:status :implemented

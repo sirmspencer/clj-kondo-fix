@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-8. `:missing-map-value`
 9. `:private-call`
 10. `:refer`
 11. `:shadowed-fn-param`

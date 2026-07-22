@@ -151,7 +151,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:missing-clause-in-try](rules.md#missing-clause-in-try) ❌
 - [:missing-docstring](rules.md#missing-docstring) ❌
 - [:missing-else-branch](rules.md#missing-else-branch) ✅
-- [:missing-map-value](rules.md#missing-map-value)
+- [:missing-map-value](rules.md#missing-map-value) ❌
 - [:missing-protocol-method](rules.md#missing-protocol-method) ❌
 - [:missing-protocol-method-arity](rules.md#missing-protocol-method-arity) ❌
 - [:missing-test-assertion](rules.md#missing-test-assertion) ❌
