@@ -529,7 +529,8 @@
    :display "aliased referred var"}
 
   :case-duplicate-test
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Case branches with duplicate test constants: the first match wins. Removing either the first or second occurrence changes behavior, and determining which duplicate was unintended requires knowing the developer's intent"
    :display "case duplicate test"}
 
   :case-symbol-test

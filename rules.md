@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-54 implemented · 30 not yet implemented · 36 not applicable · 0 skipped
+54 implemented · 29 not yet implemented · 37 not applicable · 0 skipped
 
 ## Index
 
@@ -9,7 +9,7 @@
 - [:aliased-namespace-var-usage](#aliased-namespace-var-usage) ❌
 - [:aliased-referred-var](#aliased-referred-var) ✅
 - [:await-without-async-fn](#await-without-async-fn) ❌
-- [:case-duplicate-test](#case-duplicate-test) ☹️
+- [:case-duplicate-test](#case-duplicate-test) ❌
 - [:case-quoted-test](#case-quoted-test) ❌
 - [:case-symbol-test](#case-symbol-test) ☹️
 - [:clj-kondo-config](#clj-kondo-config) ❌
@@ -2609,7 +2609,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:case-duplicate-test` | identify duplicate case test constants |
 | `:case-symbol-test` | Warn on symbol test constants in `case`. Sometimes this is |
 | `:conditional-build-up` | warn when a `let` repeatedly rebinds the same local map using forms like `(if pred (assoc m ...) m)`, which can often be written more clearly with `cond->` |
 | `:conflicting-alias` | warn on conflicting alias |
@@ -2648,6 +2647,7 @@ These rules cannot be meaningfully auto-fixed.
 | --- | --- |
 | `:aliased-namespace-var-usage` | Fires on :as-alias usage where namespace wasn't loaded; cannot mechanically decide whether to add a real require or remove the usage — requires project knowledge |
 | `:await-without-async-fn` | Structural fix (wrapping fn in async) requires understanding intent |
+| `:case-duplicate-test` | Case branches with duplicate test constants: the first match wins. Removing either the first or second occurrence changes behavior, and determining which duplicate was unintended requires knowing the developer's intent |
 | `:case-quoted-test` | Removing the quote is trivial but the user may have intended the quoted symbol as a runtime value; requires human judgment |
 | `:clj-kondo-config` | Config validation errors need human correction |
 | `:consistent-alias` | Requires a globally configured alias table; not deterministic from a single file |

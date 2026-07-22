@@ -97,7 +97,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:aliased-namespace-var-usage](rules.md#aliased-namespace-var-usage) ❌
 - [:aliased-referred-var](rules.md#aliased-referred-var) ✅
 - [:await-without-async-fn](rules.md#await-without-async-fn) ❌
-- [:case-duplicate-test](rules.md#case-duplicate-test)
+- [:case-duplicate-test](rules.md#case-duplicate-test) ❌
 - [:case-quoted-test](rules.md#case-quoted-test) ❌
 - [:case-symbol-test](rules.md#case-symbol-test)
 - [:clj-kondo-config](rules.md#clj-kondo-config) ❌
