@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-54 implemented · 22 not yet implemented · 44 not applicable · 0 skipped
+55 implemented · 21 not yet implemented · 44 not applicable · 0 skipped
 
 ## Index
 
@@ -31,7 +31,7 @@
 - [:do-template](#do-template) ❌
 - [:docstring-blank](#docstring-blank) ✅
 - [:docstring-leading-trailing-whitespace](#docstring-leading-trailing-whitespace) ✅
-- [:docstring-no-summary](#docstring-no-summary) ☹️
+- [:docstring-no-summary](#docstring-no-summary) ✅
 - [:duplicate-field-name](#duplicate-field-name) ☹️
 - [:duplicate-key-args](#duplicate-key-args) ☹️
 - [:duplicate-map-key](#duplicate-map-key) ☹️
@@ -321,6 +321,28 @@ warn when docstring has leading or trailing whitespace
 
 ```clojure
 (defn foo "text" [a b] 1)
+```
+
+---
+
+### :docstring-no-summary
+
+**Docstring no summary**
+
+warn when first _line_ of docstring is not a complete
+
+**docstring first line not capitalized and no period**
+
+```clojure
+(ns foo)
+(defn foo "not a sentence" [a b] 1)
+```
+
+↓
+
+```clojure
+(ns foo)
+(defn foo "Not a sentence." [a b] 1)
 ```
 
 ---
@@ -2609,7 +2631,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:docstring-no-summary` | warn when first _line_ of docstring is not a complete |
 | `:duplicate-field-name` | identify duplicate fields in deftype/defrecord fields definition |
 | `:duplicate-key-args` | identify duplicate key args in calls to `assoc`, `dissoc`, `hash-map` etc |
 | `:duplicate-map-key` | warn on duplicate key in map |

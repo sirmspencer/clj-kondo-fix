@@ -25,8 +25,11 @@
 
 (defn run-kondo [paths config]
   (let [files (resolve-files paths)
+        base-config {:linters {:namespace-name-mismatch {:level :off}}}
+        merged-config (update-in base-config [:linters]
+                                 merge (:linters config))
         result (kondo/run! {:lint files
-                            :config (merge config {:linters {:namespace-name-mismatch {:level :off}}})})]
+                            :config merged-config})]
     (map normalize-finding (:findings result))))
 
 (defn group-findings-by-file [findings]

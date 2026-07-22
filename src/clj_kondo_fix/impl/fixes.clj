@@ -57,7 +57,8 @@
                 [clj-kondo-fix.impl.fixes.aliased-referred-var :as aliased-referred-var]
                 [clj-kondo-fix.impl.fixes.used-underscored-binding :as used-underscored-binding]
                 [clj-kondo-fix.impl.fixes.unreachable-code :as unreachable-code]
-                [clj-kondo-fix.impl.fixes.use :as use]))
+                [clj-kondo-fix.impl.fixes.use :as use]
+                [clj-kondo-fix.impl.fixes.docstring-no-summary :as docstring-no-summary]))
 
 (def fix-unused-ns-in-file          unused-namespace/fix-unused-ns-in-file)
 (def fix-duplicate-require-in-file  duplicate-require/fix-duplicate-require-in-file)
@@ -91,6 +92,7 @@
 (def fix-docstring-leading-trailing-whitespace-in-file docstring-leading-trailing-whitespace/fix-docstring-leading-trailing-whitespace-in-file)
 (def fix-cond-else-in-file              cond-else/fix-cond-else-in-file)
 (def fix-docstring-blank-in-file        docstring-blank/fix-docstring-blank-in-file)
+(def fix-docstring-no-summary-in-file   docstring-no-summary/fix-docstring-no-summary-in-file)
 (def fix-redundant-declare-in-file      redundant-declare/fix-redundant-declare-in-file)
 (def fix-uninitialized-var-in-file     uninitialized-var/fix-uninitialized-var-in-file)
 (def fix-dynamic-var-not-earmuffed-in-file dynamic-var-not-earmuffed/fix-dynamic-var-not-earmuffed-in-file)

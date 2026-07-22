@@ -195,6 +195,12 @@
     :fix-fn      fixes/fix-docstring-blank-in-file
     :display     "docstring blank"}
 
+   :docstring-no-summary
+   {:message-re #"^First line of the docstring should be a capitalized sentence ending with punctuation\.$"
+    :phase       :default
+    :fix-fn      fixes/fix-docstring-no-summary-in-file
+    :display     "docstring no summary"}
+
    :redundant-declare
    {:message-re #"^Redundant declare: "
     :phase       :default
@@ -573,7 +579,7 @@
    :display "do template"}
 
   :docstring-no-summary
-  {:status :not-implemented
+  {:status :implemented
    :display "docstring no summary"}
 
   :duplicate-field-name
@@ -928,11 +934,6 @@
   :do-template
   {:message-re #"^"
    :display "do template"
-   :fix-fn stub-fix-fn}
-
-  :docstring-no-summary
-  {:message-re #"^"
-   :display "docstring no summary"
    :fix-fn stub-fix-fn}
 
   :duplicate-field-name
