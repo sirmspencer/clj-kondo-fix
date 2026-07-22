@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-54 implemented · 29 not yet implemented · 37 not applicable · 0 skipped
+54 implemented · 28 not yet implemented · 38 not applicable · 0 skipped
 
 ## Index
 
@@ -11,7 +11,7 @@
 - [:await-without-async-fn](#await-without-async-fn) ❌
 - [:case-duplicate-test](#case-duplicate-test) ❌
 - [:case-quoted-test](#case-quoted-test) ❌
-- [:case-symbol-test](#case-symbol-test) ☹️
+- [:case-symbol-test](#case-symbol-test) ❌
 - [:clj-kondo-config](#clj-kondo-config) ❌
 - [:cond-else](#cond-else) ✅
 - [:condition-always-true](#condition-always-true) ✅
@@ -2609,7 +2609,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:case-symbol-test` | Warn on symbol test constants in `case`. Sometimes this is |
 | `:conditional-build-up` | warn when a `let` repeatedly rebinds the same local map using forms like `(if pred (assoc m ...) m)`, which can often be written more clearly with `cond->` |
 | `:conflicting-alias` | warn on conflicting alias |
 | `:destructured-or-always-evaluates` | Warn when an `:or` default value in a destructuring contains an |
@@ -2649,6 +2648,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:await-without-async-fn` | Structural fix (wrapping fn in async) requires understanding intent |
 | `:case-duplicate-test` | Case branches with duplicate test constants: the first match wins. Removing either the first or second occurrence changes behavior, and determining which duplicate was unintended requires knowing the developer's intent |
 | `:case-quoted-test` | Removing the quote is trivial but the user may have intended the quoted symbol as a runtime value; requires human judgment |
+| `:case-symbol-test` | Prepending : is trivial but the bare symbol may be an intentional compile-time constant; requires human judgment |
 | `:clj-kondo-config` | Config validation errors need human correction |
 | `:consistent-alias` | Requires a globally configured alias table; not deterministic from a single file |
 | `:datalog-syntax` | Invalid datalog syntax requires domain knowledge to correct |

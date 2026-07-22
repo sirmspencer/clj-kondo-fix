@@ -99,7 +99,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:await-without-async-fn](rules.md#await-without-async-fn) ❌
 - [:case-duplicate-test](rules.md#case-duplicate-test) ❌
 - [:case-quoted-test](rules.md#case-quoted-test) ❌
-- [:case-symbol-test](rules.md#case-symbol-test)
+- [:case-symbol-test](rules.md#case-symbol-test) ❌
 - [:clj-kondo-config](rules.md#clj-kondo-config) ❌
 - [:cond-else](rules.md#cond-else) ✅
 - [:condition-always-true](rules.md#condition-always-true) ✅

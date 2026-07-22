@@ -534,7 +534,8 @@
    :display "case duplicate test"}
 
   :case-symbol-test
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Prepending : is trivial but the bare symbol may be an intentional compile-time constant; requires human judgment"
    :display "case symbol test"}
 
   :conditional-build-up
