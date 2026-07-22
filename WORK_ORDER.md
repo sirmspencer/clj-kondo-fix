@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-7. `:missing-clause-in-try`
 8. `:missing-map-value`
 9. `:private-call`
 10. `:refer`

@@ -649,9 +649,10 @@
    {:status :implemented
     :display "missing body in when"}
 
-   :missing-clause-in-try
-   {:status :not-implemented
-    :display "missing clause in try"}
+  :missing-clause-in-try
+  {:status :not-applicable
+   :reason "Cannot generate a meaningful catch or finally clause; removing the try wrapper changes semantics"
+   :display "missing clause in try"}
 
    :missing-map-value
    {:status :not-implemented

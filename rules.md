@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-57 implemented · 14 not yet implemented · 49 not applicable · 0 skipped
+57 implemented · 13 not yet implemented · 50 not applicable · 0 skipped
 
 ## Index
 
@@ -60,7 +60,7 @@
 - [:misplaced-async-metadata](#misplaced-async-metadata) ❌
 - [:misplaced-docstring](#misplaced-docstring) ✅
 - [:missing-body-in-when](#missing-body-in-when) ✅
-- [:missing-clause-in-try](#missing-clause-in-try) ☹️
+- [:missing-clause-in-try](#missing-clause-in-try) ❌
 - [:missing-docstring](#missing-docstring) ❌
 - [:missing-else-branch](#missing-else-branch) ✅
 - [:missing-map-value](#missing-map-value) ☹️
@@ -2710,7 +2710,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:missing-clause-in-try` | warn when `try` expression misses `catch` or `finally` clause |
 | `:missing-map-value` | warn on key with uneven amount of elements, i.e. one of the keys |
 | `:private-call` | warn when private var is used. The name of this linter should be |
 | `:refer` | warns when `:refer` is used. This can be used when one wants to |
@@ -2760,6 +2759,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:loop-without-recur` | Structural fix (adding recur) requires understanding loop semantics and intent |
 | `:main-without-gen-class` | Requires adding :gen-class to ns form, which may change compilation behavior |
 | `:misplaced-async-metadata` | ClojureScript-only linter — cannot trigger or test with .clj fixtures |
+| `:missing-clause-in-try` | Cannot generate a meaningful catch or finally clause; removing the try wrapper changes semantics |
 | `:missing-docstring` | Writing a meaningful docstring requires human authorship |
 | `:missing-protocol-method` | Generating a protocol method implementation requires knowing the intended behavior |
 | `:missing-protocol-method-arity` | Same as missing-protocol-method |
