@@ -594,7 +594,8 @@
    :display "duplicate field name"}
 
   :duplicate-key-args
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Cannot determine which of the duplicate key-value pairs was intended; requires human judgment"
    :display "duplicate key args"}
 
   :duplicate-map-key
