@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-57 implemented · 11 not yet implemented · 52 not applicable · 0 skipped
+57 implemented · 10 not yet implemented · 53 not applicable · 0 skipped
 
 ## Index
 
@@ -86,7 +86,7 @@
 - [:redundant-nested-call](#redundant-nested-call) ✅
 - [:redundant-primitive-coercion](#redundant-primitive-coercion) ✅
 - [:redundant-str-call](#redundant-str-call) ✅
-- [:refer](#refer) ☹️
+- [:refer](#refer) ❌
 - [:refer-all](#refer-all) ❌
 - [:schema-misplaced-return](#schema-misplaced-return) ❌
 - [:self-requiring-namespace](#self-requiring-namespace) ❌
@@ -2710,7 +2710,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:refer` | warns when `:refer` is used. This can be used when one wants to |
 | `:shadowed-fn-param` | warn on fn param that has same name as previously defined one (in the same fn expression) |
 | `:shadowed-var` | warn on var that is shadowed by local |
 | `:unbound-destructuring-default` | warn on binding in `:or` which does not occur in destructuring |
@@ -2770,6 +2769,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:quoted-case-test-constant` | Fix is trivial (remove single quote) but safety depends on whether the quoted form is intentional behavior in a performance-sensitive code path |
 | `:redefined-var` | Deciding which definition to keep or merge requires human judgment |
 | `:redundant-ignore` | Removing #_ changes argument positions in the enclosing form, which can alter semantics regardless of whether the ignored expression is pure |
+| `:refer` | Replacing :refer with :as requires renaming all referred symbols to alias/sym throughout the file; not a safe text transform |
 | `:refer-all` | Cannot determine which symbols are actually used without analysis data; producing an explicit :refer list or :as alias requires domain knowledge |
 | `:schema-misplaced-return` | Plumatic Schema placement requires understanding the schema structure |
 | `:self-requiring-namespace` | Circular self-require must be resolved by removing the problematic require manually |

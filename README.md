@@ -174,7 +174,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:redundant-nested-call](rules.md#redundant-nested-call) ✅
 - [:redundant-primitive-coercion](rules.md#redundant-primitive-coercion) ✅
 - [:redundant-str-call](rules.md#redundant-str-call) ✅
-- [:refer](rules.md#refer)
+- [:refer](rules.md#refer) ❌
 - [:refer-all](rules.md#refer-all) ❌
 - [:schema-misplaced-return](rules.md#schema-misplaced-return) ❌
 - [:self-requiring-namespace](rules.md#self-requiring-namespace) ❌

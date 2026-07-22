@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-10. `:refer`
 11. `:shadowed-fn-param`
 12. `:shadowed-var`
 13. `:unbound-destructuring-default`

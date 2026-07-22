@@ -668,9 +668,10 @@
    :reason "Calling a private var across namespaces is a design violation; whether to make the var public or remove the call requires human judgment"
    :display "private call"}
 
-   :refer
-   {:status :not-implemented
-    :display "refer"}
+  :refer
+  {:status :not-applicable
+   :reason "Replacing :refer with :as requires renaming all referred symbols to alias/sym throughout the file; not a safe text transform"
+   :display "refer"}
 
    :shadowed-fn-param
    {:status :not-implemented
