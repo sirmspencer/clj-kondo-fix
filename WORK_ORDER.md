@@ -4,16 +4,43 @@
 
 ## Process (read before starting)
 
-1. **One rule at a time.** Pick the next unchecked item from the list below.
-2. **Load the skill first.** Before writing any code, load the `add-rule` skill
-   for the step-by-step implementation guide.
-3. **Plan before coding.** Use the todo list to plan the rule's sub-steps; work
-   through them one at a time.
-4. **Pause after each rule.** When the implementation is complete and tests pass,
-   stop and wait for review before moving to the next item.
-5. **Remove the rule in the same commit.** The commit that ships the fix must also
-   delete the rule's entry from this file. Do not batch removals. Do not
-   renumber any items.
-6. **Generate the next plan.** After committing, present the plan for the next
-   item on the list and wait for approval before implementing.
-7. **Next item.** After plan approval, implement. Repeat from step 1.
+1. **One rule at a time.** Pick the next item from the list below.
+2. **Load the skill first.** Before writing any code, load the `add-rule` skill; it is the authoritative implementation guide.
+3. **Plan before coding.** Use the todo list to plan the rule's sub-steps; work through them one at a time.
+4. **Update `rules.clj`.** `rule-metadata` in `src/clj_kondo_fix/impl/rules.clj` is the single source of truth for status. Implementing a rule means flipping its status from `:not-implemented` to `:implemented` and moving it out of `stub-definitions`.
+5. **Verify.** Run `clojure -M:test` (0 failures), run `cljfmt` on all edited source files, regenerate docs with `clojure -M:gen-rules`.
+6. **Remove the rule in the same commit.** The commit that ships the fix must also delete that rule's entry from this file. Do not batch removals. Do not renumber remaining items.
+7. **Pause after each rule.** Stop and wait for review before starting the next item.
+8. **Commit once approved** make a commit for each rule.
+9. **Repeat** go back to step 1 for the next rule.
+
+## Remaining Rules
+
+1. `:conditional-build-up`
+2. `:conflicting-alias`
+3. `:destructured-or-always-evaluates`
+4. `:destructured-or-binding-of-same-map`
+5. `:discouraged-tag`
+6. `:do-template`
+7. `:docstring-no-summary`
+8. `:duplicate-field-name`
+9. `:duplicate-key-args`
+10. `:duplicate-map-key`
+11. `:format`
+12. `:inline-def`
+13. `:line-length`
+14. `:missing-body-in-when`
+15. `:missing-clause-in-try`
+16. `:missing-map-value`
+17. `:private-call`
+18. `:refer`
+19. `:shadowed-fn-param`
+20. `:shadowed-var`
+21. `:unbound-destructuring-default`
+22. `:underscore-in-namespace`
+23. `:unexpected-recur`
+24. `:unknown-ns-option`
+25. `:unknown-require-option`
+26. `:unquote-not-syntax-quoted`
+27. `:unused-value`
+28. `:var-same-name-except-case`
