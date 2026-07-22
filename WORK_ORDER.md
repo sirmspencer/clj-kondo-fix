@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-4. `:inline-def`
 5. `:line-length`
 6. `:missing-body-in-when`
 7. `:missing-clause-in-try`

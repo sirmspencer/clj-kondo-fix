@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-56 implemented · 17 not yet implemented · 47 not applicable · 0 skipped
+56 implemented · 16 not yet implemented · 48 not applicable · 0 skipped
 
 ## Index
 
@@ -50,7 +50,7 @@
 - [:hook](#hook) ❌
 - [:if-nil-return](#if-nil-return) ✅
 - [:if-x-x-y](#if-x-x-y) ✅
-- [:inline-def](#inline-def) ☹️
+- [:inline-def](#inline-def) ❌
 - [:is-message-not-string](#is-message-not-string) ✅
 - [:java-static-field-call](#java-static-field-call) ✅
 - [:line-length](#line-length) ☹️
@@ -2691,7 +2691,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:inline-def` | warn on non-toplevel usage of `def` (and `defn`, etc.) |
 | `:line-length` | warn when lines are longer than a configured length |
 | `:missing-body-in-when` | warn when `when` is called only with a condition |
 | `:missing-clause-in-try` | warn when `try` expression misses `catch` or `finally` clause |
@@ -2739,6 +2738,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:file` | File I/O errors cannot be auto-fixed |
 | `:format` | Cannot determine whether the format string needs more specifiers or the argument list needs trimming; requires human judgment |
 | `:hook` | Hook-related lint; not a code correctness issue |
+| `:inline-def` | Hoisting a def to the top level may capture local bindings unavailable there and changes evaluation timing; requires human judgment |
 | `:loop-without-recur` | Structural fix (adding recur) requires understanding loop semantics and intent |
 | `:main-without-gen-class` | Requires adding :gen-class to ns form, which may change compilation behavior |
 | `:misplaced-async-metadata` | ClojureScript-only linter — cannot trigger or test with .clj fixtures |

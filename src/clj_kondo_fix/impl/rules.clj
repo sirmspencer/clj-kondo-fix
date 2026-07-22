@@ -617,7 +617,8 @@
    :display "format"}
 
   :inline-def
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Hoisting a def to the top level may capture local bindings unavailable there and changes evaluation timing; requires human judgment"
    :display "inline def"}
 
   :is-message-not-string
