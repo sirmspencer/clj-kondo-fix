@@ -630,7 +630,8 @@
     :display "java static field call"}
 
   :line-length
-  {:status :not-implemented
+  {:status :not-applicable
+   :reason "Reflowing code to fit within a line length limit requires a formatter with structural awareness; not a safe text transform"
    :display "line length"}
 
   :misplaced-async-metadata

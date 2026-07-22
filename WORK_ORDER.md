@@ -16,7 +16,6 @@
 
 ## Remaining Rules
 
-5. `:line-length`
 6. `:missing-body-in-when`
 7. `:missing-clause-in-try`
 8. `:missing-map-value`

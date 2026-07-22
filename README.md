@@ -141,7 +141,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:inline-def](rules.md#inline-def) ❌
 - [:is-message-not-string](rules.md#is-message-not-string) ✅
 - [:java-static-field-call](rules.md#java-static-field-call) ✅
-- [:line-length](rules.md#line-length)
+- [:line-length](rules.md#line-length) ❌
 - [:loop-without-recur](rules.md#loop-without-recur) ❌
 - [:main-without-gen-class](rules.md#main-without-gen-class) ❌
 - [:minus-one](rules.md#minus-one) ✅
