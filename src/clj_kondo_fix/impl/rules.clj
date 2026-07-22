@@ -325,7 +325,13 @@
    {:message-re #"^Used binding is marked as unused:"
     :phase       :default
     :fix-fn      fixes/fix-used-underscored-binding-in-file
-    :display     "used underscored binding"}})
+    :display     "used underscored binding"}
+
+   :unreachable-code
+   {:message-re #"^unreachable code"
+    :phase       :default
+    :fix-fn      fixes/fix-unreachable-code-in-file
+    :display     "unreachable code"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -662,7 +668,7 @@
    :display "unquote not syntax quoted"}
 
   :unreachable-code
-  {:status :not-implemented
+  {:status :implemented
    :display "unreachable code"}
 
    :unresolved-excluded-var
@@ -1013,11 +1019,6 @@
   :unquote-not-syntax-quoted
   {:message-re #"^"
    :display "unquote not syntax quoted"
-   :fix-fn stub-fix-fn}
-
-  :unreachable-code
-  {:message-re #"^"
-   :display "unreachable code"
    :fix-fn stub-fix-fn}
 
    :unused-value

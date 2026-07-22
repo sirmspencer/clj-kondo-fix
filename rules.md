@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-52 implemented · 32 not yet implemented · 36 not applicable · 0 skipped
+53 implemented · 31 not yet implemented · 36 not applicable · 0 skipped
 
 ## Index
 
@@ -104,7 +104,7 @@
 - [:unknown-ns-option](#unknown-ns-option) ☹️
 - [:unknown-require-option](#unknown-require-option) ☹️
 - [:unquote-not-syntax-quoted](#unquote-not-syntax-quoted) ☹️
-- [:unreachable-code](#unreachable-code) ☹️
+- [:unreachable-code](#unreachable-code) ✅
 - [:unresolved-excluded-var](#unresolved-excluded-var) ✅
 - [:unresolved-namespace](#unresolved-namespace) ❌
 - [:unresolved-protocol-method](#unresolved-protocol-method) ❌
@@ -1481,6 +1481,36 @@ warn on var without initial value
 
 ---
 
+### :unreachable-code
+
+**Unreachable code**
+
+warn on unreachable code
+
+```clojure
+(ns test-foo)
+
+(defn foo [x]
+  (cond
+    (odd? x) 1
+    :else 2
+    :default 3))
+```
+
+↓
+
+```clojure
+(ns test-foo)
+
+(defn foo [x]
+  (cond
+    (odd? x) 1
+    :else 2
+    ))
+```
+
+---
+
 ### :unresolved-excluded-var
 
 **Unresolved excluded var**
@@ -2583,7 +2613,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 | `:unknown-ns-option` | warn on unknown top-level `ns` options |
 | `:unknown-require-option` | warn on unknown `:require` option pairs |
 | `:unquote-not-syntax-quoted` | warns when unquote (`~`) or unquote-splicing (`~@`) is used outside of syntax-quote (`` ` ``) |
-| `:unreachable-code` | warn on unreachable code |
 | `:unused-value` | warn on unused value: constants, unrealized lazy values, pure functions and transient ops (`assoc!`, `conj!` etc) |
 | `:use` | warns about `:use` or `use` |
 | `:var-same-name-except-case` | warn on vars that share the same name with different case (only in Clojure mode) as these could cause clashing class file names on case insensitive filesystems |

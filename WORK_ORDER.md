@@ -56,12 +56,6 @@ Localized rewrites of one form. No scope or usage analysis needed.
 These require finding and rewriting several positions in the file, or moving a
 form while preserving surrounding structure.
 
-### 16. `unreachable-code`
-
-- **Trigger:** forms appear after a `throw`, `recur`, or terminal return.
-- **Fix:** remove the unreachable forms, delimiting the span carefully.
-- **Effort:** M.
-
 ### 18. `use`
 
 - **Trigger:** a `:use` clause in the ns form is discouraged.
