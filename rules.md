@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-61 implemented · 2 not yet implemented · 57 not applicable · 0 skipped
+62 implemented · 1 not yet implemented · 57 not applicable · 0 skipped
 
 ## Index
 
@@ -119,7 +119,7 @@
 - [:unused-namespace](#unused-namespace) ✅
 - [:unused-private-var](#unused-private-var) ✅
 - [:unused-referred-var](#unused-referred-var) ✅
-- [:unused-value](#unused-value) ☹️
+- [:unused-value](#unused-value) ✅
 - [:use](#use) ✅
 - [:used-underscored-binding](#used-underscored-binding) ✅
 - [:var-same-name-except-case](#var-same-name-except-case) ☹️
@@ -1688,6 +1688,7 @@ warns when unquote (`~`) or unquote-splicing (`~@`) is used outside of syntax-qu
 
 ```clojure
 (ns foo)
+
 (def y ~@coll)
 ```
 
@@ -1695,6 +1696,7 @@ warns when unquote (`~`) or unquote-splicing (`~@`) is used outside of syntax-qu
 
 ```clojure
 (ns foo)
+
 (def y coll)
 ```
 
@@ -2792,6 +2794,34 @@ warns about unused referred vars
 
 ---
 
+### :unused-value
+
+**Unused value**
+
+warn on unused value: constants, unrealized lazy values, pure functions and transient ops (`assoc!`, `conj!` etc)
+
+```clojure
+(ns foo)
+
+(defn run []
+  42
+  :status
+  (+ 1 2)
+  [1 2 3]
+  :done)
+```
+
+↓
+
+```clojure
+(ns foo)
+
+(defn run []
+  :done)
+```
+
+---
+
 ### :use
 
 **Use**
@@ -2844,7 +2874,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:unused-value` | warn on unused value: constants, unrealized lazy values, pure functions and transient ops (`assoc!`, `conj!` etc) |
 | `:var-same-name-except-case` | warn on vars that share the same name with different case (only in Clojure mode) as these could cause clashing class file names on case insensitive filesystems |
 
 ## Not Applicable

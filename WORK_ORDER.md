@@ -16,5 +16,4 @@
 
 ## Remaining Rules
 
-19. `:unused-value`
 20. `:var-same-name-except-case`

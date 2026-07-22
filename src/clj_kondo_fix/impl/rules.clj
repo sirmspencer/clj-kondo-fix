@@ -380,7 +380,13 @@
    {:message-re #"^Unquote(?:-splicing)? \(~@?\) not syntax-quoted$"
     :phase       :default
     :fix-fn      fixes/fix-unquote-not-syntax-quoted-in-file
-    :display     "unquote not syntax quoted"}})
+    :display     "unquote not syntax quoted"}
+
+   :unused-value
+   {:message-re #"^Unused value"
+    :phase       :default
+    :fix-fn      fixes/fix-unused-value-in-file
+    :display     "unused value"}})
 
 (def rule-metadata
   {:await-without-async-fn
@@ -754,7 +760,7 @@
     :display "unused excluded var"}
 
    :unused-value
-   {:status :not-implemented
+   {:status :implemented
     :display "unused value"}
 
    :use
@@ -1049,11 +1055,6 @@
    :unknown-require-option
    {:message-re #"^"
     :display "unknown require option"
-    :fix-fn stub-fix-fn}
-
-   :unused-value
-   {:message-re #"^"
-    :display "unused value"
     :fix-fn stub-fix-fn}
 
    :var-same-name-except-case

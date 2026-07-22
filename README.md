@@ -207,7 +207,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:unused-namespace](rules.md#unused-namespace) ✅
 - [:unused-private-var](rules.md#unused-private-var) ✅
 - [:unused-referred-var](rules.md#unused-referred-var) ✅
-- [:unused-value](rules.md#unused-value)
+- [:unused-value](rules.md#unused-value) ✅
 - [:use](rules.md#use) ✅
 - [:used-underscored-binding](rules.md#used-underscored-binding) ✅
 - [:var-same-name-except-case](rules.md#var-same-name-except-case)
