@@ -712,9 +712,10 @@
    {:status :implemented
     :display "underscore in namespace"}
 
-   :unexpected-recur
-   {:status :not-implemented
-    :display "unexpected recur"}
+  :unexpected-recur
+  {:status :not-applicable
+   :reason "Fixing requires knowing whether to add a loop, replace with a regular call, or restructure; requires human judgment"
+   :display "unexpected recur"}
 
    :unknown-ns-option
    {:status :not-implemented

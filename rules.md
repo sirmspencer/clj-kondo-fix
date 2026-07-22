@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-60 implemented · 6 not yet implemented · 54 not applicable · 0 skipped
+60 implemented · 5 not yet implemented · 55 not applicable · 0 skipped
 
 ## Index
 
@@ -99,7 +99,7 @@
 - [:type-mismatch](#type-mismatch) ❌
 - [:unbound-destructuring-default](#unbound-destructuring-default) ✅
 - [:underscore-in-namespace](#underscore-in-namespace) ✅
-- [:unexpected-recur](#unexpected-recur) ☹️
+- [:unexpected-recur](#unexpected-recur) ❌
 - [:uninitialized-var](#uninitialized-var) ✅
 - [:unknown-ns-option](#unknown-ns-option) ☹️
 - [:unknown-require-option](#unknown-require-option) ☹️
@@ -2808,7 +2808,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:unexpected-recur` | `(recur ...)` is called where it's not expected |
 | `:unknown-ns-option` | warn on unknown top-level `ns` options |
 | `:unknown-require-option` | warn on unknown `:require` option pairs |
 | `:unquote-not-syntax-quoted` | warns when unquote (`~`) or unquote-splicing (`~@`) is used outside of syntax-quote (`` ` ``) |
@@ -2870,6 +2869,7 @@ These rules cannot be meaningfully auto-fixed.
 | `:shadowed-fn-param` | Duplicate param name in arg vector (e.g. (fn [x x])): renaming requires knowing the intended name and removes changes arity |
 | `:syntax` | Syntax errors cannot be automatically corrected |
 | `:type-mismatch` | Type errors require type inference context unavailable at text-transformation level |
+| `:unexpected-recur` | Fixing requires knowing whether to add a loop, replace with a regular call, or restructure; requires human judgment |
 | `:unresolved-namespace` | Cannot create or locate a missing namespace automatically |
 | `:unresolved-protocol-method` | Resolving a missing protocol method requires human implementation |
 | `:unresolved-symbol` | Cannot create or locate a missing symbol automatically |
