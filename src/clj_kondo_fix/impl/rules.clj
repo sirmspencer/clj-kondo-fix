@@ -350,118 +350,124 @@
    {:message-re #"^use :require"
     :phase       :default
     :fix-fn      fixes/fix-use-in-file
-    :display     "use"}})
+    :display     "use"}
+
+   :missing-body-in-when
+   {:message-re #"^Missing body in when$"
+    :phase       :default
+    :fix-fn      fixes/fix-missing-body-in-when-in-file
+    :display     "missing body in when"}})
 
 (def rule-metadata
   {:await-without-async-fn
-  {:status :not-applicable
-   :reason "Structural fix (wrapping fn in async) requires understanding intent"
-   :display "await without async fn"}
+   {:status :not-applicable
+    :reason "Structural fix (wrapping fn in async) requires understanding intent"
+    :display "await without async fn"}
 
-  :case-quoted-test
-  {:status :not-applicable
-   :reason "Removing the quote is trivial but the user may have intended the quoted symbol as a runtime value; requires human judgment"
-   :display "case quoted test"}
+   :case-quoted-test
+   {:status :not-applicable
+    :reason "Removing the quote is trivial but the user may have intended the quoted symbol as a runtime value; requires human judgment"
+    :display "case quoted test"}
 
-  :clj-kondo-config
-  {:status :not-applicable
-   :reason "Config validation errors need human correction"
-   :display "clj kondo config"}
+   :clj-kondo-config
+   {:status :not-applicable
+    :reason "Config validation errors need human correction"
+    :display "clj kondo config"}
 
-  :consistent-alias
-  {:status :not-applicable
-   :reason "Requires a globally configured alias table; not deterministic from a single file"
-   :display "consistent alias"}
+   :consistent-alias
+   {:status :not-applicable
+    :reason "Requires a globally configured alias table; not deterministic from a single file"
+    :display "consistent alias"}
 
-  :datalog-syntax
-  {:status :not-applicable
-   :reason "Invalid datalog syntax requires domain knowledge to correct"
-   :display "datalog syntax"}
+   :datalog-syntax
+   {:status :not-applicable
+    :reason "Invalid datalog syntax requires domain knowledge to correct"
+    :display "datalog syntax"}
 
-  :deprecated-namespace
-  {:status :not-applicable
-   :reason "Replacing a deprecated namespace requires knowing the recommended replacement"
-   :display "deprecated namespace"}
+   :deprecated-namespace
+   {:status :not-applicable
+    :reason "Replacing a deprecated namespace requires knowing the recommended replacement"
+    :display "deprecated namespace"}
 
-  :deprecated-var
-  {:status :not-applicable
-   :reason "Replacing a deprecated var requires knowing the recommended replacement"
-   :display "deprecated var"}
+   :deprecated-var
+   {:status :not-applicable
+    :reason "Replacing a deprecated var requires knowing the recommended replacement"
+    :display "deprecated var"}
 
-  :discouraged-java-method
-  {:status :not-applicable
-   :reason "Replacing a discouraged method requires knowing the configured replacement"
-   :display "discouraged java method"}
+   :discouraged-java-method
+   {:status :not-applicable
+    :reason "Replacing a discouraged method requires knowing the configured replacement"
+    :display "discouraged java method"}
 
-  :discouraged-namespace
-  {:status :not-applicable
-   :reason "Replacing a discouraged namespace requires knowing the configured replacement"
-   :display "discouraged namespace"}
+   :discouraged-namespace
+   {:status :not-applicable
+    :reason "Replacing a discouraged namespace requires knowing the configured replacement"
+    :display "discouraged namespace"}
 
-  :discouraged-var
-  {:status :not-applicable
-   :reason "Replacing a discouraged var requires knowing the configured replacement"
-   :display "discouraged var"}
+   :discouraged-var
+   {:status :not-applicable
+    :reason "Replacing a discouraged var requires knowing the configured replacement"
+    :display "discouraged var"}
 
-  :file
-  {:status :not-applicable
-   :reason "File I/O errors cannot be auto-fixed"
-   :display "file"}
+   :file
+   {:status :not-applicable
+    :reason "File I/O errors cannot be auto-fixed"
+    :display "file"}
 
-  :hook
-  {:status :not-applicable
-   :reason "Hook-related lint; not a code correctness issue"
-   :display "hook"}
+   :hook
+   {:status :not-applicable
+    :reason "Hook-related lint; not a code correctness issue"
+    :display "hook"}
 
-  :loop-without-recur
-  {:status :not-applicable
-   :reason "Structural fix (adding recur) requires understanding loop semantics and intent"
-   :display "loop without recur"}
+   :loop-without-recur
+   {:status :not-applicable
+    :reason "Structural fix (adding recur) requires understanding loop semantics and intent"
+    :display "loop without recur"}
 
-  :main-without-gen-class
-  {:status :not-applicable
-   :reason "Requires adding :gen-class to ns form, which may change compilation behavior"
-   :display "main without gen class"}
+   :main-without-gen-class
+   {:status :not-applicable
+    :reason "Requires adding :gen-class to ns form, which may change compilation behavior"
+    :display "main without gen class"}
 
-  :missing-docstring
-  {:status :not-applicable
-   :reason "Writing a meaningful docstring requires human authorship"
-   :display "missing docstring"}
+   :missing-docstring
+   {:status :not-applicable
+    :reason "Writing a meaningful docstring requires human authorship"
+    :display "missing docstring"}
 
-  :missing-protocol-method
-  {:status :not-applicable
-   :reason "Generating a protocol method implementation requires knowing the intended behavior"
-   :display "missing protocol method"}
+   :missing-protocol-method
+   {:status :not-applicable
+    :reason "Generating a protocol method implementation requires knowing the intended behavior"
+    :display "missing protocol method"}
 
-  :missing-protocol-method-arity
-  {:status :not-applicable
-   :reason "Same as missing-protocol-method"
-   :display "missing protocol method arity"}
+   :missing-protocol-method-arity
+   {:status :not-applicable
+    :reason "Same as missing-protocol-method"
+    :display "missing protocol method arity"}
 
-  :missing-test-assertion
-  {:status :not-applicable
-   :reason "Writing a test assertion requires human authorship"
-   :display "missing test assertion"}
+   :missing-test-assertion
+   {:status :not-applicable
+    :reason "Writing a test assertion requires human authorship"
+    :display "missing test assertion"}
 
-  :namespace-name-mismatch
-  {:status :not-applicable
-   :reason "Renaming either the file or the ns declaration is a multi-file operation"
-   :display "namespace name mismatch"}
+   :namespace-name-mismatch
+   {:status :not-applicable
+    :reason "Renaming either the file or the ns declaration is a multi-file operation"
+    :display "namespace name mismatch"}
 
-  :protocol-method-arity-mismatch
-  {:status :not-applicable
-   :reason "Resolving an arity mismatch requires understanding the intended protocol contract"
-   :display "protocol method arity mismatch"}
+   :protocol-method-arity-mismatch
+   {:status :not-applicable
+    :reason "Resolving an arity mismatch requires understanding the intended protocol contract"
+    :display "protocol method arity mismatch"}
 
-  :protocol-method-varargs
-  {:status :not-applicable
-   :reason "Varargs protocol methods require structural refactoring"
-   :display "protocol method varargs"}
+   :protocol-method-varargs
+   {:status :not-applicable
+    :reason "Varargs protocol methods require structural refactoring"
+    :display "protocol method varargs"}
 
-  :quoted-case-test-constant
-  {:status :not-applicable
-   :reason "Fix is trivial (remove single quote) but safety depends on whether the quoted form is intentional behavior in a performance-sensitive code path"
-   :display "quoted case test constant"}
+   :quoted-case-test-constant
+   {:status :not-applicable
+    :reason "Fix is trivial (remove single quote) but safety depends on whether the quoted form is intentional behavior in a performance-sensitive code path"
+    :display "quoted case test constant"}
 
    :redefined-var
    {:status :not-applicable
@@ -474,134 +480,134 @@
     :display "redundant ignore"}
 
    :refer-all
-  {:status :not-applicable
-   :reason "Cannot determine which symbols are actually used without analysis data; producing an explicit :refer list or :as alias requires domain knowledge"
-   :display "refer all"}
+   {:status :not-applicable
+    :reason "Cannot determine which symbols are actually used without analysis data; producing an explicit :refer list or :as alias requires domain knowledge"
+    :display "refer all"}
 
-  :schema-misplaced-return
-  {:status :not-applicable
-   :reason "Plumatic Schema placement requires understanding the schema structure"
-   :display "schema misplaced return"}
+   :schema-misplaced-return
+   {:status :not-applicable
+    :reason "Plumatic Schema placement requires understanding the schema structure"
+    :display "schema misplaced return"}
 
-  :self-requiring-namespace
-  {:status :not-applicable
-   :reason "Circular self-require must be resolved by removing the problematic require manually"
-   :display "self requiring namespace"}
+   :self-requiring-namespace
+   {:status :not-applicable
+    :reason "Circular self-require must be resolved by removing the problematic require manually"
+    :display "self requiring namespace"}
 
-  :syntax
-  {:status :not-applicable
-   :reason "Syntax errors cannot be automatically corrected"
-   :display "syntax"}
+   :syntax
+   {:status :not-applicable
+    :reason "Syntax errors cannot be automatically corrected"
+    :display "syntax"}
 
-  :type-mismatch
-  {:status :not-applicable
-   :reason "Type errors require type inference context unavailable at text-transformation level"
-   :display "type mismatch"}
+   :type-mismatch
+   {:status :not-applicable
+    :reason "Type errors require type inference context unavailable at text-transformation level"
+    :display "type mismatch"}
 
-  :unresolved-namespace
-  {:status :not-applicable
-   :reason "Cannot create or locate a missing namespace automatically"
-   :display "unresolved namespace"}
+   :unresolved-namespace
+   {:status :not-applicable
+    :reason "Cannot create or locate a missing namespace automatically"
+    :display "unresolved namespace"}
 
-  :unresolved-protocol-method
-  {:status :not-applicable
-   :reason "Resolving a missing protocol method requires human implementation"
-   :display "unresolved protocol method"}
+   :unresolved-protocol-method
+   {:status :not-applicable
+    :reason "Resolving a missing protocol method requires human implementation"
+    :display "unresolved protocol method"}
 
-  :unresolved-symbol
-  {:status :not-applicable
-   :reason "Cannot create or locate a missing symbol automatically"
-   :display "unresolved symbol"}
+   :unresolved-symbol
+   {:status :not-applicable
+    :reason "Cannot create or locate a missing symbol automatically"
+    :display "unresolved symbol"}
 
-  :unresolved-var
-  {:status :not-applicable
-   :reason "Cannot create or locate a missing var automatically"
-   :display "unresolved var"}
+   :unresolved-var
+   {:status :not-applicable
+    :reason "Cannot create or locate a missing var automatically"
+    :display "unresolved var"}
 
-  :warn-on-reflection
-  {:status :not-applicable
-   :reason "Requires adding *warn-on-reflection* binding; intent and placement are contextual"
-   :display "warn on reflection"}
+   :warn-on-reflection
+   {:status :not-applicable
+    :reason "Requires adding *warn-on-reflection* binding; intent and placement are contextual"
+    :display "warn on reflection"}
 
   ;; ---- not-implemented ----
    :alias-same-as-ns
    {:status :implemented
     :display "alias same as ns"}
 
-  :aliased-namespace-symbol
+   :aliased-namespace-symbol
    {:status :implemented
     :display "aliased namespace symbol"}
 
-  :aliased-namespace-var-usage
-  {:status :not-applicable
-   :reason "Fires on :as-alias usage where namespace wasn't loaded; cannot mechanically decide whether to add a real require or remove the usage — requires project knowledge"
-   :display "aliased namespace var usage"}
+   :aliased-namespace-var-usage
+   {:status :not-applicable
+    :reason "Fires on :as-alias usage where namespace wasn't loaded; cannot mechanically decide whether to add a real require or remove the usage — requires project knowledge"
+    :display "aliased namespace var usage"}
 
-  :aliased-referred-var
-  {:status :implemented
-   :display "aliased referred var"}
+   :aliased-referred-var
+   {:status :implemented
+    :display "aliased referred var"}
 
-  :case-duplicate-test
-  {:status :not-applicable
-   :reason "Case branches with duplicate test constants: the first match wins. Removing either the first or second occurrence changes behavior, and determining which duplicate was unintended requires knowing the developer's intent"
-   :display "case duplicate test"}
+   :case-duplicate-test
+   {:status :not-applicable
+    :reason "Case branches with duplicate test constants: the first match wins. Removing either the first or second occurrence changes behavior, and determining which duplicate was unintended requires knowing the developer's intent"
+    :display "case duplicate test"}
 
-  :case-symbol-test
-  {:status :not-applicable
-   :reason "Prepending : is trivial but the bare symbol may be an intentional compile-time constant; requires human judgment"
-   :display "case symbol test"}
+   :case-symbol-test
+   {:status :not-applicable
+    :reason "Prepending : is trivial but the bare symbol may be an intentional compile-time constant; requires human judgment"
+    :display "case symbol test"}
 
-  :conditional-build-up
-  {:status :not-applicable
-   :reason "Rewriting a let with conditional assoc/update into cond-> requires understanding the full let form structure and developer intent; cannot safely automate"
-   :display "conditional build up"}
+   :conditional-build-up
+   {:status :not-applicable
+    :reason "Rewriting a let with conditional assoc/update into cond-> requires understanding the full let form structure and developer intent; cannot safely automate"
+    :display "conditional build up"}
 
-  :conflicting-alias
-  {:status :not-applicable
-   :reason "Renaming the alias requires knowing which call sites refer to which namespace; cannot determine from a single-file finding"
-   :display "conflicting alias"}
+   :conflicting-alias
+   {:status :not-applicable
+    :reason "Renaming the alias requires knowing which call sites refer to which namespace; cannot determine from a single-file finding"
+    :display "conflicting alias"}
 
-  :def-fn
+   :def-fn
    {:status :implemented
     :display "def fn"}
 
-  :destructured-or-always-evaluates
-  {:status :not-applicable
-   :reason "Fixing requires restructuring destructuring to defer evaluation (e.g., let + if); no simple text transform exists"
-   :display "destructured or always evaluates"}
+   :destructured-or-always-evaluates
+   {:status :not-applicable
+    :reason "Fixing requires restructuring destructuring to defer evaluation (e.g., let + if); no simple text transform exists"
+    :display "destructured or always evaluates"}
 
-  :destructured-or-binding-of-same-map
-  {:status :not-applicable
-   :reason "Fixing requires understanding the intended default value and restructuring the destructuring or adding a let; no simple text transform"
-   :display "destructured or binding of same map"}
+   :destructured-or-binding-of-same-map
+   {:status :not-applicable
+    :reason "Fixing requires understanding the intended default value and restructuring the destructuring or adding a let; no simple text transform"
+    :display "destructured or binding of same map"}
 
-  :discouraged-tag
-  {:status :not-applicable
-   :reason "Which tagged literal to replace with what is user-configured; cannot determine without reading config"
-   :display "discouraged tag"}
+   :discouraged-tag
+   {:status :not-applicable
+    :reason "Which tagged literal to replace with what is user-configured; cannot determine without reading config"
+    :display "discouraged tag"}
 
-  :do-template
-  {:status :not-applicable
-   :reason "Fixing incorrect arg/value count requires knowing which values to add or remove; requires developer intent"
-   :display "do template"}
+   :do-template
+   {:status :not-applicable
+    :reason "Fixing incorrect arg/value count requires knowing which values to add or remove; requires developer intent"
+    :display "do template"}
 
-  :docstring-no-summary
-  {:status :implemented
-   :display "docstring no summary"}
+   :docstring-no-summary
+   {:status :implemented
+    :display "docstring no summary"}
 
-  :duplicate-field-name
-  {:status :implemented
-   :display "duplicate field name"}
+   :duplicate-field-name
+   {:status :implemented
+    :display "duplicate field name"}
 
-  :duplicate-key-args
-  {:status :not-applicable
-   :reason "Cannot determine which of the duplicate key-value pairs was intended; requires human judgment"
-   :display "duplicate key args"}
+   :duplicate-key-args
+   {:status :not-applicable
+    :reason "Cannot determine which of the duplicate key-value pairs was intended; requires human judgment"
+    :display "duplicate key args"}
 
-  :duplicate-map-key
-  {:status :not-applicable
-   :reason "Cannot determine which of the duplicate key-value pairs was intended; requires human judgment"
-   :display "duplicate map key"}
+   :duplicate-map-key
+   {:status :not-applicable
+    :reason "Cannot determine which of the duplicate key-value pairs was intended; requires human judgment"
+    :display "duplicate map key"}
 
    :duplicate-refer
    {:status :implemented
@@ -611,17 +617,17 @@
    {:status :implemented
     :display "duplicate set key"}
 
-  :format
-  {:status :not-applicable
-   :reason "Cannot determine whether the format string needs more specifiers or the argument list needs trimming; requires human judgment"
-   :display "format"}
+   :format
+   {:status :not-applicable
+    :reason "Cannot determine whether the format string needs more specifiers or the argument list needs trimming; requires human judgment"
+    :display "format"}
 
-  :inline-def
-  {:status :not-applicable
-   :reason "Hoisting a def to the top level may capture local bindings unavailable there and changes evaluation timing; requires human judgment"
-   :display "inline def"}
+   :inline-def
+   {:status :not-applicable
+    :reason "Hoisting a def to the top level may capture local bindings unavailable there and changes evaluation timing; requires human judgment"
+    :display "inline def"}
 
-  :is-message-not-string
+   :is-message-not-string
    {:status :implemented
     :display "is message not string"}
 
@@ -629,79 +635,79 @@
    {:status :implemented
     :display "java static field call"}
 
-  :line-length
-  {:status :not-applicable
-   :reason "Reflowing code to fit within a line length limit requires a formatter with structural awareness; not a safe text transform"
-   :display "line length"}
+   :line-length
+   {:status :not-applicable
+    :reason "Reflowing code to fit within a line length limit requires a formatter with structural awareness; not a safe text transform"
+    :display "line length"}
 
-  :misplaced-async-metadata
-  {:status :not-applicable
-   :reason "ClojureScript-only linter — cannot trigger or test with .clj fixtures"
-   :display "misplaced async metadata"}
+   :misplaced-async-metadata
+   {:status :not-applicable
+    :reason "ClojureScript-only linter — cannot trigger or test with .clj fixtures"
+    :display "misplaced async metadata"}
 
-  :missing-body-in-when
-  {:status :not-implemented
-   :display "missing body in when"}
+   :missing-body-in-when
+   {:status :implemented
+    :display "missing body in when"}
 
-  :missing-clause-in-try
-  {:status :not-implemented
-   :display "missing clause in try"}
+   :missing-clause-in-try
+   {:status :not-implemented
+    :display "missing clause in try"}
 
-  :missing-map-value
-  {:status :not-implemented
-   :display "missing map value"}
+   :missing-map-value
+   {:status :not-implemented
+    :display "missing map value"}
 
-  :non-arg-vec-return-type-hint
+   :non-arg-vec-return-type-hint
    {:status :implemented
     :display "non arg vec return type hint"}
 
-  :private-call
-  {:status :not-implemented
-   :display "private call"}
+   :private-call
+   {:status :not-implemented
+    :display "private call"}
 
    :refer
-  {:status :not-implemented
-   :display "refer"}
+   {:status :not-implemented
+    :display "refer"}
 
-  :shadowed-fn-param
-  {:status :not-implemented
-   :display "shadowed fn param"}
+   :shadowed-fn-param
+   {:status :not-implemented
+    :display "shadowed fn param"}
 
-  :shadowed-var
-  {:status :not-implemented
-   :display "shadowed var"}
+   :shadowed-var
+   {:status :not-implemented
+    :display "shadowed var"}
 
    :single-operand-comparison
    {:status :implemented
     :display "single operand comparison"}
 
-  :unbound-destructuring-default
-  {:status :not-implemented
-   :display "unbound destructuring default"}
+   :unbound-destructuring-default
+   {:status :not-implemented
+    :display "unbound destructuring default"}
 
-  :underscore-in-namespace
-  {:status :not-implemented
-   :display "underscore in namespace"}
+   :underscore-in-namespace
+   {:status :not-implemented
+    :display "underscore in namespace"}
 
-  :unexpected-recur
-  {:status :not-implemented
-   :display "unexpected recur"}
+   :unexpected-recur
+   {:status :not-implemented
+    :display "unexpected recur"}
 
-  :unknown-ns-option
-  {:status :not-implemented
-   :display "unknown ns option"}
+   :unknown-ns-option
+   {:status :not-implemented
+    :display "unknown ns option"}
 
-  :unknown-require-option
-  {:status :not-implemented
-   :display "unknown require option"}
+   :unknown-require-option
+   {:status :not-implemented
+    :display "unknown require option"}
 
-  :unquote-not-syntax-quoted
-  {:status :not-implemented
-   :display "unquote not syntax quoted"}
+   :unquote-not-syntax-quoted
+   {:status :not-implemented
+    :display "unquote not syntax quoted"}
 
-  :unreachable-code
-  {:status :implemented
-   :display "unreachable code"}
+   :unreachable-code
+   {:status :implemented
+    :display "unreachable code"}
 
    :unresolved-excluded-var
    {:status :implemented
@@ -715,21 +721,21 @@
    {:status :implemented
     :display "unused excluded var"}
 
-  :unused-value
-  {:status :not-implemented
-   :display "unused value"}
+   :unused-value
+   {:status :not-implemented
+    :display "unused value"}
 
-  :use
-  {:status :implemented
-   :display "use"}
+   :use
+   {:status :implemented
+    :display "use"}
 
-  :used-underscored-binding
-  {:status :implemented
-   :display "used underscored binding"}
+   :used-underscored-binding
+   {:status :implemented
+    :display "used underscored binding"}
 
-  :var-same-name-except-case
-  {:status :not-implemented
-   :display "var same name except case"}})
+   :var-same-name-except-case
+   {:status :not-implemented
+    :display "var same name except case"}})
 
 (defn stub-fix-fn [file-path lines findings log]
   (let [rule-key (:type (first findings))
@@ -743,315 +749,310 @@
 
 (def stub-definitions
   {:await-without-async-fn
-  {:message-re #"^"
-   :display "await without async fn"
-   :fix-fn stub-fix-fn}
+   {:message-re #"^"
+    :display "await without async fn"
+    :fix-fn stub-fix-fn}
 
-  :case-quoted-test
-  {:message-re #"^"
-   :display "case quoted test"
-   :fix-fn stub-fix-fn}
+   :case-quoted-test
+   {:message-re #"^"
+    :display "case quoted test"
+    :fix-fn stub-fix-fn}
 
-  :clj-kondo-config
-  {:message-re #"^"
-   :display "clj kondo config"
-   :fix-fn stub-fix-fn}
+   :clj-kondo-config
+   {:message-re #"^"
+    :display "clj kondo config"
+    :fix-fn stub-fix-fn}
 
-  :consistent-alias
-  {:message-re #"^"
-   :display "consistent alias"
-   :fix-fn stub-fix-fn}
+   :consistent-alias
+   {:message-re #"^"
+    :display "consistent alias"
+    :fix-fn stub-fix-fn}
 
-  :datalog-syntax
-  {:message-re #"^"
-   :display "datalog syntax"
-   :fix-fn stub-fix-fn}
+   :datalog-syntax
+   {:message-re #"^"
+    :display "datalog syntax"
+    :fix-fn stub-fix-fn}
 
-  :deprecated-namespace
-  {:message-re #"^"
-   :display "deprecated namespace"
-   :fix-fn stub-fix-fn}
+   :deprecated-namespace
+   {:message-re #"^"
+    :display "deprecated namespace"
+    :fix-fn stub-fix-fn}
 
-  :deprecated-var
-  {:message-re #"^"
-   :display "deprecated var"
-   :fix-fn stub-fix-fn}
+   :deprecated-var
+   {:message-re #"^"
+    :display "deprecated var"
+    :fix-fn stub-fix-fn}
 
-  :discouraged-java-method
-  {:message-re #"^"
-   :display "discouraged java method"
-   :fix-fn stub-fix-fn}
+   :discouraged-java-method
+   {:message-re #"^"
+    :display "discouraged java method"
+    :fix-fn stub-fix-fn}
 
-  :discouraged-namespace
-  {:message-re #"^"
-   :display "discouraged namespace"
-   :fix-fn stub-fix-fn}
+   :discouraged-namespace
+   {:message-re #"^"
+    :display "discouraged namespace"
+    :fix-fn stub-fix-fn}
 
-  :discouraged-var
-  {:message-re #"^"
-   :display "discouraged var"
-   :fix-fn stub-fix-fn}
+   :discouraged-var
+   {:message-re #"^"
+    :display "discouraged var"
+    :fix-fn stub-fix-fn}
 
-  :file
-  {:message-re #"^"
-   :display "file"
-   :fix-fn stub-fix-fn}
+   :file
+   {:message-re #"^"
+    :display "file"
+    :fix-fn stub-fix-fn}
 
-  :hook
-  {:message-re #"^"
-   :display "hook"
-   :fix-fn stub-fix-fn}
+   :hook
+   {:message-re #"^"
+    :display "hook"
+    :fix-fn stub-fix-fn}
 
-  :loop-without-recur
-  {:message-re #"^"
-   :display "loop without recur"
-   :fix-fn stub-fix-fn}
+   :loop-without-recur
+   {:message-re #"^"
+    :display "loop without recur"
+    :fix-fn stub-fix-fn}
 
-  :main-without-gen-class
-  {:message-re #"^"
-   :display "main without gen class"
-   :fix-fn stub-fix-fn}
+   :main-without-gen-class
+   {:message-re #"^"
+    :display "main without gen class"
+    :fix-fn stub-fix-fn}
 
-  :missing-docstring
-  {:message-re #"^"
-   :display "missing docstring"
-   :fix-fn stub-fix-fn}
+   :missing-docstring
+   {:message-re #"^"
+    :display "missing docstring"
+    :fix-fn stub-fix-fn}
 
-  :missing-protocol-method
-  {:message-re #"^"
-   :display "missing protocol method"
-   :fix-fn stub-fix-fn}
+   :missing-protocol-method
+   {:message-re #"^"
+    :display "missing protocol method"
+    :fix-fn stub-fix-fn}
 
-  :missing-protocol-method-arity
-  {:message-re #"^"
-   :display "missing protocol method arity"
-   :fix-fn stub-fix-fn}
+   :missing-protocol-method-arity
+   {:message-re #"^"
+    :display "missing protocol method arity"
+    :fix-fn stub-fix-fn}
 
-  :missing-test-assertion
-  {:message-re #"^"
-   :display "missing test assertion"
-   :fix-fn stub-fix-fn}
+   :missing-test-assertion
+   {:message-re #"^"
+    :display "missing test assertion"
+    :fix-fn stub-fix-fn}
 
-  :namespace-name-mismatch
-  {:message-re #"^"
-   :display "namespace name mismatch"
-   :fix-fn stub-fix-fn}
+   :namespace-name-mismatch
+   {:message-re #"^"
+    :display "namespace name mismatch"
+    :fix-fn stub-fix-fn}
 
-  :protocol-method-arity-mismatch
-  {:message-re #"^"
-   :display "protocol method arity mismatch"
-   :fix-fn stub-fix-fn}
+   :protocol-method-arity-mismatch
+   {:message-re #"^"
+    :display "protocol method arity mismatch"
+    :fix-fn stub-fix-fn}
 
-  :protocol-method-varargs
-  {:message-re #"^"
-   :display "protocol method varargs"
-   :fix-fn stub-fix-fn}
+   :protocol-method-varargs
+   {:message-re #"^"
+    :display "protocol method varargs"
+    :fix-fn stub-fix-fn}
 
-  :quoted-case-test-constant
-  {:message-re #"^"
-   :display "quoted case test constant"
-   :fix-fn stub-fix-fn}
+   :quoted-case-test-constant
+   {:message-re #"^"
+    :display "quoted case test constant"
+    :fix-fn stub-fix-fn}
 
-  :redefined-var
-  {:message-re #"^"
-   :display "redefined var"
-   :fix-fn stub-fix-fn}
+   :redefined-var
+   {:message-re #"^"
+    :display "redefined var"
+    :fix-fn stub-fix-fn}
 
-  :refer-all
-  {:message-re #"^"
-   :display "refer all"
-   :fix-fn stub-fix-fn}
+   :refer-all
+   {:message-re #"^"
+    :display "refer all"
+    :fix-fn stub-fix-fn}
 
-  :schema-misplaced-return
-  {:message-re #"^"
-   :display "schema misplaced return"
-   :fix-fn stub-fix-fn}
+   :schema-misplaced-return
+   {:message-re #"^"
+    :display "schema misplaced return"
+    :fix-fn stub-fix-fn}
 
-  :self-requiring-namespace
-  {:message-re #"^"
-   :display "self requiring namespace"
-   :fix-fn stub-fix-fn}
+   :self-requiring-namespace
+   {:message-re #"^"
+    :display "self requiring namespace"
+    :fix-fn stub-fix-fn}
 
-  :syntax
-  {:message-re #"^"
-   :display "syntax"
-   :fix-fn stub-fix-fn}
+   :syntax
+   {:message-re #"^"
+    :display "syntax"
+    :fix-fn stub-fix-fn}
 
-  :type-mismatch
-  {:message-re #"^"
-   :display "type mismatch"
-   :fix-fn stub-fix-fn}
+   :type-mismatch
+   {:message-re #"^"
+    :display "type mismatch"
+    :fix-fn stub-fix-fn}
 
-  :unresolved-namespace
-  {:message-re #"^"
-   :display "unresolved namespace"
-   :fix-fn stub-fix-fn}
+   :unresolved-namespace
+   {:message-re #"^"
+    :display "unresolved namespace"
+    :fix-fn stub-fix-fn}
 
-  :unresolved-protocol-method
-  {:message-re #"^"
-   :display "unresolved protocol method"
-   :fix-fn stub-fix-fn}
+   :unresolved-protocol-method
+   {:message-re #"^"
+    :display "unresolved protocol method"
+    :fix-fn stub-fix-fn}
 
-  :unresolved-symbol
-  {:message-re #"^"
-   :display "unresolved symbol"
-   :fix-fn stub-fix-fn}
+   :unresolved-symbol
+   {:message-re #"^"
+    :display "unresolved symbol"
+    :fix-fn stub-fix-fn}
 
-  :unresolved-var
-  {:message-re #"^"
-   :display "unresolved var"
-   :fix-fn stub-fix-fn}
+   :unresolved-var
+   {:message-re #"^"
+    :display "unresolved var"
+    :fix-fn stub-fix-fn}
 
-  :warn-on-reflection
-  {:message-re #"^"
-   :display "warn on reflection"
-   :fix-fn stub-fix-fn}
+   :warn-on-reflection
+   {:message-re #"^"
+    :display "warn on reflection"
+    :fix-fn stub-fix-fn}
 
   ;; ---- stubs (not-implemented) ----
-  :case-duplicate-test
-  {:message-re #"^"
-   :display "case duplicate test"
-   :fix-fn stub-fix-fn}
+   :case-duplicate-test
+   {:message-re #"^"
+    :display "case duplicate test"
+    :fix-fn stub-fix-fn}
 
-  :case-symbol-test
-  {:message-re #"^"
-   :display "case symbol test"
-   :fix-fn stub-fix-fn}
+   :case-symbol-test
+   {:message-re #"^"
+    :display "case symbol test"
+    :fix-fn stub-fix-fn}
 
-  :conditional-build-up
-  {:message-re #"^"
-   :display "conditional build up"
-   :fix-fn stub-fix-fn}
+   :conditional-build-up
+   {:message-re #"^"
+    :display "conditional build up"
+    :fix-fn stub-fix-fn}
 
-  :conflicting-alias
-  {:message-re #"^"
-   :display "conflicting alias"
-   :fix-fn stub-fix-fn}
+   :conflicting-alias
+   {:message-re #"^"
+    :display "conflicting alias"
+    :fix-fn stub-fix-fn}
 
    :destructured-or-always-evaluates
-  {:message-re #"^"
-   :display "destructured or always evaluates"
-   :fix-fn stub-fix-fn}
+   {:message-re #"^"
+    :display "destructured or always evaluates"
+    :fix-fn stub-fix-fn}
 
-  :destructured-or-binding-of-same-map
-  {:message-re #"^"
-   :display "destructured or binding of same map"
-   :fix-fn stub-fix-fn}
+   :destructured-or-binding-of-same-map
+   {:message-re #"^"
+    :display "destructured or binding of same map"
+    :fix-fn stub-fix-fn}
 
-  :discouraged-tag
-  {:message-re #"^"
-   :display "discouraged tag"
-   :fix-fn stub-fix-fn}
+   :discouraged-tag
+   {:message-re #"^"
+    :display "discouraged tag"
+    :fix-fn stub-fix-fn}
 
-  :do-template
-  {:message-re #"^"
-   :display "do template"
-   :fix-fn stub-fix-fn}
+   :do-template
+   {:message-re #"^"
+    :display "do template"
+    :fix-fn stub-fix-fn}
 
-  :duplicate-key-args
-  {:message-re #"^"
-   :display "duplicate key args"
-   :fix-fn stub-fix-fn}
+   :duplicate-key-args
+   {:message-re #"^"
+    :display "duplicate key args"
+    :fix-fn stub-fix-fn}
 
-  :duplicate-map-key
-  {:message-re #"^"
-   :display "duplicate map key"
-   :fix-fn stub-fix-fn}
+   :duplicate-map-key
+   {:message-re #"^"
+    :display "duplicate map key"
+    :fix-fn stub-fix-fn}
 
    :format
-  {:message-re #"^"
-   :display "format"
-   :fix-fn stub-fix-fn}
+   {:message-re #"^"
+    :display "format"
+    :fix-fn stub-fix-fn}
 
-  :inline-def
-  {:message-re #"^"
-   :display "inline def"
-   :fix-fn stub-fix-fn}
+   :inline-def
+   {:message-re #"^"
+    :display "inline def"
+    :fix-fn stub-fix-fn}
 
    :line-length
-  {:message-re #"^"
-   :display "line length"
-   :fix-fn stub-fix-fn}
+   {:message-re #"^"
+    :display "line length"
+    :fix-fn stub-fix-fn}
 
-  :missing-body-in-when
-  {:message-re #"^"
-   :display "missing body in when"
-   :fix-fn stub-fix-fn}
+   :missing-clause-in-try
+   {:message-re #"^"
+    :display "missing clause in try"
+    :fix-fn stub-fix-fn}
 
-  :missing-clause-in-try
-  {:message-re #"^"
-   :display "missing clause in try"
-   :fix-fn stub-fix-fn}
-
-  :missing-map-value
-  {:message-re #"^"
-   :display "missing map value"
-   :fix-fn stub-fix-fn}
+   :missing-map-value
+   {:message-re #"^"
+    :display "missing map value"
+    :fix-fn stub-fix-fn}
 
    :private-call
-  {:message-re #"^"
-   :display "private call"
-   :fix-fn stub-fix-fn}
+   {:message-re #"^"
+    :display "private call"
+    :fix-fn stub-fix-fn}
 
-  :redundant-ignore
-  {:message-re #"^"
-   :display "redundant ignore"
-   :fix-fn stub-fix-fn}
+   :redundant-ignore
+   {:message-re #"^"
+    :display "redundant ignore"
+    :fix-fn stub-fix-fn}
 
-  :refer
-  {:message-re #"^"
-   :display "refer"
-   :fix-fn stub-fix-fn}
+   :refer
+   {:message-re #"^"
+    :display "refer"
+    :fix-fn stub-fix-fn}
 
-  :shadowed-fn-param
-  {:message-re #"^"
-   :display "shadowed fn param"
-   :fix-fn stub-fix-fn}
+   :shadowed-fn-param
+   {:message-re #"^"
+    :display "shadowed fn param"
+    :fix-fn stub-fix-fn}
 
-  :shadowed-var
-  {:message-re #"^"
-   :display "shadowed var"
-   :fix-fn stub-fix-fn}
+   :shadowed-var
+   {:message-re #"^"
+    :display "shadowed var"
+    :fix-fn stub-fix-fn}
 
    :unbound-destructuring-default
-  {:message-re #"^"
-   :display "unbound destructuring default"
-   :fix-fn stub-fix-fn}
+   {:message-re #"^"
+    :display "unbound destructuring default"
+    :fix-fn stub-fix-fn}
 
-  :underscore-in-namespace
-  {:message-re #"^"
-   :display "underscore in namespace"
-   :fix-fn stub-fix-fn}
+   :underscore-in-namespace
+   {:message-re #"^"
+    :display "underscore in namespace"
+    :fix-fn stub-fix-fn}
 
-  :unexpected-recur
-  {:message-re #"^"
-   :display "unexpected recur"
-   :fix-fn stub-fix-fn}
+   :unexpected-recur
+   {:message-re #"^"
+    :display "unexpected recur"
+    :fix-fn stub-fix-fn}
 
-  :unknown-ns-option
-  {:message-re #"^"
-   :display "unknown ns option"
-   :fix-fn stub-fix-fn}
+   :unknown-ns-option
+   {:message-re #"^"
+    :display "unknown ns option"
+    :fix-fn stub-fix-fn}
 
-  :unknown-require-option
-  {:message-re #"^"
-   :display "unknown require option"
-   :fix-fn stub-fix-fn}
+   :unknown-require-option
+   {:message-re #"^"
+    :display "unknown require option"
+    :fix-fn stub-fix-fn}
 
-  :unquote-not-syntax-quoted
-  {:message-re #"^"
-   :display "unquote not syntax quoted"
-   :fix-fn stub-fix-fn}
+   :unquote-not-syntax-quoted
+   {:message-re #"^"
+    :display "unquote not syntax quoted"
+    :fix-fn stub-fix-fn}
 
    :unused-value
    {:message-re #"^"
     :display "unused value"
     :fix-fn stub-fix-fn}
 
-  :var-same-name-except-case
-  {:message-re #"^"
-   :display "var same name except case"
-   :fix-fn stub-fix-fn}})
+   :var-same-name-except-case
+   {:message-re #"^"
+    :display "var same name except case"
+    :fix-fn stub-fix-fn}})
 
 (def category-aliases
   {:unused-ns #{:unused-namespace :duplicate-require}})

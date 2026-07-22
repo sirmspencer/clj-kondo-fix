@@ -1,6 +1,6 @@
 # clj-kondo-fix Rule Index
 
-56 implemented · 15 not yet implemented · 49 not applicable · 0 skipped
+57 implemented · 14 not yet implemented · 49 not applicable · 0 skipped
 
 ## Index
 
@@ -59,7 +59,7 @@
 - [:minus-one](#minus-one) ✅
 - [:misplaced-async-metadata](#misplaced-async-metadata) ❌
 - [:misplaced-docstring](#misplaced-docstring) ✅
-- [:missing-body-in-when](#missing-body-in-when) ☹️
+- [:missing-body-in-when](#missing-body-in-when) ✅
 - [:missing-clause-in-try](#missing-clause-in-try) ☹️
 - [:missing-docstring](#missing-docstring) ❌
 - [:missing-else-branch](#missing-else-branch) ✅
@@ -897,6 +897,25 @@ warn when docstring appears after argument vector instead of before
   "does something"
   [x y]
   (+ x y))
+```
+
+---
+
+### :missing-body-in-when
+
+**Missing body in when**
+
+warn when `when` is called only with a condition
+
+```clojure
+(ns foo)
+(when true)
+```
+
+↓
+
+```clojure
+(ns foo)
 ```
 
 ---
@@ -2691,7 +2710,6 @@ These rules could potentially be auto-fixed but have not been tackled yet.
 
 | Rule | Description |
 | --- | --- |
-| `:missing-body-in-when` | warn when `when` is called only with a condition |
 | `:missing-clause-in-try` | warn when `try` expression misses `catch` or `finally` clause |
 | `:missing-map-value` | warn on key with uneven amount of elements, i.e. one of the keys |
 | `:private-call` | warn when private var is used. The name of this linter should be |

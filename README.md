@@ -147,7 +147,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:minus-one](rules.md#minus-one) ✅
 - [:misplaced-async-metadata](rules.md#misplaced-async-metadata) ❌
 - [:misplaced-docstring](rules.md#misplaced-docstring) ✅
-- [:missing-body-in-when](rules.md#missing-body-in-when)
+- [:missing-body-in-when](rules.md#missing-body-in-when) ✅
 - [:missing-clause-in-try](rules.md#missing-clause-in-try)
 - [:missing-docstring](rules.md#missing-docstring) ❌
 - [:missing-else-branch](rules.md#missing-else-branch) ✅
