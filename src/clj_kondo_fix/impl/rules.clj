@@ -722,9 +722,10 @@
    :reason "Cannot determine whether the clause is a mistyped :require (removing it would silently drop dependencies) or an unrecognized tool config"
    :display "unknown ns option"}
 
-   :unknown-require-option
-   {:status :not-implemented
-    :display "unknown require option"}
+  :unknown-require-option
+  {:status :not-applicable
+   :reason "Cannot determine whether the option is a mistyped :as or :refer; removing it could silently drop an alias or referred vars"
+   :display "unknown require option"}
 
    :unquote-not-syntax-quoted
    {:status :not-implemented
