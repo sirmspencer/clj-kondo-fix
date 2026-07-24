@@ -4,6 +4,16 @@ clj-kondo doesn't have a fix option.  this is to create a tool that runs exactly
 
 ## Install
 
+### Homebrew (recommended)
+
+```bash
+brew tap sirmspencer/tap
+brew trust sirmspencer/tap
+brew install clj-kondo-fix
+```
+
+### From source
+
 Requires the [Clojure CLI](https://clojure.org/guides/install_clojure) (`clojure`) on your PATH.
 
 ```bash
@@ -16,12 +26,6 @@ Pass a custom destination if you prefer a different directory:
 
 ```bash
 ./bin/link ~/bin
-```
-
-Verify the install:
-
-```bash
-clj-kondo-fix --help
 ```
 
 The first run resolves and caches dependencies via the Clojure CLI — subsequent runs are faster.
