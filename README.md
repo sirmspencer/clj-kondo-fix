@@ -7,7 +7,7 @@ clj-kondo doesn't have a fix option.  this is to create a tool that runs exactly
 Requires the [Clojure CLI](https://clojure.org/guides/install_clojure) (`clojure`) on your PATH.
 
 ```bash
-git clone https://github.com/your-org/clj-kondo-fix
+git clone https://github.com/sirmspencer/clj-kondo-fix
 cd clj-kondo-fix
 ./bin/link          # symlinks bin/clj-kondo-fix into /usr/local/bin
 ```
