@@ -1,6 +1,6 @@
 # clj-kondo-fix
 
-clj-kondo doesn't have a fix option.  this is to create a tool that runs exactly the same as clj-kondo to give the option to fix the code.
+clj-kondo-fix extends [clj-kondo](https://github.com/clj-kondo/clj-kondo) with auto-fix support. It runs the same analysis and automatically corrects the findings it knows how to fix.
 
 ## Install
 
@@ -19,22 +19,20 @@ Requires the [Clojure CLI](https://clojure.org/guides/install_clojure) (`clojure
 ```bash
 git clone https://github.com/sirmspencer/clj-kondo-fix
 cd clj-kondo-fix
-./bin/link          # symlinks bin/clj-kondo-fix into /usr/local/bin
+./bin/link     # installs into $(brew --prefix)/bin if Homebrew is present, otherwise /usr/local/bin
 ```
-
-Pass a custom destination if you prefer a different directory:
-
-```bash
-./bin/link ~/bin
-```
-
-The first run resolves and caches dependencies via the Clojure CLI — subsequent runs are faster.
 
 To remove:
 
 ```bash
-./bin/unlink        # removes the symlink from /usr/local/bin
-./bin/unlink ~/bin  # or wherever you installed it
+./bin/unlink   # removes the symlink; restores the Homebrew version if installed
+```
+
+Pass a custom destination to install elsewhere:
+
+```bash
+./bin/link ~/bin
+./bin/unlink ~/bin
 ```
 
 ## Usage
@@ -42,7 +40,7 @@ To remove:
 ### CLI
 
 ```bash
-clojure -M:run --lint src/ --fix
+clj-kondo-fix --lint src/ --fix
 ```
 
 Options:
@@ -82,12 +80,15 @@ Options:
 
 ## Development
 
-```bash
-# run tests
-clojure -M:test
+`./bin/link` replaces the active `clj-kondo-fix` on PATH with a symlink to the local source. If Homebrew is installed, `./bin/unlink` removes the dev symlink and restores the Homebrew version automatically.
 
-# run against a directory
-clojure -M:run --lint src/ --fix
+```bash
+./bin/link              # activate dev version
+
+clojure -M:test         # run tests
+clojure -M:run --lint src/ --fix  # run against a directory
+
+./bin/unlink            # restore Homebrew version
 ```
 
 ## Rules
@@ -216,3 +217,7 @@ See [rules.md](rules.md) for implementation notes and before/after examples.
 - [:used-underscored-binding](rules.md#used-underscored-binding) ✅
 - [:var-same-name-except-case](rules.md#var-same-name-except-case) ❌
 - [:warn-on-reflection](rules.md#warn-on-reflection) ❌
+
+---
+
+*README updated with LLM assistance*
