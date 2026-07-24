@@ -9,5 +9,7 @@
   :run {:main-opts ["-m" "clj-kondo-fix.main"]}
   :gen-fixtures {:extra-paths ["local"]
                  :main-opts ["-m" "gen-fixtures"]}
-  :gen-rules    {:extra-paths ["local"]
-                 :main-opts ["-m" "gen-rules-md"]}}}
+   :gen-rules    {:extra-paths ["local"]
+                  :main-opts ["-m" "gen-rules-md"]}
+   :build        {:deps {io.github.clojure/tools.build {:git/tag "v0.10.5" :git/sha "2a21b7a"}}
+                  :ns-default build}}}
