@@ -14,26 +14,21 @@ brew install clj-kondo-fix
 
 ### From source
 
-Requires the [Clojure CLI](https://clojure.org/guides/install_clojure) (`clojure`) on your PATH.
+For environments without Homebrew. Requires the [Clojure CLI](https://clojure.org/guides/install_clojure) (`clojure`) on your PATH. The tool runs directly from source via the Clojure CLI — no build step required.
 
 ```bash
 git clone https://github.com/sirmspencer/clj-kondo-fix
 cd clj-kondo-fix
-./bin/link     # installs into $(brew --prefix)/bin if Homebrew is present, otherwise /usr/local/bin
+./bin/link /usr/local/bin   # symlinks bin/clj-kondo-fix into /usr/local/bin
 ```
 
 To remove:
 
 ```bash
-./bin/unlink   # removes the symlink; restores the Homebrew version if installed
+./bin/unlink /usr/local/bin
 ```
 
-Pass a custom destination to install elsewhere:
-
-```bash
-./bin/link ~/bin
-./bin/unlink ~/bin
-```
+Pass any writable directory on your PATH as the destination.
 
 ## Usage
 
