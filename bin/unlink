@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
-# Remove the clj-kondo-fix symlink from /usr/local/bin.
+# Remove the dev clj-kondo-fix symlink and restore the Homebrew version if installed.
 # Usage: ./bin/unlink [dest-dir]
-#   dest-dir defaults to /usr/local/bin
+#   dest-dir defaults to $(brew --prefix)/bin if brew is available, otherwise /usr/local/bin
 set -euo pipefail
 
-dest_dir="${1:-/usr/local/bin}"
+if [ -n "${1:-}" ]; then
+  dest_dir="$1"
+elif command -v brew >/dev/null 2>&1; then
+  dest_dir="$(brew --prefix)/bin"
+else
+  dest_dir="/usr/local/bin"
+fi
+
 dest="$dest_dir/clj-kondo-fix"
 
 if [ -L "$dest" ]; then
@@ -16,4 +23,17 @@ elif [ -e "$dest" ]; then
 else
   echo "nothing to remove: $dest not found" >&2
   exit 1
+fi
+
+# Restore Homebrew symlink if clj-kondo-fix is installed in the Cellar
+if command -v brew >/dev/null 2>&1; then
+  cellar="$(brew --cellar clj-kondo-fix 2>/dev/null)"
+  if [ -n "$cellar" ] && [ -d "$cellar" ]; then
+    version="$(ls "$cellar" | sort -V | tail -1)"
+    cellar_bin="$cellar/$version/bin/clj-kondo-fix"
+    if [ -f "$cellar_bin" ]; then
+      ln -sf "$cellar_bin" "$dest"
+      echo "restored homebrew: $dest -> $cellar_bin"
+    fi
+  fi
 fi

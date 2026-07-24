@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# Symlink clj-kondo-fix into /usr/local/bin so it is available system-wide.
+# Symlink clj-kondo-fix so it takes precedence over the Homebrew-installed version.
 # Usage: ./bin/link [dest-dir]
-#   dest-dir defaults to /usr/local/bin
+#   dest-dir defaults to $(brew --prefix)/bin if brew is available, otherwise /usr/local/bin
 set -euo pipefail
 
 src="${BASH_SOURCE[0]}"
@@ -13,7 +13,14 @@ done
 bin_dir="$(cd -P "$(dirname "$src")" && pwd)"
 launcher="$bin_dir/clj-kondo-fix"
 
-dest_dir="${1:-/usr/local/bin}"
+if [ -n "${1:-}" ]; then
+  dest_dir="$1"
+elif command -v brew >/dev/null 2>&1; then
+  dest_dir="$(brew --prefix)/bin"
+else
+  dest_dir="/usr/local/bin"
+fi
+
 dest="$dest_dir/clj-kondo-fix"
 
 mkdir -p "$dest_dir"
