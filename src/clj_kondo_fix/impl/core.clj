@@ -10,9 +10,9 @@
       (let [f (io/file p)]
         (if (.isDirectory f)
           (doseq [file (file-seq f)
-                  :when (and (.isFile file)
-                             (re-find #"\.clj[cst]?$" (.getName file)))]
-            (swap! result conj (.getAbsolutePath file)))
+                  :when (and (.isFile ^java.io.File file)
+                             (re-find #"\.clj[cst]?$" (.getName ^java.io.File file)))]
+            (swap! result conj (.getAbsolutePath ^java.io.File file)))
           (swap! result conj (.getAbsolutePath f)))))
     @result))
 

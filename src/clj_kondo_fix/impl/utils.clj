@@ -112,7 +112,7 @@
   [line binding-name approx-col]
   (let [search-from (max 0 (dec approx-col))]
     (loop [search-idx search-from]
-      (let [idx (.indexOf line binding-name search-idx)]
+      (let [idx (.indexOf ^String line ^String binding-name (int search-idx))]
         (cond
           (neg? idx) nil
           (and (or (zero? idx)
@@ -127,7 +127,7 @@
    start-line-idx. Returns start-line-idx if no opening quote is found."
   [lines start-line-idx]
   (let [docstring-line (nth lines start-line-idx)
-        quote-col      (.indexOf docstring-line "\"")]
+        quote-col      (.indexOf ^String docstring-line "\"")]
     (if (neg? quote-col)
       start-line-idx
       (loop [line-idx start-line-idx

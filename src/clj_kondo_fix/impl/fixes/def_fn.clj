@@ -18,11 +18,11 @@
   [line def-open fn-col-idx]
   (let [after-def (+ def-open 5)
         s (loop [i after-def]
-            (if (or (>= i fn-col-idx) (not (Character/isWhitespace (get line i))))
+            (if (or (>= i fn-col-idx) (not (Character/isWhitespace (char (get line i)))))
               i
               (recur (inc i))))
         e (loop [i (dec fn-col-idx)]
-            (if (or (<= i s) (not (Character/isWhitespace (get line i))))
+            (if (or (<= i s) (not (Character/isWhitespace (char (get line i)))))
               (inc i)
               (recur (dec i))))]
     (when (< s e)
@@ -34,7 +34,7 @@
   [line fn-open-col]
   (let [after-fn (+ fn-open-col 3)]
     (loop [i (min after-fn (dec (count line)))]
-      (if (or (>= i (count line)) (not (Character/isWhitespace (get line i))))
+      (if (or (>= i (count line)) (not (Character/isWhitespace (char (get line i)))))
         i
         (recur (inc i))))))
 

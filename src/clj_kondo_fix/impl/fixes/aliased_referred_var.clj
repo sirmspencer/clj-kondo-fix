@@ -6,7 +6,7 @@
   (let [len (count line)]
     (loop [i start-idx]
       (if (or (>= i len)
-              (Character/isWhitespace (get line i))
+              (Character/isWhitespace (char (get line i)))
               (#{\( \) \[ \] \{ \} \" \, \; \@ \^ \~ \`} (get line i)))
         i
         (recur (inc i))))))
@@ -23,7 +23,7 @@
     (if (#{\(} ch)
       (let [next-col (inc col-idx)]
         (loop [i next-col]
-          (if (and (< i (count line)) (Character/isWhitespace (get line i)))
+          (if (and (< i (count line)) (Character/isWhitespace (char (get line i))))
             (recur (inc i))
             i)))
       col-idx)))

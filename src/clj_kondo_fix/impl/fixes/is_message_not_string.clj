@@ -7,7 +7,7 @@
   (let [len (count line)]
     (loop [i start-idx]
       (if (or (>= i len)
-              (Character/isWhitespace (get line i))
+              (Character/isWhitespace (char (get line i)))
               (#{\( \) \[ \] \{ \} \" \, \; \@ \^ \~} (get line i)))
         i
         (recur (inc i))))))

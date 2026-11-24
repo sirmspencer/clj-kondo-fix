@@ -37,7 +37,7 @@
                                (if-let [ns-name (ns-after-use line col-idx)]
                                  (let [use-end      (+ col-idx 4)
                                        rest-of-line (subs line use-end)
-                                       ns-idx       (.indexOf rest-of-line ns-name)
+                                       ns-idx       (.indexOf rest-of-line ^String ns-name)
                                        ns-end       (+ ns-idx (count ns-name))
                                        rest-after   (subs rest-of-line ns-end)
                                        replacement  (str ":require [" ns-name " :refer :all]")

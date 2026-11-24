@@ -16,9 +16,9 @@
     (reduce-findings lines findings
                      (fn [current-lines f]
                        (let [binding-name (some-> (re-find #"Used binding is marked as unused: (.+)" (:message f))
-                                                   second)]
+                                                  second)]
                          (if (and binding-name
-                                  (.startsWith binding-name "_")
+                                  (.startsWith ^String binding-name "_")
                                   (> (count binding-name) 1))
                            (let [new-name  (subs binding-name 1)
                                  changed?  (volatile! false)

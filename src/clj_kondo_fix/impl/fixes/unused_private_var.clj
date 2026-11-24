@@ -19,7 +19,7 @@
                                                 (re-find #"^\s*\(def" (nth current-lines i)) i
                                                 :else (recur (dec i))))
                                  form-col   (when form-start
-                                              (.indexOf (nth current-lines form-start) "("))]
+                                              (.indexOf ^String (nth current-lines form-start) "("))]
                              (if (or (nil? form-start) (neg? form-col))
                                [current-lines nil]
                                (if-let [[end-line _] (find-matching-bracket-across-lines current-lines form-start form-col)]

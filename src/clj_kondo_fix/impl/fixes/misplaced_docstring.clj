@@ -14,7 +14,7 @@
                            [current-lines nil]
                            (let [def-line       (nth current-lines def-line-idx)
                                  docstring-line (nth current-lines docstring-line-idx)
-                                 bracket-idx    (.indexOf def-line "[")]
+                                 bracket-idx    (.indexOf ^String def-line "[")]
                              (if (neg? bracket-idx)
                                [current-lines nil]
                                (let [end-idx (find-matching-bracket def-line bracket-idx)]

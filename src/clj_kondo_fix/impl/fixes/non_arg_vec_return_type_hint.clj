@@ -6,7 +6,7 @@
   [line start-idx]
   (let [len (count line)]
     (loop [i start-idx]
-      (if (or (>= i len) (Character/isWhitespace (get line i)))
+      (if (or (>= i len) (Character/isWhitespace (char (get line i))))
         i
         (recur (inc i))))))
 
@@ -14,7 +14,7 @@
   [line start-idx]
   (let [len (count line)]
     (loop [i start-idx]
-      (if (or (>= i len) (not (Character/isWhitespace (get line i))))
+      (if (or (>= i len) (not (Character/isWhitespace (char (get line i)))))
         i
         (recur (inc i))))))
 

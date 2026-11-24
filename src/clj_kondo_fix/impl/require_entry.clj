@@ -29,7 +29,7 @@
   ([line ns-name start-from]
    (let [ns-str (str "[" ns-name)]
      (loop [start (max 0 start-from)]
-       (let [idx (.indexOf line ns-str start)]
+       (let [idx (.indexOf ^String line ns-str (int start))]
          (if (neg? idx)
            nil
            (if (ns-name-matches-at line (inc idx) ns-name)
