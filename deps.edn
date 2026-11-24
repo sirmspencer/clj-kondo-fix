@@ -11,5 +11,6 @@
                  :main-opts ["-m" "gen-fixtures"]}
    :gen-rules    {:extra-paths ["local"]
                   :main-opts ["-m" "gen-rules-md"]}
+   :native       {:extra-deps {com.github.clj-easy/graal-build-time {:mvn/version "1.0.6"}}}
    :build        {:deps {io.github.clojure/tools.build {:git/tag "v0.10.5" :git/sha "2a21b7a"}}
                   :ns-default build}}}
