@@ -54,11 +54,18 @@
     (loop [[[_rule-key {:keys [rule-def findings]}] & more] (seq rule-findings)
            current-lines initial-lines
            total-fixed 0]
-      (if (nil? rule-def)
+      (cond
+        (nil? rule-def)
         {:fixed total-fixed
          :lines current-lines
          :changed? (not= current-lines initial-lines)}
-        (let [file-findings  (get findings file-path [])
+
+        ;; rule only has findings in other files
+        (empty? (get findings file-path))
+        (recur more current-lines total-fixed)
+
+        :else
+        (let [file-findings  (get findings file-path)
               fix-fn         (:fix-fn rule-def)
               ;; Extract :fix-contexts from the rule's :config map and pass it
               ;; as the 5th arg.  Other fix functions ignore the extra arg via

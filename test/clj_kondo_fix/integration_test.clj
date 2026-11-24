@@ -20,3 +20,12 @@
         (let [result (fix/fix! {:lint [f] :dry-run false})]
           (is (pos? (-> result :summary :total-fixed)))
           (is (not (str/includes? (slurp f) "clojure.string"))))))))
+
+(deftest test-rule-with-findings-in-other-file-only
+  (testing "a stub rule with findings in one file does not crash on another file"
+    (with-temp-file "(ns stub-only) (defn f []) (defn f [])"
+      (fn [stub-file]
+        (with-temp-file "(ns fixable (:require [clojure.string :as s]))"
+          (fn [fixable-file]
+            (let [result (fix/fix! {:lint [stub-file fixable-file] :dry-run true})]
+              (is (pos? (-> result :summary :total-fixed))))))))))
