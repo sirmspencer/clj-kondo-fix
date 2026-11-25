@@ -30,7 +30,11 @@
    ["-h" "--help" "Print usage"]
    ["-v" "--version" "Print version"]])
 
-(def version "0.1.0")
+;; stamped at aot compile time by build.clj; "dev" when run from source
+(defmacro ^:private stamped-version []
+  (or (System/getProperty "clj-kondo-fix.version") "dev"))
+
+(def version (stamped-version))
 
 (defn usage [summary]
   (str/join \newline

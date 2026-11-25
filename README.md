@@ -86,6 +86,18 @@ clojure -M:run --lint src/ --fix  # run against a directory
 ./bin/unlink            # restore Homebrew version
 ```
 
+### Native image
+
+The Homebrew package installs a GraalVM native binary, which starts in milliseconds and does not require Java. Building it locally requires GraalVM with `native-image`:
+
+```bash
+GRAALVM_HOME=/path/to/graalvm clojure -T:build native :version '"v0.2.0"'   # writes target/clj-kondo-fix
+```
+
+### Releasing
+
+Pushing a `v*` tag builds native binaries for macOS (arm64, x86_64) and Linux (amd64, arm64), publishes them to a GitHub release, and updates the Homebrew formula. See [docs/releasing.md](docs/releasing.md) for the setup and the workflow.
+
 ## Rules
 
 ✅ implemented · ❌ not applicable · ⚠️ skipped · (no icon) not yet implemented

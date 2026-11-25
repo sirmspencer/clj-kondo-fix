@@ -1,0 +1,119 @@
+# builds clj-kondo-fix on every platform it ships to, after running the tests there.
+# a v* tag also publishes a github release with the archives and checksums,
+# and updates the homebrew formula.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: macos-latest
+            target: darwin-arm64
+          - runner: macos-15-intel
+            target: darwin-amd64
+          - runner: ubuntu-24.04
+            target: linux-amd64
+            static: static
+          - runner: ubuntu-24.04-arm
+            target: linux-arm64
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: graalvm/setup-graalvm@v1
+        with:
+          java-version: "25"
+          distribution: graalvm
+          native-image-musl: ${{ matrix.static == 'static' }}
+          github-token: ${{ github.token }}
+      - uses: DeLaGuardo/setup-clojure@13.7.0
+        with:
+          cli: latest
+      - name: test
+        run: clojure -M:test
+      - name: build
+        run: scripts/build.sh "${GITHUB_REF_NAME}" ${{ matrix.target }} ${{ matrix.static }}
+      # the binary exits 1 when it fixes something
+      - name: smoke test
+        run: |
+          mkdir -p smoke && cp -R test/clj_kondo_fix/rules smoke/
+          ./target/clj-kondo-fix --lint smoke --fix || [ $? -eq 1 ]
+      - name: uberjar
+        if: matrix.target == 'linux-amd64'
+        run: |
+          clojure -T:build uber :version "\"${GITHUB_REF_NAME}\""
+          cp target/clj-kondo-fix-*-standalone.jar dist/
+      - uses: actions/upload-artifact@v7
+        with:
+          name: clj-kondo-fix-${{ matrix.target }}
+          path: dist/*
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - name: checksums
+        run: cd dist && sha256sum * > checksums.txt
+      - name: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${GITHUB_REF_NAME}" dist/* --repo "${GITHUB_REPOSITORY}" --title "${GITHUB_REF_NAME}" --generate-notes
+
+  homebrew:
+    needs: release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/checkout@v7
+        with:
+          repository: sirmspencer/homebrew-tap
+          token: ${{ secrets.TAP_TOKEN }}
+          path: tap
+      - name: write the formula
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/update-formula.sh "${GITHUB_REF_NAME}" tap/clj-kondo-fix.rb
+      - name: commit
+        id: commit
+        working-directory: tap
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add clj-kondo-fix.rb
+          if git diff --cached --quiet; then
+            echo "the formula is unchanged"
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            git commit -m "clj-kondo-fix ${GITHUB_REF_NAME#v}"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+      # install from the committed checkout, so a formula that fails is never pushed
+      - name: install and test
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          HOMEBREW_NO_AUTO_UPDATE: "1"
+          HOMEBREW_NO_INSTALL_CLEANUP: "1"
+        run: |
+          brew tap sirmspencer/tap "$PWD/tap"
+          brew trust sirmspencer/tap || true
+          brew install sirmspencer/tap/clj-kondo-fix
+          brew test sirmspencer/tap/clj-kondo-fix
+          clj-kondo-fix --version
+      - name: push
+        if: steps.commit.outputs.changed == 'true'
+        working-directory: tap
+        run: git push
