@@ -38,6 +38,14 @@ jobs:
       - uses: DeLaGuardo/setup-clojure@13.7.0
         with:
           cli: latest
+      # maven central rate limits shared runner ips, so reuse downloaded deps
+      - uses: actions/cache@v6
+        with:
+          path: |
+            ~/.m2/repository
+            ~/.gitlibs
+          key: deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('deps.edn') }}
+          restore-keys: deps-${{ runner.os }}-${{ runner.arch }}-
       - name: test
         run: clojure -M:test
       - name: build
@@ -117,3 +125,31 @@ jobs:
         if: steps.commit.outputs.changed == 'true'
         working-directory: tap
         run: git push
+
+  jetbrains:
+    needs: release
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: package
+        run: scripts/package-intellij.sh "${GITHUB_REF_NAME}" dist
+      - name: attach to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${GITHUB_REF_NAME}" dist/clj-kondo-fix-intellij-*.zip --repo "${GITHUB_REPOSITORY}" --clobber
+      # the first version of a plugin must be uploaded by hand on plugins.jetbrains.com;
+      # set the repository variable JETBRAINS_PUBLISH to true once it is approved
+      - name: publish to the jetbrains marketplace
+        if: vars.JETBRAINS_PUBLISH == 'true'
+        env:
+          PUBLISH_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
+        working-directory: editors/intellij
+        run: ./gradlew publishPlugin -PpluginVersion="${GITHUB_REF_NAME#v}" --console=plain

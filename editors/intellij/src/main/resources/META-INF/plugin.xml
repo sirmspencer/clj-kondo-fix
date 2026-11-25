@@ -1,0 +1,37 @@
+<idea-plugin>
+    <id>io.github.sirmspencer.clj-kondo-fix</id>
+    <name>clj-kondo-fix</name>
+    <vendor url="https://github.com/sirmspencer/clj-kondo-fix">sirmspencer</vendor>
+
+    <description><![CDATA[
+    <p>Fixes Clojure code with <a href="https://github.com/sirmspencer/clj-kondo-fix">clj-kondo-fix</a>,
+    which runs the <a href="https://github.com/clj-kondo/clj-kondo">clj-kondo</a> linter and automatically
+    corrects the findings it knows how to fix, such as unused requires, redundant forms, and unsorted
+    namespaces.</p>
+    <p>Code | Fix with clj-kondo-fix, also in the editor's context menu, fixes the current
+    <code>.clj</code>, <code>.cljs</code>, or <code>.cljc</code> file, including unsaved changes, as one
+    undoable edit. The project's <code>.clj-kondo</code> configuration applies.</p>
+    <p>The plugin includes the clj-kondo-fix binary for macOS and Linux. A different executable can be set
+    under Settings | Tools | clj-kondo-fix.</p>
+    ]]></description>
+
+    <depends>com.intellij.modules.platform</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationConfigurable parentId="tools"
+                                 instance="io.github.sirmspencer.cljkondofix.CljKondoFixConfigurable"
+                                 id="io.github.sirmspencer.clj-kondo-fix"
+                                 displayName="clj-kondo-fix"/>
+        <notificationGroup id="clj-kondo-fix" displayType="BALLOON"/>
+    </extensions>
+
+    <actions>
+        <action id="io.github.sirmspencer.cljkondofix.FixFile"
+                class="io.github.sirmspencer.cljkondofix.FixFileAction"
+                text="Fix with clj-kondo-fix"
+                description="Apply clj-kondo-fix auto-fixes to the current file">
+            <add-to-group group-id="CodeMenu" anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+    </actions>
+</idea-plugin>

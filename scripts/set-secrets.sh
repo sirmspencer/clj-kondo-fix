@@ -12,7 +12,7 @@
 set -euo pipefail
 
 repo="${1:-sirmspencer/clj-kondo-fix}"
-secrets="TAP_TOKEN"
+secrets="TAP_TOKEN JETBRAINS_MARKETPLACE_TOKEN"
 
 if ! gh auth status >/dev/null 2>&1; then
   echo "gh is not signed in; run gh auth login first" >&2
@@ -27,3 +27,10 @@ for name in $secrets; do
   printf '%s' "${!name}" | gh secret set "$name" --repo "$repo"
   echo "set $name"
 done
+
+# JETBRAINS_PUBLISH is a repository variable, not a secret: set it to true
+# once the first plugin version has been approved on the marketplace
+if [ -n "${JETBRAINS_PUBLISH:-}" ]; then
+  gh variable set JETBRAINS_PUBLISH --repo "$repo" --body "$JETBRAINS_PUBLISH"
+  echo "set variable JETBRAINS_PUBLISH=$JETBRAINS_PUBLISH"
+fi
