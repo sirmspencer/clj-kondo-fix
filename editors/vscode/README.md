@@ -1,5 +1,3 @@
-*README generated with LLM assistance*
-
 # clj-kondo-fix for VS Code
 
 Fixes Clojure code with [clj-kondo-fix](https://github.com/sirmspencer/clj-kondo-fix), which runs the [clj-kondo](https://github.com/clj-kondo/clj-kondo) linter and automatically corrects the findings it knows how to fix, such as unused requires, redundant forms, and unsorted namespaces. The clj-kondo-fix executable is bundled with the extension; nothing else needs to be installed.
