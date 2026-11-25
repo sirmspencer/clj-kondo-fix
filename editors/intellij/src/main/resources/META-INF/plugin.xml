@@ -11,8 +11,9 @@
     <p>Code | Fix with clj-kondo-fix, also in the editor's context menu, fixes the current
     <code>.clj</code>, <code>.cljs</code>, or <code>.cljc</code> file, including unsaved changes, as one
     undoable edit. The project's <code>.clj-kondo</code> configuration applies.</p>
-    <p>The plugin includes the clj-kondo-fix binary for macOS, Linux, and Windows. A different executable can be set
-    under Settings | Tools | clj-kondo-fix.</p>
+    <p>On first use, the plugin downloads the clj-kondo-fix binary for macOS, Linux, or Windows from the
+    GitHub release that matches its version, verifies its checksum, and caches it. A different executable can
+    be set under Settings | Tools | clj-kondo-fix.</p>
     ]]></description>
 
     <depends>com.intellij.modules.platform</depends>

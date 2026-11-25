@@ -16,6 +16,7 @@ import com.intellij.openapi.project.DumbAwareAction
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.VirtualFile
 import java.io.File
+import java.io.IOException
 import java.nio.charset.StandardCharsets
 
 private const val TIMEOUT_MS = 30_000
@@ -43,20 +44,24 @@ class FixFileAction : DumbAwareAction() {
         val project = event.project ?: return
         val document = event.getData(CommonDataKeys.EDITOR)?.document ?: return
         val file = event.getData(CommonDataKeys.VIRTUAL_FILE) ?: return
-        val executable = CljKondoFixExecutable.find()
-        if (executable == null) {
-            notify(project, "clj-kondo-fix was not found. Set its path in Settings | Tools | clj-kondo-fix.", NotificationType.ERROR)
-            return
-        }
         val source = document.text
         val stamp = document.modificationStamp
-        val commandLine = GeneralCommandLine(executable, "--stdin", "--filename", file.name)
-            .withCharset(StandardCharsets.UTF_8)
-        // clj-kondo finds the project's .clj-kondo config from the working directory
-        file.parent?.path?.let { commandLine.withWorkDirectory(File(it)) }
+        val workDirectory = file.parent?.path
 
         object : Task.Backgroundable(project, "Running clj-kondo-fix", true) {
             override fun run(indicator: ProgressIndicator) {
+                // finding the executable may download it, so it happens here, off the ui thread
+                val executable = try {
+                    CljKondoFixExecutable.find(indicator)
+                } catch (error: IOException) {
+                    notify(project, error.message ?: "clj-kondo-fix was not found", NotificationType.ERROR)
+                    return
+                }
+                indicator.text = "Running clj-kondo-fix"
+                val commandLine = GeneralCommandLine(executable, "--stdin", "--filename", file.name)
+                    .withCharset(StandardCharsets.UTF_8)
+                // clj-kondo finds the project's .clj-kondo config from the working directory
+                workDirectory?.let { commandLine.withWorkDirectory(File(it)) }
                 val process = try {
                     CapturingProcessHandler(commandLine)
                 } catch (error: ExecutionException) {

@@ -35,12 +35,3 @@ intellijPlatform {
         }
     }
 }
-
-tasks {
-    // bin/<os>-<arch>/clj-kondo-fix binaries, filled by scripts/package-intellij.sh, ship inside the plugin
-    prepareSandbox {
-        from(layout.projectDirectory.dir("bin")) {
-            into(intellijPlatform.projectName.map { "$it/bin" })
-        }
-    }
-}

@@ -17,7 +17,7 @@ class CljKondoFixConfigurable : BoundConfigurable("clj-kondo-fix") {
             textField()
                 .bindText({ options.path.orEmpty() }, { options.path = it })
                 .columns(COLUMNS_LARGE)
-                .comment("Leave empty to use the bundled binary, or clj-kondo-fix from the PATH or Homebrew.")
+                .comment("Leave empty to download the release binary that matches the plugin version.")
         }
     }
 }

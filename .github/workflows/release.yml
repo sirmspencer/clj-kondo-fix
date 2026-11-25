@@ -173,15 +173,12 @@ jobs:
             npx --yes ovsx publish "$vsix" -p "$OVSX_PAT"
           done
 
+  # the plugin bundles no binaries; it downloads them from this release on first use
   jetbrains:
     needs: release
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7
-      - uses: actions/download-artifact@v8
-        with:
-          path: dist
-          merge-multiple: true
       - uses: actions/setup-java@v6
         with:
           distribution: temurin

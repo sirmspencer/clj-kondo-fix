@@ -12,9 +12,9 @@ This document describes the tokens and one-time steps behind the clj-kondo-fix r
 | Homebrew | `sirmspencer/tap/clj-kondo-fix`, a formula that installs the prebuilt native binary | the workflow, with `TAP_TOKEN` |
 | Visual Studio Marketplace | `sirmspencer.clj-kondo-fix`, one package per platform | the workflow, with `VSCE_PAT` |
 | Open VSX | `sirmspencer.clj-kondo-fix`, one package per platform | the workflow, with `OVSX_PAT` |
-| JetBrains Marketplace | the clj-kondo-fix plugin, one zip with every platform's binary | by hand for the first version, then the workflow, with `JETBRAINS_MARKETPLACE_TOKEN` |
+| JetBrains Marketplace | the clj-kondo-fix plugin, which downloads the matching release binary on first use | by hand for the first version, then the workflow, with `JETBRAINS_MARKETPLACE_TOKEN` |
 
-The platforms are macOS on Apple silicon and Intel, Linux on x64 and ARM, and Windows on x64. Homebrew covers macOS and Linux; the editor plugins bundle every platform's binary. The binaries are GraalVM native images. `native-image` cannot cross-compile, so each platform is built and tested on its own runner. The Linux x64 binary is linked statically against musl, so it runs on any distribution.
+The platforms are macOS on Apple silicon and Intel, Linux on x64 and ARM, and Windows on x64. Homebrew covers macOS and Linux. The VS Code extension bundles each platform's binary in a separate package. The JetBrains Marketplace accepts one package for every platform, so the IntelliJ plugin bundles none; on first use it downloads the binary for its platform from the release that matches its version, verifies it against `checksums.txt`, and caches it in the IDE's system directory. The binaries are GraalVM native images. `native-image` cannot cross-compile, so each platform is built and tested on its own runner. The Linux x64 binary is linked statically against musl, so it runs on any distribution.
 
 ## Tokens
 
@@ -61,7 +61,7 @@ The `release` workflow then runs these jobs:
 2. **release:** creates the GitHub release with the archives, the uberjar, and `checksums.txt`.
 3. **homebrew:** writes the formula from `checksums.txt`, installs and tests it on macOS from a checkout of the tap, and pushes it to `sirmspencer/homebrew-tap` only if the test passes.
 4. **vscode:** packages one extension per platform with its binary, attaches them to the release, and publishes them to the Visual Studio Marketplace and Open VSX.
-5. **jetbrains:** builds the plugin with every binary, attaches it to the release, and publishes it when `JETBRAINS_PUBLISH` is `true`.
+5. **jetbrains:** builds the plugin, attaches it to the release, and publishes it when `JETBRAINS_PUBLISH` is `true`.
 
 Running the workflow by hand from the Actions tab runs only the build job, which tests every platform without publishing anything.
 
@@ -71,7 +71,7 @@ Running the workflow by hand from the Actions tab runs only the build job, which
 |---|---|
 | `scripts/build.sh <version> <os-arch> [static]` | builds the native binary for the current runner and packages it into `dist/` |
 | `scripts/package-vscode.sh <version> <dist>` | builds one VS Code package per platform |
-| `scripts/package-intellij.sh <version> <dist>` | builds the IntelliJ plugin with every binary |
+| `scripts/package-intellij.sh <version> <dist>` | builds the IntelliJ plugin |
 | `scripts/update-formula.sh <version> <formula>` | writes the Homebrew formula from a release's checksums |
 | `scripts/set-secrets.sh [owner/repo]` | stores the release secrets from environment variables |
 
