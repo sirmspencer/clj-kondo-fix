@@ -35,3 +35,14 @@ intellijPlatform {
         }
     }
 }
+
+tasks {
+    // stamps the plugin version into version.properties, which the plugin reads to pick its release binary
+    processResources {
+        val pluginVersion = providers.gradleProperty("pluginVersion")
+        inputs.property("pluginVersion", pluginVersion)
+        filesMatching("**/version.properties") {
+            expand("version" to pluginVersion.get())
+        }
+    }
+}

@@ -1,6 +1,5 @@
 package io.github.sirmspencer.cljkondofix
 
-import com.intellij.ide.plugins.PluginManagerCore
 import com.intellij.openapi.application.PathManager
 import com.intellij.openapi.components.BaseState
 import com.intellij.openapi.components.Service
@@ -8,10 +7,8 @@ import com.intellij.openapi.components.SimplePersistentStateComponent
 import com.intellij.openapi.components.State
 import com.intellij.openapi.components.Storage
 import com.intellij.openapi.components.service
-import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.progress.ProgressIndicator
 import com.intellij.openapi.util.SystemInfo
-import com.intellij.openapi.util.io.FileUtil
 import com.intellij.util.EnvironmentUtil
 import com.intellij.util.io.Decompressor
 import com.intellij.util.io.HttpRequests
@@ -22,6 +19,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.security.MessageDigest
+import java.util.Properties
 
 /** Application-wide settings, stored in clj-kondo-fix.xml in the IDE config directory. */
 @Service(Service.Level.APP)
@@ -45,7 +43,6 @@ class CljKondoFixSettings : SimplePersistentStateComponent<CljKondoFixSettings.O
  * in the IDE's system directory.
  */
 object CljKondoFixExecutable {
-    private const val PLUGIN_ID = "io.github.sirmspencer.clj-kondo-fix"
     private const val RELEASES = "https://github.com/sirmspencer/clj-kondo-fix/releases/download"
 
     private val name = if (SystemInfo.isWindows) "clj-kondo-fix.exe" else "clj-kondo-fix"
@@ -93,8 +90,10 @@ object CljKondoFixExecutable {
         return "$os-$arch"
     }
 
+    // written by the gradle build, which avoids the platform's internal plugin lookup
     private fun pluginVersion(): String =
-        PluginManagerCore.getPlugin(PluginId.getId(PLUGIN_ID))?.version
+        CljKondoFixExecutable::class.java.getResourceAsStream("version.properties")
+            ?.use { Properties().apply { load(it) }.getProperty("version") }
             ?: throw IOException("could not read the plugin version")
 
     @Synchronized
@@ -134,8 +133,12 @@ object CljKondoFixExecutable {
             Files.move(binary, cached, StandardCopyOption.REPLACE_EXISTING)
             return cached.toString()
         } finally {
-            FileUtil.delete(work)
+            deleteRecursively(work)
         }
+    }
+
+    private fun deleteRecursively(path: Path) {
+        Files.walk(path).use { paths -> paths.sorted(Comparator.reverseOrder()).forEach(Files::deleteIfExists) }
     }
 
     private fun sha256(file: Path): String {
