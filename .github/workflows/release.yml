@@ -26,7 +26,12 @@ jobs:
             static: static
           - runner: ubuntu-24.04-arm
             target: linux-arm64
+          - runner: windows-latest
+            target: windows-amd64
     runs-on: ${{ matrix.runner }}
+    defaults:
+      run:
+        shell: bash
     steps:
       - uses: actions/checkout@v7
       - uses: graalvm/setup-graalvm@v1
@@ -46,8 +51,14 @@ jobs:
             ~/.gitlibs
           key: deps-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('deps.edn') }}
           restore-keys: deps-${{ runner.os }}-${{ runner.arch }}-
+      # setup-clojure installs the clojure cli on windows as a powershell module
       - name: test
-        run: clojure -M:test
+        run: |
+          if [ "$RUNNER_OS" = Windows ]; then
+            pwsh -NoProfile -Command "clojure -M:test"
+          else
+            clojure -M:test
+          fi
       - name: build
         run: scripts/build.sh "${GITHUB_REF_NAME}" ${{ matrix.target }} ${{ matrix.static }}
       # the binary exits 1 when it fixes something
@@ -58,7 +69,7 @@ jobs:
       - name: uberjar
         if: matrix.target == 'linux-amd64'
         run: |
-          clojure -T:build uber :version "\"${GITHUB_REF_NAME}\""
+          CLJ_KONDO_FIX_VERSION="${GITHUB_REF_NAME}" clojure -T:build uber
           cp target/clj-kondo-fix-*-standalone.jar dist/
       - uses: actions/upload-artifact@v7
         with:
@@ -125,6 +136,42 @@ jobs:
         if: steps.commit.outputs.changed == 'true'
         working-directory: tap
         run: git push
+
+  vscode:
+    needs: release
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          path: dist
+          merge-multiple: true
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+      - name: install
+        run: npm ci --prefix editors/vscode
+      - name: package
+        run: scripts/package-vscode.sh "${GITHUB_REF_NAME}" dist
+      - name: attach to release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "${GITHUB_REF_NAME}" dist/*.vsix --repo "${GITHUB_REPOSITORY}" --clobber
+      - name: publish to the vs code marketplace
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          for vsix in "$PWD"/dist/*.vsix; do
+            (cd editors/vscode && npx vsce publish --packagePath "$vsix")
+          done
+      - name: publish to open vsx
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          npx --yes ovsx create-namespace sirmspencer -p "$OVSX_PAT" || true
+          for vsix in dist/*.vsix; do
+            npx --yes ovsx publish "$vsix" -p "$OVSX_PAT"
+          done
 
   jetbrains:
     needs: release

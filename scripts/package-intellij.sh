@@ -9,15 +9,17 @@ dist="$(cd "$2" && pwd)"
 plugin="$(cd "$(dirname "$0")/../editors/intellij" && pwd)"
 
 rm -rf "$plugin/bin"
-for target in darwin-arm64 darwin-amd64 linux-amd64 linux-arm64; do
-  archive="$dist/clj-kondo-fix-$target.tar.gz"
-  if [ ! -f "$archive" ]; then
-    echo "skipped $target (no $archive)" >&2
-    continue
-  fi
+for target in darwin-arm64 darwin-amd64 linux-amd64 linux-arm64 windows-amd64; do
   mkdir -p "$plugin/bin/$target"
-  tar -xzf "$archive" -C "$plugin/bin/$target" ./clj-kondo-fix
-  chmod +x "$plugin/bin/$target/clj-kondo-fix"
+  if [ -f "$dist/clj-kondo-fix-$target.zip" ]; then
+    unzip -q -o "$dist/clj-kondo-fix-$target.zip" clj-kondo-fix.exe -d "$plugin/bin/$target"
+  elif [ -f "$dist/clj-kondo-fix-$target.tar.gz" ]; then
+    tar -xzf "$dist/clj-kondo-fix-$target.tar.gz" -C "$plugin/bin/$target" ./clj-kondo-fix
+    chmod +x "$plugin/bin/$target/clj-kondo-fix"
+  else
+    echo "skipped $target: no archive" >&2
+    rmdir "$plugin/bin/$target"
+  fi
 done
 cd "$plugin"
 ./gradlew buildPlugin -PpluginVersion="$version" --console=plain -q

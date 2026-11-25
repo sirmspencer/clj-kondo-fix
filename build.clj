@@ -7,9 +7,13 @@
 (def native-file "target/clj-kondo-fix")
 
 (defn- version-from
-  "accepts a tag such as v0.2.0, a bare version, or nothing (dev)"
+  "accepts a tag such as v0.2.0 or a bare version, from :version or the
+  CLJ_KONDO_FIX_VERSION environment variable; dev when neither is set"
   [version]
-  (str/replace (str (or version "dev")) #"^v" ""))
+  (str/replace (str (or version (System/getenv "CLJ_KONDO_FIX_VERSION") "dev")) #"^v" ""))
+
+(def ^:private windows?
+  (str/starts-with? (System/getProperty "os.name") "Windows"))
 
 (defn- uber-file [version]
   (format "target/clj-kondo-fix-%s-standalone.jar" version))
@@ -43,9 +47,10 @@
                :version (version-from version)}))
 
 (defn- find-native-image []
-  (if-let [graal-home (System/getenv "GRAALVM_HOME")]
-    (str graal-home "/bin/native-image")
-    "native-image"))
+  (let [command (if windows? "native-image.cmd" "native-image")]
+    (if-let [graal-home (System/getenv "GRAALVM_HOME")]
+      (str graal-home "/bin/" command)
+      command)))
 
 (defn native
   "Build the native binary. Pass :version v0.2.0 to stamp the version, and

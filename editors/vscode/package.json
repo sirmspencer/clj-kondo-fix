@@ -1,0 +1,89 @@
+{
+  "name": "clj-kondo-fix",
+  "displayName": "clj-kondo-fix",
+  "description": "Auto-fix Clojure code based on clj-kondo findings",
+  "version": "0.2.0",
+  "publisher": "sirmspencer",
+  "license": "EPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sirmspencer/clj-kondo-fix"
+  },
+  "homepage": "https://github.com/sirmspencer/clj-kondo-fix",
+  "bugs": {
+    "url": "https://github.com/sirmspencer/clj-kondo-fix/issues"
+  },
+  "engines": {
+    "vscode": "^1.90.0"
+  },
+  "categories": [
+    "Linters"
+  ],
+  "keywords": [
+    "clojure",
+    "clj-kondo",
+    "linter",
+    "fix"
+  ],
+  "activationEvents": [
+    "onLanguage:clojure"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "clj-kondo-fix.fixFile",
+        "title": "Fix File",
+        "category": "clj-kondo-fix"
+      }
+    ],
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "clj-kondo-fix.fixFile",
+          "when": "editorLangId == clojure"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "clj-kondo-fix.fixFile",
+          "when": "editorLangId == clojure",
+          "group": "1_modification"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "clj-kondo-fix",
+      "properties": {
+        "clj-kondo-fix.path": {
+          "type": "string",
+          "default": "",
+          "description": "Path to a clj-kondo-fix executable. Leave empty to use the one bundled with the extension."
+        },
+        "clj-kondo-fix.fixOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Fix Clojure files with clj-kondo-fix before they are saved."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "esbuild src/extension.ts --bundle --platform=node --format=cjs --external:vscode --outfile=dist/extension.js",
+    "build:test": "esbuild src/test/run.ts src/test/suite.ts --bundle --platform=node --format=cjs --external:vscode --external:@vscode/test-electron --outdir=dist/test",
+    "test": "npm run build && npm run build:test && node dist/test/run.js",
+    "package": "npm run build && vsce package"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.90.0",
+    "@vscode/test-electron": "^3.1.0",
+    "@vscode/vsce": "^4.1.1",
+    "esbuild": "^0.28.2",
+    "typescript": "^7.0.2"
+  },
+  "icon": "images/icon.png",
+  "galleryBanner": {
+    "color": "#5881d8",
+    "theme": "dark"
+  }
+}

@@ -28,10 +28,10 @@ class CljKondoFixSettings : SimplePersistentStateComponent<CljKondoFixSettings.O
 }
 
 object CljKondoFixExecutable {
-    private const val NAME = "clj-kondo-fix"
+    private val name = if (SystemInfo.isWindows) "clj-kondo-fix.exe" else "clj-kondo-fix"
 
     // apps started from the dock may not see the shell path, so check homebrew directly
-    private val homebrewPaths = listOf("/opt/homebrew/bin/$NAME", "/usr/local/bin/$NAME")
+    private val homebrewPaths = listOf("/opt/homebrew/bin/clj-kondo-fix", "/usr/local/bin/clj-kondo-fix")
 
     /** The configured path, then the bundled binary, then clj-kondo-fix on the path or in homebrew. */
     fun find(): String? {
@@ -49,7 +49,7 @@ object CljKondoFixExecutable {
         val path = EnvironmentUtil.getValue("PATH") ?: System.getenv("PATH") ?: return null
         return path.split(File.pathSeparator)
             .filter { it.isNotBlank() }
-            .map { File(it, NAME) }
+            .map { File(it, name) }
             .firstOrNull { it.isFile && it.canExecute() }
             ?.absolutePath
     }
@@ -62,10 +62,11 @@ object CljKondoFixExecutable {
         val os = when {
             SystemInfo.isMac -> "darwin"
             SystemInfo.isLinux -> "linux"
+            SystemInfo.isWindows -> "windows"
             else -> return null
         }
         val arch = if (CpuArch.isArm64()) "arm64" else "amd64"
-        val file = File(pluginDir, "bin/$os-$arch/$NAME")
+        val file = File(pluginDir, "bin/$os-$arch/$name")
         if (!file.isFile) {
             return null
         }
