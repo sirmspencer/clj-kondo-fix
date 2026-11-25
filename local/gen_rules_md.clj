@@ -77,7 +77,7 @@
 ;; ---------------------------------------------------------------------------
 
 (defn fixture-dir [rule-kw]
-  (io/file "test/clj_kondo_fix/rules" (str/replace (name rule-kw) #"-" "_")))
+  (io/file "test/clj_kondo_fix/rules" (-> (name rule-kw) (str/replace #"-" "_") (str/replace "?" ""))))
 
 (defn read-fixture [rule-kw slug suffix]
   "Read fixture file content, stripping leading ;;-; ... ;-;; tag if present."

@@ -1,4 +1,4 @@
-(ns clj-kondo-fix.rules.not-nil?-test
+(ns clj-kondo-fix.rules.not-nil-test
   (:require [clojure.test :refer [deftest is testing]]
             [clj-kondo-fix.impl.fixes :as fixes]
             [clj-kondo-fix.test-support :refer [fixture-path assert-fix assert-no-finding]]))

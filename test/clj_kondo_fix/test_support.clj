@@ -14,10 +14,11 @@
    rule  — clj-kondo rule name, hyphenated (e.g. \"unused-namespace\")
    slug  — file slug without extension (e.g. \"removes-single-in\")
    Fixtures live colocated with their test file under
-   test/clj_kondo_fix/rules/<rule_underscored>/<slug>.clj"
+   test/clj_kondo_fix/rules/<rule_underscored>/<slug>.clj, with ? dropped
+   since windows paths cannot contain it"
   [rule slug]
   (str (System/getProperty "user.dir")
-       "/test/clj_kondo_fix/rules/" (str/replace rule "-" "_") "/" slug ".clj"))
+       "/test/clj_kondo_fix/rules/" (-> rule (str/replace "-" "_") (str/replace "?" "")) "/" slug ".clj"))
 
 (defn with-temp-file [content f]
   (let [fpath (str (System/getProperty "java.io.tmpdir")
