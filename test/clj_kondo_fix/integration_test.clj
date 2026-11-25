@@ -29,3 +29,17 @@
           (fn [fixable-file]
             (let [result (fix/fix! {:lint [stub-file fixable-file] :dry-run true})]
               (is (pos? (-> result :summary :total-fixed))))))))))
+
+(deftest test-fix-source
+  (testing "returns the fixed source without touching any file"
+    (let [{:keys [source result]} (fix/fix-source "(ns foo (:require [clojure.string :as s]))\n"
+                                                  {:filename "src/foo.clj"})]
+      (is (= "(ns foo)\n" source))
+      (is (pos? (-> result :summary :total-fixed)))))
+  (testing "returns the input unchanged when nothing is fixed"
+    (let [input "(ns foo)\n(defn bar [] 1)"]
+      (is (= input (:source (fix/fix-source input {}))))))
+  (testing "picks the language from the filename extension"
+    (let [{:keys [result]} (fix/fix-source "(ns foo (:require [clojure.string :as s]))\n"
+                                           {:filename "foo.cljs"})]
+      (is (pos? (-> result :summary :total-fixed))))))

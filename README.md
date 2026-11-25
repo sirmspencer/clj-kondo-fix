@@ -47,6 +47,8 @@ Options:
 | `--rules RULES` | Comma-separated list of active fix rules (default: all) |
 | `--config EDN` | clj-kondo config map as EDN string |
 | `--output FORMAT` | Output format: `text` (default) or `edn` |
+| `--stdin` | Read source from stdin and write the fixed source to stdout; the log goes to stderr |
+| `--filename NAME` | File name for `--stdin`; its extension selects the language |
 | `--help` | Print usage |
 | `--version` | Print version |
 

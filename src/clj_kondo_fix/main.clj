@@ -7,6 +7,7 @@
      clj-kondo-fix --lint src/ --fix
      clj-kondo-fix --lint src/ --fix --rules unused-namespace,unused-binding
      clj-kondo-fix --lint src/ --output edn
+     clj-kondo-fix --stdin --filename src/foo.clj < src/foo.clj
      clj-kondo-fix --version
      clj-kondo-fix --help"
   (:gen-class)
@@ -27,6 +28,10 @@
    ["-o" "--output FORMAT" "Output format: text or edn (default: text)"
     :default "text"
     :validate [#(contains? #{"text" "edn"} %) "Must be 'text' or 'edn'"]]
+   ["-s" "--stdin" "Read source from stdin and write the fixed source to stdout"
+    :default false]
+   ["-n" "--filename NAME" "File name for --stdin; its extension picks the language"
+    :default nil]
    ["-h" "--help" "Print usage"]
    ["-v" "--version" "Print version"]])
 
@@ -50,6 +55,7 @@
              "  clj-kondo-fix --lint src/ --fix"
              "  clj-kondo-fix --lint src/ --fix --rules unused-namespace,unused-binding"
              "  clj-kondo-fix --lint src/ --output edn"
+             "  clj-kondo-fix --stdin --filename src/foo.clj < src/foo.clj"
              ""
              "When called without --fix, runs in dry-run mode (no files changed)."]))
 
@@ -62,10 +68,32 @@
                           (System/exit 0))
       (:version options) (do (println "clj-kondo-fix" version)
                              (System/exit 0))
-      (empty? (:lint options)) (do (println "Error: --lint is required")
-                                   (println (usage summary))
-                                   (System/exit 1))
+      (and (empty? (:lint options))
+           (not (:stdin options))) (do (println "Error: --lint or --stdin is required")
+                                       (println (usage summary))
+                                       (System/exit 1))
       :else options)))
+
+(defn- fix-paths! [opts rules config output-format]
+  (let [result (clj-kondo-fix/fix! {:lint (:lint opts)
+                                    :config config
+                                    :dry-run (not (:fix opts))
+                                    :rules rules})]
+    (clj-kondo-fix/print! result {:output output-format})
+    (System/exit (if (pos? (-> result :summary :total-fixed)) 1 0))))
+
+(defn- fix-stdin!
+  "fixed source goes to stdout and the log to stderr, so editors can pipe through it"
+  [opts rules config output-format]
+  (let [{:keys [source result]} (clj-kondo-fix/fix-source (slurp *in*)
+                                                          {:filename (:filename opts)
+                                                           :config config
+                                                           :rules rules})]
+    (binding [*out* *err*]
+      (clj-kondo-fix/print! result {:output output-format}))
+    (print source)
+    (flush)
+    (System/exit 0)))
 
 (defn -main [& args]
   (let [opts (parse-args args)
@@ -73,10 +101,7 @@
         rules (when (:rules opts)
                 (str/split (:rules opts) #","))
         config (when (:config opts)
-                 (read-string (:config opts)))
-        result (clj-kondo-fix/fix! {:lint (:lint opts)
-                                    :config config
-                                    :dry-run (not (:fix opts))
-                                    :rules rules})]
-    (clj-kondo-fix/print! result {:output output-format})
-    (System/exit (if (pos? (-> result :summary :total-fixed)) 1 0))))
+                 (read-string (:config opts)))]
+    (if (:stdin opts)
+      (fix-stdin! opts rules config output-format)
+      (fix-paths! opts rules config output-format))))

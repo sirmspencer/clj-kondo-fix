@@ -8,7 +8,8 @@
                            :dry-run true})
 
      (clj-kondo-fix/print! result {:output :text})"
-  (:require [clj-kondo-fix.impl.core :as impl]))
+  (:require [clj-kondo-fix.impl.core :as impl]
+            [clojure.java.io :as io]))
 
 (defn fix!
   "Run clj-kondo lint and apply auto-fixes.
@@ -26,6 +27,33 @@
     :log      [...]}"
   [opts]
   (impl/fix! opts))
+
+(defn fix-source
+  "Apply auto-fixes to source code given as a string.
+
+   Options are the same as fix!, without :lint and :dry-run, plus:
+   - :filename — name used to pick the language from its extension
+                 (.clj, .cljs, or .cljc; default .clj)
+
+   Returns {:source \"fixed source\" :result fix!-result}. :source is the input
+   unchanged when nothing was fixed."
+  [source {:keys [filename] :as opts}]
+  (let [ext  (or (re-find #"\.clj[cs]?$" (str filename)) ".clj")
+        dir  (.toFile (java.nio.file.Files/createTempDirectory
+                       "clj-kondo-fix" (make-array java.nio.file.attribute.FileAttribute 0)))
+        file (io/file dir (str "source" ext))]
+    (try
+      (spit file source)
+      (let [result (impl/fix! (-> opts
+                                  (dissoc :filename)
+                                  (assoc :lint [(str file)] :dry-run false)))]
+        {:source (if (pos? (-> result :summary :files-changed))
+                   (slurp file)
+                   source)
+         :result result})
+      (finally
+        (io/delete-file file true)
+        (io/delete-file dir true)))))
 
 (defn print!
   "Print a fix! result map to *out*.
