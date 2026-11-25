@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 # stores every NAME=value line of a file as a github repository secret, from
-# .envrc at the repository root by default. JETBRAINS_PUBLISH is stored as a
-# repository variable instead, since it is a setting rather than a secret.
-# values are piped to gh on stdin, so they never appear in the process list or
-# the output.
+# .envrc at the repository root by default. values are piped to gh on stdin,
+# so they never appear in the process list or the output.
 #
 # usage: scripts/set-secrets.sh [file] [owner/repo]
 set -euo pipefail
@@ -41,11 +39,6 @@ for name in $names; do
   value="${!name:-}"
   if [ -z "$value" ]; then
     echo "skipped $name: empty"
-    continue
-  fi
-  if [ "$name" = "JETBRAINS_PUBLISH" ]; then
-    gh variable set "$name" --repo "$repo" --body "$value"
-    echo "set variable $name=$value"
     continue
   fi
   printf '%s' "$value" | gh secret set "$name" --repo "$repo"
