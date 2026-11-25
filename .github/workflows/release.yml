@@ -189,10 +189,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: gh release upload "${GITHUB_REF_NAME}" dist/clj-kondo-fix-intellij-*.zip --repo "${GITHUB_REPOSITORY}" --clobber
-      # the first version of a plugin must be uploaded by hand on plugins.jetbrains.com;
-      # set the repository variable JETBRAINS_PUBLISH to true once it is approved
       - name: publish to the jetbrains marketplace
-        if: vars.JETBRAINS_PUBLISH == 'true'
         env:
           PUBLISH_TOKEN: ${{ secrets.JETBRAINS_MARKETPLACE_TOKEN }}
         working-directory: editors/intellij

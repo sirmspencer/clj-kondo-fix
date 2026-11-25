@@ -12,7 +12,7 @@ This document describes the tokens and one-time steps behind the clj-kondo-fix r
 | Homebrew | `sirmspencer/tap/clj-kondo-fix`, a formula that installs the prebuilt native binary | the workflow, with `TAP_TOKEN` |
 | Visual Studio Marketplace | `sirmspencer.clj-kondo-fix`, one package per platform | the workflow, with `VSCE_PAT` |
 | Open VSX | `sirmspencer.clj-kondo-fix`, one package per platform | the workflow, with `OVSX_PAT` |
-| JetBrains Marketplace | the clj-kondo-fix plugin, which downloads the matching release binary on first use | by hand for the first version, then the workflow, with `JETBRAINS_MARKETPLACE_TOKEN` |
+| JetBrains Marketplace | the clj-kondo-fix plugin, which downloads the matching release binary on first use | the workflow, with `JETBRAINS_MARKETPLACE_TOKEN` |
 
 The platforms are macOS on Apple silicon and Intel, Linux on x64 and ARM, and Windows on x64. Homebrew covers macOS and Linux. The VS Code extension bundles each platform's binary in a separate package. The JetBrains Marketplace accepts one package for every platform, so the IntelliJ plugin bundles none; on first use it downloads the binary for its platform from the release that matches its version, verifies it against `checksums.txt`, and caches it in the IDE's system directory. The binaries are GraalVM native images. `native-image` cannot cross-compile, so each platform is built and tested on its own runner. The Linux x64 binary is linked statically against musl, so it runs on any distribution.
 
@@ -31,7 +31,7 @@ The tokens expire. When one does, the job that uses it fails, and a new token re
 
 ### Setting the secrets with a script
 
-`scripts/set-secrets.sh` stores every `NAME=value` line of a file as a repository secret, reading `.envrc` at the repository root by default. `JETBRAINS_PUBLISH` is stored as a repository variable instead. The script pipes each value to `gh` on stdin, so values do not appear in the process list or the output. `.envrc` is listed in `.gitignore`.
+`scripts/set-secrets.sh` stores every `NAME=value` line of a file as a repository secret, reading `.envrc` at the repository root by default. The script pipes each value to `gh` on stdin, so values do not appear in the process list or the output. `.envrc` is listed in `.gitignore`.
 
 ```sh
 scripts/set-secrets.sh                 # reads .envrc
@@ -42,9 +42,8 @@ scripts/set-secrets.sh ~/release.env   # reads another file
 
 ## One-time steps
 
-1. **JetBrains Marketplace.** The first version of the plugin must be uploaded by hand at plugins.jetbrains.com/plugin/add, using the `clj-kondo-fix-intellij-<version>.zip` attached to a GitHub release. The form asks for the license (EPL-2.0) and the source code link. JetBrains reviews every new plugin before it becomes public.
-2. **Automatic JetBrains publishing.** After the first version is approved, the repository variable `JETBRAINS_PUBLISH` is set to `true`, under Settings, Secrets and variables, Actions, Variables. Until then, the workflow builds the plugin and attaches it to the release without publishing it.
-3. **Homebrew users** run `brew trust sirmspencer/tap` once, as recent Homebrew versions require for third-party taps.
+1. **JetBrains Marketplace.** The first version of the plugin was uploaded by hand at plugins.jetbrains.com/plugin/add and approved by JetBrains. Later versions are published by the workflow. A new plugin listing would require the same manual first upload.
+2. **Homebrew users** run `brew trust sirmspencer/tap` once, as recent Homebrew versions require for third-party taps.
 
 ## Releasing a version
 
@@ -61,7 +60,7 @@ The `release` workflow then runs these jobs:
 2. **release:** creates the GitHub release with the archives, the uberjar, and `checksums.txt`.
 3. **homebrew:** writes the formula from `checksums.txt`, installs and tests it on macOS from a checkout of the tap, and pushes it to `sirmspencer/homebrew-tap` only if the test passes.
 4. **vscode:** packages one extension per platform with its binary, attaches them to the release, and publishes them to the Visual Studio Marketplace and Open VSX.
-5. **jetbrains:** builds the plugin, attaches it to the release, and publishes it when `JETBRAINS_PUBLISH` is `true`.
+5. **jetbrains:** builds the plugin, attaches it to the release, and publishes it to the JetBrains Marketplace.
 
 Running the workflow by hand from the Actions tab runs only the build job, which tests every platform without publishing anything.
 
